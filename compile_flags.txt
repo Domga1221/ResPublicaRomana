@@ -1,0 +1,5 @@
+-Iengine/src
+-Iengine/Libraries/include
+-DAEXPORT
+-DDEBUG
+-std=c++20
