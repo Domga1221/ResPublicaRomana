@@ -2,8 +2,13 @@
 
 #include "defines.hpp"
 
-#include <iostream>
+#include "Core/Log.hpp"
 
 void print(i32 a) {
-    std::cout << "test " << a << "\n";
+    RPR_CRITICAL("test %d", 5);
+    RPR_ERROR("test %s", "hello");
+    RPR_WARN("test %f", 0.25f);
+    RPR_INFO("test");
+    RPR_DEBUG("test");
+    RPR_TRACE("test");
 }

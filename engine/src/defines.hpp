@@ -30,7 +30,7 @@ static_assert(sizeof(f32) == 4, "Expected f32 to be 4 bytes.");
 static_assert(sizeof(f64) == 8, "Expected f64 to be 8 bytes.");
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)
-#define RPLATFORM_WINDOWS 
+#define RPRPLATFORM_WINDOWS 
 #ifndef _WIN64
 #error "64-bit operating system required on Windows"
 #endif
