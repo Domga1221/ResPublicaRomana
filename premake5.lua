@@ -25,7 +25,7 @@ project "engine"
 
     includedirs {
         "%{prj.name}/src",
-        --"%{prj.name}/Libraries/include",
+        "%{prj.name}/Libraries/include",
     }   
 
     libdirs {
@@ -37,8 +37,8 @@ project "engine"
         "user32",
         "kernel32",
         "shell32",
-        -- "glfw3_mt",
-        -- "opengl32",
+        "glfw3_mt",
+        "opengl32",
         -- "assimp-vc143-mt"
     }
 
