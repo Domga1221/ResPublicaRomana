@@ -3,6 +3,7 @@
 #include "Memory.hpp"
 
 #include <vector>
+#include <iterator>
 
 
 template<typename T>
@@ -65,6 +66,18 @@ class Vector {
 
         T& operator[] (i32 i) {
             return myVec[i];
+        }
+
+        typename std::vector<T>::iterator Begin() {
+            return myVec.begin();
+        }
+
+        typename std::vector<T>::iterator End() {
+            return myVec.end();
+        }
+
+        void Erase(typename std::vector<T>::iterator iterator) {
+            myVec.erase(iterator);
         }
 
     private:

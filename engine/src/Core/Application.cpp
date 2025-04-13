@@ -6,6 +6,7 @@
 #include "Core/Window.hpp"
 #include "Memory/Memory.hpp"
 #include "Memory/Vector.hpp"
+#include "Core/LayerStack.hpp"
 
 Vector<i32> testVector;
 
@@ -33,14 +34,21 @@ void Application_Initialize(Application* app) {
 void Application_Run(Application* app) {
     const char* memoryUsageString = MEMORY_GetMemoryUsageString();
     RPR_DEBUG("%s", memoryUsageString);
-    return;
+    //return;
     while(app->isRunning) {
         
         glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        LayerStack_Update();
+
         Window_Update();
         if(Window_ShouldClose())
             app->isRunning = false;
     }
+}
+
+RPR_API void Application_PushLayer(Layer* layer) {
+    LayerStack_PushLayer(layer);   
+    RPR_DEBUG("Application_PushLayer called");
 }

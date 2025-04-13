@@ -10,6 +10,9 @@ static const char* memoryTagStrings[MEMORY_TAG_LAST] = {
     "ARRAY   ",
     "VECTOR  ",
     "STRING  ",
+
+    "LAYER   ",
+
     "RENDERER",
     "TEXTURE ",
     "ENTITY  "
