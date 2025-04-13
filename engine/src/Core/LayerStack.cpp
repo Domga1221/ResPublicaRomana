@@ -21,11 +21,13 @@ void LayerStack_Shutdown() {
 
 void LayerStack_PushLayer(Layer* layer) {
     layerStack.layers.PushBack(layer);
+    layer->OnAttach();
 }
    
 void LayerStack_PopLayer(Layer* layer) {
     std::vector<Layer*>::iterator iterator = std::find(layerStack.layers.Begin(), layerStack.layers.End(), layer);
     layerStack.layers.Erase(iterator);
+    layer->OnDetach();
 }
 
 void LayerStack_Update() {

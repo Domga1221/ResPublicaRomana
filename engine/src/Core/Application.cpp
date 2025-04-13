@@ -49,6 +49,6 @@ void Application_Run(Application* app) {
 }
 
 RPR_API void Application_PushLayer(Layer* layer) {
-    LayerStack_PushLayer(layer);   
     RPR_DEBUG("Application_PushLayer called");
+    LayerStack_PushLayer(layer);   
 }
