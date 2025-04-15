@@ -35,3 +35,9 @@ void LayerStack_Update() {
         layerStack.layers[i]->OnUpdate();
     }
 }
+
+void LayerStack_ImGuiRender() {
+    for(int i = 0; i < layerStack.layers.Size(); i++) {
+        layerStack.layers[i]->OnImGuiRender();
+    }
+}

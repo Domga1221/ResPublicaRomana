@@ -6,7 +6,35 @@ workspace "rpr"
         "Release"
     }
 
+-- currentDir = os.getcwd()
 outputdir = "%{cfg.buildcfg}"
+
+-- TODO: Think about better project structuring
+project "imgui-docking"
+    kind "StaticLib"
+    language "C++"
+    cppdialect "C++17"
+
+    -- outputdir defined in parent dir premake file 
+    -- currentDir defined in parent dir premake file 
+    targetdir ("bin/" .. outputdir)
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    symbolspath ("bin/" .. outputdir .. "/%{prj.name}.pdb")
+
+    files {
+        "engine/Libraries/include/imgui-docking/*.h",
+        "engine/Libraries/include/imgui-docking/*.cpp",
+    }
+
+    includedirs {
+        "engine/Libraries/include"
+    }
+   
+    toolset("clang")
+    buildoptions {
+        "-Wvarargs", "-Wall", "-Werror",
+    }
+    linkoptions { "-g" }
 
 project "engine"
     location "engine"
@@ -26,13 +54,16 @@ project "engine"
     includedirs {
         "%{prj.name}/src",
         "%{prj.name}/Libraries/include",
+        "%{prj.name}/Libraries/include/imgui-docking"
     }   
 
     libdirs {
+        "bin/*",
         "%{prj.name}/Libraries/lib"
     }
 
     links {
+        "imgui-docking",
         "gdi32",
         "user32",
         "kernel32",
@@ -81,7 +112,7 @@ project "sandbox"
 
     includedirs {
         "%{prj.name}/src",
-        "engine/src"
+        "engine/src",
     }   
 
     libdirs {

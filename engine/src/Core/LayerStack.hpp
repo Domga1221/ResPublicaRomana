@@ -11,3 +11,4 @@ void LayerStack_PushLayer(Layer* layer);
 void LayerStack_PopLayer(Layer* layer);
 
 void LayerStack_Update();
+void LayerStack_ImGuiRender();

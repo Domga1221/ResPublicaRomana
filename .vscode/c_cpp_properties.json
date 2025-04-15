@@ -4,7 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/engine/src/**",
-                "${workspaceFolder}/engine/Libraries/include/**"
+                "${workspaceFolder}/engine/Libraries/include/**",
+                "${workspaceFolder}/imgui-docking"
             ],
             "defines": [
                 "RPR_EXPORT",
