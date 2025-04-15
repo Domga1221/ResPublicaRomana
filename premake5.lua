@@ -85,12 +85,22 @@ project "sandbox"
     }   
 
     libdirs {
-        "bin/"
+        "bin/",
+        "engine/Libraries/lib"
     }
 
+    -- Visual studio automatically puts engine in References, meaning when building 
+    -- sandbox, all the dependencies from engine are used in sandbox as well 
+    -- when using gmake + clang, the dependencies need to be included here in sandbox as well 
+    -- https://github.com/premake/premake-core/issues/627
     links {
         "engine",
-        "user32"
+        "gdi32",
+        "user32",
+        "kernel32",
+        "shell32",
+        "glfw3_mt",
+        "opengl32",
     }
 
     defines {

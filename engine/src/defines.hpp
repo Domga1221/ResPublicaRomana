@@ -36,6 +36,7 @@ static_assert(sizeof(f64) == 8, "Expected f64 to be 8 bytes.");
 #endif
 #endif
 
+
 #ifdef RPR_EXPORT
 #ifdef _MSC_VER
 #define RPR_API __declspec(dllexport)
@@ -49,6 +50,7 @@ static_assert(sizeof(f64) == 8, "Expected f64 to be 8 bytes.");
 #define RPR_API 
 #endif 
 #endif 
+
 
 
 

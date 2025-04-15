@@ -14,7 +14,7 @@ void log_output(Log_Level level, const char* message, ...) {
     char outMessage[maxMessageLength];
     memset(outMessage, 0, maxMessageLength);
 
-    __builtin_va_list argList;
+    va_list argList;
     va_start(argList, message);
     vsnprintf(outMessage, maxMessageLength, message, argList);
     va_end(argList);

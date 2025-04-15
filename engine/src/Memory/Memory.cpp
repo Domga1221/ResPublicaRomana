@@ -91,7 +91,7 @@ RPR_API const char* MEMORY_GetMemoryUsageString() {
     
     char* memString_cStr = (char*)MEMORY_Allocate(memString.size() + 1, MEMORY_TAG_STRING);
     MEMORY_Copy(memString_cStr, memString.c_str(), memString.size());
-    memString_cStr[memString.size() + 1] = '\0';
+    memString_cStr[memString.size()] = '\0';
     return memString_cStr;
 }
 
