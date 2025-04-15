@@ -35,3 +35,5 @@
 bin/*
 # Makefiles
 Makefile
+# include libs 
+!engine/Libraries/lib/*
