@@ -5,7 +5,7 @@
 #include <vector>
 #include <iterator>
 
-
+//#include "Core/Log.hpp"
 template<typename T>
 class Vector {
     public:
@@ -13,6 +13,7 @@ class Vector {
         Vector() { 
             //MEMORY_IncreaseMemoryUsage(sizeof(Vector))
             myVec = std::vector<T>(0);
+            //RPR_ERROR("VECTOR CONSTRUCTOR CALLED");
         }
 
         Vector(int size) {
@@ -35,6 +36,21 @@ class Vector {
         // Destroy
         ~Vector() {
             MEMORY_DecreaseMemoryUsage(myVec.capacity() * sizeof(T), MEMORY_TAG_VECTOR);
+        }
+
+        // Copy Constructor 
+        Vector(const Vector& other) {
+            //RPR_ERROR("COPY CONSTRUCTOR CALLED");
+            myVec = other.myVec;
+            MEMORY_IncreaseMemoryUsage(myVec.capacity() * sizeof(T), MEMORY_TAG_VECTOR);
+        }
+
+        // Copy assignment 
+        Vector& operator=(const Vector& other) {
+            //RPR_WARN("Copy assignment operator called");
+            myVec = other.myVec;
+            MEMORY_IncreaseMemoryUsage(myVec.capacity() * sizeof(T), MEMORY_TAG_VECTOR);
+            return *this;
         }
 
         // Clear

@@ -5,15 +5,19 @@
 #include "Core/Log.hpp"
 #include "Core/Window.hpp"
 #include "Memory/Memory.hpp"
-#include "Memory/Vector.hpp"
 #include "Core/LayerStack.hpp"
 #include "ImGuiLayer.hpp"
 #include <filesystem>
 #include "Renderer/Shader.hpp"
 
-Vector<i32> testVector;
+#include "Renderer/BufferLayout.hpp"
+#include "Renderer/VertexBuffer.hpp"
+#include "Renderer/VertexArray.hpp"
+
 Layer imGuiLayer;
 Shader shader;
+VertexBuffer vertexBuffer;
+VertexArray vertexArray;
 
 void Application_Initialize(Application* app) {
 
@@ -24,32 +28,58 @@ void Application_Initialize(Application* app) {
 
     app->isRunning = true;
 
-    RPR_WARN("Vector size %d", testVector.Size());
-    testVector.PushBack(5);
-    RPR_WARN("Vector size %d", testVector.Size());
-    testVector.PushBack(10);
-    RPR_WARN("Vector size %d", testVector.Size());
-
-
-    const char* memoryUsageString = MEMORY_GetMemoryUsageString();
+    std::string memoryUsageString = MEMORY_GetMemoryUsageString();
     RPR_DEBUG("%s", memoryUsageString);
-    MEMORY_Free((void*)memoryUsageString, strlen(memoryUsageString) + 1, MEMORY_TAG_STRING);
 
+    
     ImGuiLayer_Initialize(&imGuiLayer); 
     // right now imguilayer is pushed as first layer into stack, then sandbox editorlayer is pushed
     LayerStack_PushLayer(&imGuiLayer);
 
+    
     std::string currentPath = std::filesystem::current_path().parent_path().parent_path().string();
     currentPath = currentPath + "/Assets/Shaders/";
-    std::string vertPath = currentPath + "triangle.vert";
-    std::string fragPath = currentPath + "triangle.frag";
+    std::string vertPath = currentPath + "triangle2.vert";
+    std::string fragPath = currentPath + "triangle2.frag";
     Shader_Create(&shader, vertPath, fragPath);
     RPR_DEBUG("%s", currentPath);
+
+    memoryUsageString = MEMORY_GetMemoryUsageString();
+    RPR_DEBUG("%s", memoryUsageString);
+
+    BufferLayout bufferLayout;
+    BufferLayout_AddElement(&bufferLayout, { .name = "aPosition", .shaderDataType = ShaderDataType::Float3 });
+    BufferLayout_AddElement(&bufferLayout, { "aColor", ShaderDataType::Float3});
+    BufferLayout_CalculateOffsetAndStride(&bufferLayout);
+    
+    for(int i = 0; i < bufferLayout.elements.Size(); i++) {
+        BufferElement_Print(&bufferLayout.elements[i]);
+    }
+    
+    memoryUsageString = MEMORY_GetMemoryUsageString();
+    RPR_DEBUG("%s", memoryUsageString);
+    
+    
+    f32 triangleVertices[18] = {
+        -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,
+        0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 1.0f,
+    };
+    
+    VertexBuffer_Create(&vertexBuffer, triangleVertices, sizeof(triangleVertices));
+    VertexBuffer_SetLayout(&vertexBuffer, &bufferLayout);
+    
+    BufferLayout_Print(&vertexBuffer.bufferLayout);
+    
+    VertexArray_Create(&vertexArray);
+    VertexArray_AddVertexBuffer(&vertexArray, &vertexBuffer);
+
 }
 
 void Application_Run(Application* app) {
-    const char* memoryUsageString = MEMORY_GetMemoryUsageString();
+    std::string memoryUsageString = MEMORY_GetMemoryUsageString();
     RPR_DEBUG("%s", memoryUsageString);
+
     //return;
     while(app->isRunning) {
         
@@ -57,6 +87,7 @@ void Application_Run(Application* app) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         Shader_Bind(&shader);
+        VertexArray_Bind(&vertexArray);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         LayerStack_Update();
