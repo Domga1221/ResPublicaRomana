@@ -22,6 +22,12 @@ VertexArray vertexArray;
 #include "Memory/List.hpp"
 #include "Memory/List_Test.hpp"
 
+#include "Renderer/Framebuffer.hpp"
+Framebuffer framebuffer;
+Shader screenSpaceShader;
+VertexBuffer screenVertexBuffer;
+VertexArray screenVertexArray;
+
 void Application_Initialize(Application* app) {
 
     MEMORY_Initialize();
@@ -82,6 +88,44 @@ void Application_Initialize(Application* app) {
     
     
     //List_Test();
+
+
+
+    // Framebuffer
+    FramebufferProperties framebufferProperties;
+    FramebufferProperties_Create(&framebufferProperties);
+    FramebufferProperties_AddAttachment(&framebufferProperties, TEXTURE_FORMAT_RGBA16F);
+    framebufferProperties.width = 1280;
+    framebufferProperties.height = 720;
+
+    Framebuffer_Create(&framebuffer, &framebufferProperties);
+
+    RPR_DEBUG("%s", currentPath);
+    vertPath = currentPath + "screenSpace.vert";
+    fragPath = currentPath + "screenSpace.frag";
+    Shader_Create(&screenSpaceShader, vertPath, fragPath);
+
+    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+    BufferLayout screenBufferLayout;
+    BufferLayout_Create(&screenBufferLayout);
+    BufferLayout_AddElement(&screenBufferLayout, { .name = "aPos", .shaderDataType = ShaderDataType::Float2 });
+    BufferLayout_AddElement(&screenBufferLayout, { "aTexCoords", ShaderDataType::Float2});
+    BufferLayout_CalculateOffsetAndStride(&screenBufferLayout);
+
+    VertexBuffer_Create(&screenVertexBuffer, quadVertices, sizeof(quadVertices));
+    VertexBuffer_SetLayout(&screenVertexBuffer, &screenBufferLayout);
+    
+    VertexArray_Create(&screenVertexArray);
+    VertexArray_AddVertexBuffer(&screenVertexArray, &screenVertexBuffer);
 }
 
 void Application_Run(Application* app) {
@@ -93,9 +137,17 @@ void Application_Run(Application* app) {
         glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        Framebuffer_Bind(&framebuffer);
+        glClearColor(0.0f, 1.0f, 1.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
         Shader_Bind(&shader);
         VertexArray_Bind(&vertexArray);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        Framebuffer_Unbind();
+
+        Shader_Bind(&screenSpaceShader);
+        VertexArray_Bind(&screenVertexArray);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         LayerStack_Update();
 

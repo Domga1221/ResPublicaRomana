@@ -28,7 +28,7 @@ void EditorLayer_OnUpdate() {
 void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     ImGui::SetCurrentContext(context); // ImGui global does not persist across dll boundaries 
 
-    
+    return;
     
     static bool dockSpace = true;
     static bool opt_fullscreen_persistent = true;
