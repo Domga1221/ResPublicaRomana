@@ -2,14 +2,16 @@
 
 #include "defines.hpp"
 
-#include "Memory/Vector.hpp"
+#include "Memory/List.hpp"
 
 #include "BufferElement.hpp"
 
 struct BufferLayout {
-    Vector<BufferElement> elements;
+    List<BufferElement> elements;
     u32 stride;
 };
+
+void BufferLayout_Create(BufferLayout* bufferLayout);
 
 void BufferLayout_CalculateOffsetAndStride(BufferLayout* bufferLayout);
 

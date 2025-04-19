@@ -8,15 +8,17 @@ void VertexArray_Create(VertexArray* vertexArray) {
 }
 
 void VertexArray_Destroy(VertexArray* vertexArray) {
-    for(u32 i = 0; i < vertexArray->vertexBuffers.Size(); i++) {
+    for(u32 i = 0; i < vertexArray->vertexBuffers.size; i++) {
         // TODO: delete
+        VertexBuffer* vertexBuffer = vertexArray->vertexBuffers.data[i];
+        VertexBuffer_Destroy(vertexBuffer);
     }
     glDeleteVertexArrays(1, &vertexArray->ID);
 }
 
 void VertexArray_AddVertexBuffer(VertexArray* vertexArray, VertexBuffer* vertexBuffer) {
     // TODO: assert
-    if(vertexBuffer->bufferLayout.elements.Size() <= 0)   
+    if(vertexBuffer->bufferLayout.elements.size <= 0)   
         RPR_ERROR("VertexArray_AddVertexBuffer: provided vertexBuffer has no layout");
 
     glBindVertexArray(vertexArray->ID);
@@ -26,8 +28,8 @@ void VertexArray_AddVertexBuffer(VertexArray* vertexArray, VertexBuffer* vertexB
     // otherwise memory usage won't be increased, but will be decreased after end of this scope 
     // should have used a pointer to BufferLayout to avoid copy for performance reasons
     BufferLayout layout = vertexBuffer->bufferLayout; 
-    for(u32 i = 0; i < layout.elements.Size(); i++) {
-        BufferElement element = layout.elements[i];
+    for(u32 i = 0; i < layout.elements.size; i++) {
+        BufferElement element = layout.elements.data[i];
         u32 componentCount = ShaderDataType_GetComponentCount(element.shaderDataType);
         GLenum glType = ShaderDataType_ToGLType(element.shaderDataType);
         GLboolean normalized = GL_FALSE;
@@ -37,7 +39,7 @@ void VertexArray_AddVertexBuffer(VertexArray* vertexArray, VertexBuffer* vertexB
         glEnableVertexAttribArray(i);
         glVertexAttribPointer(i, componentCount, glType, normalized, stride, offset);
     }
-    vertexArray->vertexBuffers.PushBack(vertexBuffer);
+    List_PushBack(&vertexArray->vertexBuffers, vertexBuffer);
 }
 
 void VertexArray_Bind(VertexArray* vertexArray) {

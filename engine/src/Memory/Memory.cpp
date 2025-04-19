@@ -9,6 +9,7 @@ static const char* memoryTagStrings[MEMORY_TAG_LAST] = {
     "UNKNOWN ",
     "ARRAY   ",
     "VECTOR  ",
+    "LIST    ",
     "STRING  ",
 
     "LAYER   ",
@@ -61,6 +62,10 @@ RPR_API void* MEMORY_Copy(void* dest, const void* source, u64 size) {
 
 RPR_API void* MEMORY_Set(void* dest, i32 value, u64 size) {
     return memset(dest, value, size);
+}
+
+RPR_API void* MEMORY_Move(void* dest, const void* source, u64 size) {
+    return memmove(dest, source, size);
 }
 
 

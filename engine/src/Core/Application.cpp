@@ -19,9 +19,13 @@ Shader shader;
 VertexBuffer vertexBuffer;
 VertexArray vertexArray;
 
+#include "Memory/List.hpp"
+#include "Memory/List_Test.hpp"
+
 void Application_Initialize(Application* app) {
 
     MEMORY_Initialize();
+    LayerStack_Initialize();
 
     WindowProps windowProps { "title", 1280, 720 };
     Window_Initialize(&windowProps);
@@ -47,18 +51,20 @@ void Application_Initialize(Application* app) {
     memoryUsageString = MEMORY_GetMemoryUsageString();
     RPR_DEBUG("%s", memoryUsageString);
 
+    
     BufferLayout bufferLayout;
+    BufferLayout_Create(&bufferLayout);
     BufferLayout_AddElement(&bufferLayout, { .name = "aPosition", .shaderDataType = ShaderDataType::Float3 });
     BufferLayout_AddElement(&bufferLayout, { "aColor", ShaderDataType::Float3});
     BufferLayout_CalculateOffsetAndStride(&bufferLayout);
     
-    for(int i = 0; i < bufferLayout.elements.Size(); i++) {
-        BufferElement_Print(&bufferLayout.elements[i]);
+    for(int i = 0; i < bufferLayout.elements.size; i++) {
+        BufferElement_Print(&bufferLayout.elements.data[i]);
     }
     
     memoryUsageString = MEMORY_GetMemoryUsageString();
     RPR_DEBUG("%s", memoryUsageString);
-    
+
     
     f32 triangleVertices[18] = {
         -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,
@@ -73,7 +79,9 @@ void Application_Initialize(Application* app) {
     
     VertexArray_Create(&vertexArray);
     VertexArray_AddVertexBuffer(&vertexArray, &vertexBuffer);
-
+    
+    
+    //List_Test();
 }
 
 void Application_Run(Application* app) {
@@ -82,7 +90,6 @@ void Application_Run(Application* app) {
 
     //return;
     while(app->isRunning) {
-        
         glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 

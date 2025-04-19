@@ -6,6 +6,7 @@ enum Memory_Tag {
     MEMORY_TAG_UNKNOWN,
     MEMORY_TAG_ARRAY,
     MEMORY_TAG_VECTOR,
+    MEMORY_TAG_LIST,
     MEMORY_TAG_STRING,
 
     MEMORY_TAG_LAYER,
@@ -26,6 +27,7 @@ RPR_API void MEMORY_Free(void* block, u64 size,  Memory_Tag tag);
 RPR_API void* MEMORY_Zero(void* block, u64 size);
 RPR_API void* MEMORY_Copy(void* dest, const void* source, u64 size);
 RPR_API void* MEMORY_Set(void* dest, i32 value, u64 size);
+RPR_API void* MEMORY_Move(void* dest, const void* source, u64 size);
 
 RPR_API const char* MEMORY_GetMemoryUsage_C_String(); // char* to be freed by caller 
 #include <string>

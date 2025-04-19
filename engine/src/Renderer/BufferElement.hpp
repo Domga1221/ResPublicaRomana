@@ -7,7 +7,7 @@
 #include <string>
 
 struct BufferElement {
-    std::string name; // TODO: own string implementation 
+    const char* name; // TODO: own string implementation 
     ShaderDataType shaderDataType;
     u32 size;
     u32 offset;

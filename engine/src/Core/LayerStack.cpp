@@ -1,43 +1,44 @@
 #include "LayerStack.hpp"
 
-#include "Memory/Vector.hpp"
+#include "Memory/List.hpp"
 
 struct LayerStack {
-    Vector<Layer*> layers;
+    List<Layer*> layers;
 };
 
 static LayerStack layerStack;
 
 void LayerStack_Initialize() {
-
+    List_Create(&layerStack.layers);
 }
 
 void LayerStack_Shutdown() {
-    for(int i = 0; i < layerStack.layers.Size(); i++) {
-        MEMORY_Free(layerStack.layers[i], sizeof(Layer), MEMORY_TAG_LAYER);
+    for(int i = 0; i < layerStack.layers.size; i++) {
+        MEMORY_Free(layerStack.layers.data[i], sizeof(Layer), MEMORY_TAG_LAYER);
     }
-    layerStack.layers.Clear();
+    List_Destroy(&layerStack.layers);
 }
 
 void LayerStack_PushLayer(Layer* layer) {
-    layerStack.layers.PushBack(layer);
+    List_PushBack(&layerStack.layers, layer);
     layer->OnAttach();
 }
    
 void LayerStack_PopLayer(Layer* layer) {
-    std::vector<Layer*>::iterator iterator = std::find(layerStack.layers.Begin(), layerStack.layers.End(), layer);
-    layerStack.layers.Erase(iterator);
-    layer->OnDetach();
+    // TODO:
+    //std::vector<Layer*>::iterator iterator = std::find(layerStack.layers.Begin(), layerStack.layers.End(), layer);
+    //layerStack.layers.Erase(iterator);
+    //layer->OnDetach();
 }
 
 void LayerStack_Update() {
-    for(int i = 0; i < layerStack.layers.Size(); i++) {
-        layerStack.layers[i]->OnUpdate();
+    for(int i = 0; i < layerStack.layers.size; i++) {
+        layerStack.layers.data[i]->OnUpdate();
     }
 }
 
 void LayerStack_ImGuiRender() {
-    for(int i = 0; i < layerStack.layers.Size(); i++) {
-        layerStack.layers[i]->OnImGuiRender();
+    for(int i = 0; i < layerStack.layers.size; i++) {
+        layerStack.layers.data[i]->OnImGuiRender();
     }
 }

@@ -2,13 +2,13 @@
 
 #include "defines.hpp"
 
-#include "Memory/Vector.hpp"
+#include "Memory/List.hpp"
 
 #include "VertexBuffer.hpp"
 
 struct VertexArray {
     u32 ID;
-    Vector<VertexBuffer*> vertexBuffers;    
+    List<VertexBuffer*> vertexBuffers;    
     // TODO: IndexBuffer
 };
 
