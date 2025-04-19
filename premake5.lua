@@ -14,6 +14,7 @@ project "imgui-docking"
     kind "StaticLib"
     language "C++"
     cppdialect "C++17"
+    symbols "on"
 
     -- outputdir defined in parent dir premake file 
     -- currentDir defined in parent dir premake file 
@@ -113,6 +114,7 @@ project "sandbox"
     includedirs {
         "%{prj.name}/src",
         "engine/src",
+        "engine/Libraries/include"
     }   
 
     libdirs {
@@ -126,6 +128,7 @@ project "sandbox"
     -- https://github.com/premake/premake-core/issues/627
     links {
         "engine",
+        "imgui-docking",
         "gdi32",
         "user32",
         "kernel32",

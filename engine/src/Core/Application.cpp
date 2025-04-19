@@ -99,9 +99,9 @@ void Application_Run(Application* app) {
 
         LayerStack_Update();
 
-        //ImGuiLayer_Begin();
-        //LayerStack_ImGuiRender();
-        //ImGuiLayer_End();
+        ImGuiContext* context = ImGuiLayer_Begin();
+        LayerStack_ImGuiRender(context);
+        ImGuiLayer_End();
 
         Window_Update();
         if(Window_ShouldClose())

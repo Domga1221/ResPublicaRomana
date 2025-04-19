@@ -56,18 +56,27 @@ void ImGuiLayer_OnUpdate() {
 
 }
 
-void ImGuiLayer_OnImGuiRender() {
-    static bool show = true;
-    ImGui::ShowDemoWindow(&show);
+void ImGuiLayer_OnImGuiRender(ImGuiContext* context) {
+    ImGui::SetCurrentContext(context);
+    //RPR_WARN("ImGuiLayer_OnImGuiRender called");
+    //static bool show = true;
+    //ImGui::ShowDemoWindow(&show);
+    //ImGui::Begin("My name is window, ImGui window");
+    //ImGui::Text("Hello there adventurer");
+    //ImGui::End();
 }
 
-void ImGuiLayer_Begin() {
+ImGuiContext* ImGuiLayer_Begin() {
+    //RPR_WARN("ImGuiLayer_Begin called");
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
+    ImGuiContext* context = ImGui::GetCurrentContext();
+    return context;
 }
 
 void ImGuiLayer_End() {
+    //RPR_WARN("ImGuiLayer_End called");
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize = ImVec2(1280, 720); // TODO: Make dynamic 
     

@@ -37,8 +37,8 @@ void LayerStack_Update() {
     }
 }
 
-void LayerStack_ImGuiRender() {
+void LayerStack_ImGuiRender(ImGuiContext* context) {
     for(int i = 0; i < layerStack.layers.size; i++) {
-        layerStack.layers.data[i]->OnImGuiRender();
+        layerStack.layers.data[i]->OnImGuiRender(context);
     }
 }

@@ -8,7 +8,7 @@ void ImGuiLayer_Shutdown(Layer* layer);
 void ImGuiLayer_OnAttach();
 void ImGuiLayer_OnDetach();
 void ImGuiLayer_OnUpdate();
-void ImGuiLayer_OnImGuiRender();
+void ImGuiLayer_OnImGuiRender(ImGuiContext* context);
 
-void ImGuiLayer_Begin();
+ImGuiContext* ImGuiLayer_Begin();
 void ImGuiLayer_End();
