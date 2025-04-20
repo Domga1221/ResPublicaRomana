@@ -2,15 +2,9 @@
 
 #include "defines.hpp"
 
-enum Log_Level {
-    LOG_LEVEL_CRITICAL = 0,
-    LOG_LEVEL_ERROR = 1,
-    LOG_LEVEL_WARN = 2,
-    LOG_LEVEL_INFO = 3,
+#include "LogLevel.hpp"
+#include "ClientLog.hpp"
 
-    LOG_LEVEL_DEBUG = 4,
-    LOG_LEVEL_TRACE = 5,
-};
 
 b8 Log_Initialize();
 void Log_Shutdown();
@@ -24,7 +18,7 @@ const T& log_helper(const T& t) {
 
 const char* log_helper(std::string& s);
 
-void log_output(Log_Level level, const char* message, ...);
+RPR_API void log_output(Log_Level level, const char* message, ...);
 template<typename... Args> 
 RPR_API void log(Log_Level level, const char* message, Args&&... args) {
     log_output(level, message, log_helper(args)...);

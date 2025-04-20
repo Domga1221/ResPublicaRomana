@@ -67,7 +67,8 @@ void List_RemoveAt(List<T>* list, unsigned int index) {
 	unsigned int stride = list->stride;
 	T* data = list->data;
 	if (index >= size) {
-        RPR_WARN("List_RemoveAt: trying to removae at invalid position: %d, list->size: %d", index, size);
+        //RPR_WARN("List_RemoveAt: trying to removae at invalid position: %d, list->size: %d", index, size);
+		log_output(LOG_LEVEL_WARN, "List_RemoveAt: trying to removae at invalid position: %d, list->size: %d", index, size);
 		return;
 	}
 

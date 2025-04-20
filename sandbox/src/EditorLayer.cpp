@@ -1,20 +1,27 @@
 #include "EditorLayer.hpp"
 
-#include <Core/Log.hpp>
+#include <Core/ClientLog.hpp>
 
 #include <iostream>
 #include <glm/glm.hpp>
 
+// UI
 #include "UI/ContentBrowserPanel.hpp"
 #include <imgui-docking/imgui.h>
+
+#include <Memory/List.hpp>
 
 glm::vec2 viewportSize = glm::vec2(1280, 720);
 
 void EditorLayer_OnAttach() {
-    std::string test = "Hello from EditorLayer";
-    std::cout << "Hello from EditorLayer\n";
+    RPR_CLIENT_INFO("Hello from EditorLayer");
 
+
+    // UI
     ContentBrowserPanel_Initialize();
+
+
+    
 }
 
 void EditorLayer_OnDetach() {
