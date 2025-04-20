@@ -12,10 +12,10 @@ struct VertexArray {
     // TODO: IndexBuffer
 };
 
-void VertexArray_Create(VertexArray* vertexArray);
-void VertexArray_Destroy(VertexArray* vertexArray);
+RPR_API void VertexArray_Create(VertexArray* vertexArray);
+RPR_API void VertexArray_Destroy(VertexArray* vertexArray);
 
-void VertexArray_AddVertexBuffer(VertexArray* vertexArray, VertexBuffer* vertexBuffer);
+RPR_API void VertexArray_AddVertexBuffer(VertexArray* vertexArray, VertexBuffer* vertexBuffer);
 
-void VertexArray_Bind(VertexArray* vertexArray);
-void VertexArray_Unbind();
+RPR_API void VertexArray_Bind(VertexArray* vertexArray);
+RPR_API void VertexArray_Unbind();

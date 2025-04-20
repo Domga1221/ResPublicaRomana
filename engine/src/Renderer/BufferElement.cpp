@@ -1,5 +1,7 @@
 #include "BufferElement.hpp"
 
+#include "Core/Log.hpp"
+
 void BufferElement_Print(BufferElement* element) {
     std::string name = std::string(element->name);
     const char* dataTypeString = ShaderDataType_ToString(element->shaderDataType);

@@ -11,13 +11,13 @@ struct BufferLayout {
     u32 stride;
 };
 
-void BufferLayout_Create(BufferLayout* bufferLayout);
+RPR_API void BufferLayout_Create(BufferLayout* bufferLayout);
 
-void BufferLayout_CalculateOffsetAndStride(BufferLayout* bufferLayout);
+RPR_API void BufferLayout_CalculateOffsetAndStride(BufferLayout* bufferLayout);
 
-void BufferLayout_AddElement(BufferLayout* bufferLayout, BufferElement element);
+RPR_API void BufferLayout_AddElement(BufferLayout* bufferLayout, BufferElement element);
 
-#ifdef DEBUG
+//#ifdef DEBUG
 #include <string>
-void BufferLayout_Print(BufferLayout* bufferLayout);
-#endif 
+RPR_API void BufferLayout_Print(BufferLayout* bufferLayout);
+//#endif 

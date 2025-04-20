@@ -9,10 +9,10 @@ struct VertexBuffer {
     BufferLayout bufferLayout;
 };
 
-void VertexBuffer_Create(VertexBuffer* vertexBuffer, f32* vertices, u32 vertexCount);
-void VertexBuffer_Destroy(VertexBuffer* vertexBuffer);
+RPR_API void VertexBuffer_Create(VertexBuffer* vertexBuffer, f32* vertices, u32 vertexCount);
+RPR_API void VertexBuffer_Destroy(VertexBuffer* vertexBuffer);
 
-void VertexBuffer_SetLayout(VertexBuffer* vertexBuffer, BufferLayout* bufferLayout);
+RPR_API void VertexBuffer_SetLayout(VertexBuffer* vertexBuffer, BufferLayout* bufferLayout);
 
-void VertexBuffer_Bind(VertexBuffer* vertexBuffer);
-void VertexBuffer_Unbind();
+RPR_API void VertexBuffer_Bind(VertexBuffer* vertexBuffer);
+RPR_API void VertexBuffer_Unbind();

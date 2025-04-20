@@ -13,8 +13,7 @@ struct BufferElement {
     u32 offset;
 };
 
-#ifdef DEBUG
-#include "Core/Log.hpp"
+//#ifdef DEBUG
 #include <string>
-void BufferElement_Print(BufferElement* element);
-#endif
+RPR_API void BufferElement_Print(BufferElement* element);
+//#endif

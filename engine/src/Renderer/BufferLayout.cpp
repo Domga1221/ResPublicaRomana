@@ -28,7 +28,7 @@ void BufferLayout_AddElement(BufferLayout* bufferLayout, BufferElement element) 
     List_PushBack(&bufferLayout->elements, element);
 }
 
-#ifdef DEBUG
+//#ifdef DEBUG
 void BufferLayout_Print(BufferLayout* bufferLayout) {
     std::string s = "BufferLayout: \n\t\tstride: " + std::to_string(bufferLayout->stride);
     RPR_DEBUG("%s", s);
@@ -36,4 +36,4 @@ void BufferLayout_Print(BufferLayout* bufferLayout) {
         BufferElement_Print(&bufferLayout->elements.data[i]);
     }
 }
-#endif 
+//#endif 

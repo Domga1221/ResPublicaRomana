@@ -3,6 +3,7 @@
 #include <Core/ClientLog.hpp>
 
 #include <iostream>
+#include <filesystem>
 #include <glm/glm.hpp>
 
 // UI
@@ -10,6 +11,21 @@
 #include <imgui-docking/imgui.h>
 
 #include <Memory/List.hpp>
+
+// Renderer
+#include <Renderer/Shader.hpp>
+#include <Renderer/BufferLayout.hpp>
+#include <Renderer/VertexBuffer.hpp>
+#include <Renderer/VertexArray.hpp>
+Shader shader;
+VertexBuffer vertexBuffer;
+VertexArray vertexArray;
+#include <Renderer/Framebuffer.hpp>
+Framebuffer framebuffer;
+Shader screenSpaceShader;
+VertexBuffer screenVertexBuffer;
+VertexArray screenVertexArray;
+#include <Renderer/RenderCommand.hpp>
 
 glm::vec2 viewportSize = glm::vec2(1280, 720);
 
@@ -21,7 +37,75 @@ void EditorLayer_OnAttach() {
     ContentBrowserPanel_Initialize();
 
 
+    std::string currentPath = std::filesystem::current_path().parent_path().parent_path().string();
+    currentPath = currentPath + "/Assets/Shaders/";
+    std::string vertPath = currentPath + "triangle2.vert";
+    std::string fragPath = currentPath + "triangle2.frag";
+    Shader_Create(&shader, vertPath, fragPath);
+    RPR_CLIENT_INFO("%s", currentPath.c_str());
+
     
+    BufferLayout bufferLayout;
+    BufferLayout_Create(&bufferLayout);
+    BufferLayout_AddElement(&bufferLayout, { .name = "aPosition", .shaderDataType = ShaderDataType::Float3 });
+    BufferLayout_AddElement(&bufferLayout, { "aColor", ShaderDataType::Float3});
+    BufferLayout_CalculateOffsetAndStride(&bufferLayout);
+    
+    for(int i = 0; i < bufferLayout.elements.size; i++) {
+        BufferElement_Print(&bufferLayout.elements.data[i]);
+    }
+
+    
+    f32 triangleVertices[18] = {
+        -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,
+        0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 1.0f,
+    };
+    
+    VertexBuffer_Create(&vertexBuffer, triangleVertices, sizeof(triangleVertices));
+    VertexBuffer_SetLayout(&vertexBuffer, &bufferLayout);
+    
+    BufferLayout_Print(&vertexBuffer.bufferLayout);
+    
+    VertexArray_Create(&vertexArray);
+    VertexArray_AddVertexBuffer(&vertexArray, &vertexBuffer);
+
+
+    // Framebuffer
+    FramebufferProperties framebufferProperties;
+    FramebufferProperties_Create(&framebufferProperties);
+    FramebufferProperties_AddAttachment(&framebufferProperties, TEXTURE_FORMAT_RGBA16F);
+    framebufferProperties.width = 1280;
+    framebufferProperties.height = 720;
+
+    Framebuffer_Create(&framebuffer, &framebufferProperties);
+
+    RPR_CLIENT_INFO("%s", currentPath.c_str());
+    vertPath = currentPath + "screenSpace.vert";
+    fragPath = currentPath + "screenSpace.frag";
+    Shader_Create(&screenSpaceShader, vertPath, fragPath);
+
+    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+    BufferLayout screenBufferLayout;
+    BufferLayout_Create(&screenBufferLayout);
+    BufferLayout_AddElement(&screenBufferLayout, { .name = "aPos", .shaderDataType = ShaderDataType::Float2 });
+    BufferLayout_AddElement(&screenBufferLayout, { "aTexCoords", ShaderDataType::Float2});
+    BufferLayout_CalculateOffsetAndStride(&screenBufferLayout);
+
+    VertexBuffer_Create(&screenVertexBuffer, quadVertices, sizeof(quadVertices));
+    VertexBuffer_SetLayout(&screenVertexBuffer, &screenBufferLayout);
+    
+    VertexArray_Create(&screenVertexArray);
+    VertexArray_AddVertexBuffer(&screenVertexArray, &screenVertexBuffer);
 }
 
 void EditorLayer_OnDetach() {
@@ -29,13 +113,28 @@ void EditorLayer_OnDetach() {
 }
 
 void EditorLayer_OnUpdate() {
-    
+    Framebuffer_Bind(&framebuffer);
+    glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 0.0f);
+    //glClearColor(0.0f, 1.0f, 1.0f, 0.0f);
+    //glClear(GL_COLOR_BUFFER_BIT);
+    RenderCommand_SetClearColor(&color);
+    RenderCommand_Clear(true, true);
+    Shader_Bind(&shader);
+    VertexArray_Bind(&vertexArray);
+    //glDrawArrays(GL_TRIANGLES, 0, 3);
+    RenderCommand_Draw(3);
+    Framebuffer_Unbind();
+
+    Shader_Bind(&screenSpaceShader);
+    VertexArray_Bind(&screenVertexArray);
+    //glDrawArrays(GL_TRIANGLES, 0, 6);
+    RenderCommand_Draw(6);
 }
 
 void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     ImGui::SetCurrentContext(context); // ImGui global does not persist across dll boundaries 
 
-    return;
+    //return;
     
     static bool dockSpace = true;
     static bool opt_fullscreen_persistent = true;
@@ -104,7 +203,7 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     //ImVec2 viewportMaxRegion = ImGui::GetWindowContentRegionMax();
     //ImVec2 viewportOffset = ImGui::GetWindowPos();
     
-    u32 textureID = 0;
+    u32 textureID = framebuffer.colorIDs.data[0];
     ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
     ImGui::Image((ImTextureID)textureID, ImVec2(viewportPanelSize.x, viewportPanelSize.y), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::PopStyleVar();

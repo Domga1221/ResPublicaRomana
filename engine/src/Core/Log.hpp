@@ -20,7 +20,7 @@ const char* log_helper(std::string& s);
 
 RPR_API void log_output(Log_Level level, const char* message, ...);
 template<typename... Args> 
-RPR_API void log(Log_Level level, const char* message, Args&&... args) {
+void log(Log_Level level, const char* message, Args&&... args) {
     log_output(level, message, log_helper(args)...);
 }
 // --
