@@ -28,10 +28,24 @@ Shader screenSpaceShader;
 VertexBuffer screenVertexBuffer;
 VertexArray screenVertexArray;
 
+#include "Event.hpp"
+#include "Core/Input.hpp"
+#include "Core/MouseCodes.hpp"
+#include "Core/Keycodes.hpp"
+void Application_OnKeyPressed(Event event) {
+    u16 keyPressed = event.KeyPressed;
+    RPR_INFO("Key pressed: %d", keyPressed);
+}
+void Application_OnMouseButtonPressed(Event event) {
+    u16 mouseButton = event.MouseButtonPressed;
+    RPR_INFO("Mouse button pressed %d", mouseButton);
+}
+
 void Application_Initialize(Application* app) {
 
     MEMORY_Initialize();
     LayerStack_Initialize();
+    Event_Initialize();
 
     WindowProps windowProps { "title", 1280, 720 };
     Window_Initialize(&windowProps);
@@ -126,6 +140,11 @@ void Application_Initialize(Application* app) {
     
     VertexArray_Create(&screenVertexArray);
     VertexArray_AddVertexBuffer(&screenVertexArray, &screenVertexBuffer);
+
+
+    // event 
+    Event_AddListener(EVENT_TYPE_KEY_PRESSED, Application_OnKeyPressed);
+    Event_AddListener(EVENT_TYPE_MOUSE_BUTTON_PRESSED, Application_OnMouseButtonPressed);
 }
 
 void Application_Run(Application* app) {
@@ -148,6 +167,18 @@ void Application_Run(Application* app) {
         Shader_Bind(&screenSpaceShader);
         VertexArray_Bind(&screenVertexArray);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        if(Input_IsKeyPressed(RPR_KEY_A)) {
+            Event keyPressedEvent;
+            keyPressedEvent.KeyPressed = RPR_KEY_A;
+            Event_Fire(EVENT_TYPE_KEY_PRESSED, keyPressedEvent);
+        }
+
+        if(Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_1)) {
+            Event mouseButtonPressedEvent;
+            mouseButtonPressedEvent.MouseButtonPressed = RPR_MOUSE_BUTTON_1;
+            Event_Fire(EVENT_TYPE_MOUSE_BUTTON_PRESSED, mouseButtonPressedEvent);
+        }   
 
         LayerStack_Update();
 
