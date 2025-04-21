@@ -8,7 +8,7 @@
 #include "Core/Log.hpp"
 
 
-void Shader_Create(Shader* shader, const u8* vertexPath, const u8* fragmentPath) {
+void Shader_Create(Shader* shader, const char* vertexPath, const char* fragmentPath) {
     std::string vertexCode, fragmentCode;
     std::ifstream vertexShaderFile, fragmentShaderFile;
 
@@ -86,7 +86,7 @@ void Shader_Create(Shader* shader, const u8* vertexPath, const u8* fragmentPath)
 }
 
 void Shader_Create(Shader* shader, std::string vertexPath, std::string fragmentPath) {
-    Shader_Create(shader, (const u8*)vertexPath.c_str(), (const u8*)fragmentPath.c_str());
+    Shader_Create(shader, (const char*)vertexPath.c_str(), (const char*)fragmentPath.c_str());
 }
 
 void Shader_Bind(Shader* shader) {
@@ -98,7 +98,7 @@ void Shader_Unbind() {
 }
 
 
-void Shader_SetBool(Shader* shader, const u8* name, b8 value) {
+void Shader_SetBool(Shader* shader, const char* name, b8 value) {
     glUniform1i(glGetUniformLocation(shader->ID, (const char*)name), (int)value);
 }
 
@@ -106,7 +106,7 @@ void Shader_SetBool(u32 location, b8 value) {
     glUniform1i(location, (int)value);
 }
 
-void Shader_SetInt(Shader* shader, const u8* name, i32 value) {
+void Shader_SetInt(Shader* shader, const char* name, i32 value) {
     glUniform1i(glGetUniformLocation(shader->ID, (const char*)name), (int) value);
 }
 
@@ -114,7 +114,7 @@ void Shader_SetInt(u32 location, i32 value) {
     glUniform1i(location, value);
 }
 
-void Shader_SetFloat(Shader* shader, const u8* name, f32 value) {
+void Shader_SetFloat(Shader* shader, const char* name, f32 value) {
     glUniform1f(glGetUniformLocation(shader->ID, (const char*)name), value);
 }   
 
@@ -122,7 +122,7 @@ void Shader_SetFloat(u32 location, f32 value) {
     glUniform1f(location, value);
 }
 
-void Shader_SetMat3(Shader* shader, const u8* name, const glm::mat3& mat) {
+void Shader_SetMat3(Shader* shader, const char* name, const glm::mat3& mat) {
     glUniformMatrix3fv(glGetUniformLocation(shader->ID, (const char*)name), 1, GL_FALSE, &mat[0][0]);
 }
 
@@ -130,7 +130,7 @@ void Shader_SetMat3(u32 location, const glm::mat3& mat) {
     glUniformMatrix3fv(location, 1, GL_FALSE, &mat[0][0]);
 }
 
-void Shader_SetMat4(Shader* shader, const u8* name, const glm::mat4& mat) {
+void Shader_SetMat4(Shader* shader, const char* name, const glm::mat4& mat) {
     glUniformMatrix4fv(glGetUniformLocation(shader->ID, (const char*)name), 1, GL_FALSE, &mat[0][0]);
 }
 
@@ -138,7 +138,7 @@ void Shader_SetMat4(u32 location, const glm::mat4& mat) {
     glUniformMatrix4fv(location, 1, GL_FALSE, &mat[0][0]);
 }
 
-void Shader_SetVec3(Shader* shader, const u8* name, const glm::vec3& vec) {
+void Shader_SetVec3(Shader* shader, const char* name, const glm::vec3& vec) {
     glUniform3fv(glGetUniformLocation(shader->ID, (const char*)name), 1, &vec[0]);
 }
 
@@ -146,7 +146,7 @@ void Shader_SetVec3(u32 location, const glm::vec3 vec) {
     glUniform3fv(location, 1, &vec[0]);
 }
 
-void Shader_SetVec4(Shader* shader, const u8* name, const glm::vec4& vec) {
+void Shader_SetVec4(Shader* shader, const char* name, const glm::vec4& vec) {
     glUniform4fv(glGetUniformLocation(shader->ID, (const char*)name), 1, &vec[0]);
 }
 

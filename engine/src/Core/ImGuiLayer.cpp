@@ -52,7 +52,7 @@ void ImGuiLayer_OnDetach() {
     ImGui::DestroyContext();
 }
 
-void ImGuiLayer_OnUpdate() {
+void ImGuiLayer_OnUpdate(f32 deltaTime) {
 
 }
 

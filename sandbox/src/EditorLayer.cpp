@@ -27,6 +27,19 @@ VertexBuffer screenVertexBuffer;
 VertexArray screenVertexArray;
 #include <Renderer/RenderCommand.hpp>
 
+#include "Scene/SceneCamera.hpp"
+SceneCamera sceneCamera;
+#include <Core/Input.hpp>
+#include <Core/Keycodes.hpp>
+void handleSceneCameraMovement(f32 deltaTime) {
+    if(Input_IsKeyPressed(RPR_KEY_W)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_FORWARD, deltaTime);
+    if(Input_IsKeyPressed(RPR_KEY_A)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_LEFT, deltaTime);
+    if(Input_IsKeyPressed(RPR_KEY_S)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_BACKWARD, deltaTime);
+    if(Input_IsKeyPressed(RPR_KEY_D)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_RIGHT, deltaTime);
+    if(Input_IsKeyPressed(RPR_KEY_SPACE)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_UP, deltaTime);
+    if(Input_IsKeyPressed(RPR_KEY_LEFT_SHIFT)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_DOWN, deltaTime);
+}
+
 glm::vec2 viewportSize = glm::vec2(1280, 720);
 
 void EditorLayer_OnAttach() {
@@ -39,8 +52,8 @@ void EditorLayer_OnAttach() {
 
     std::string currentPath = std::filesystem::current_path().parent_path().parent_path().string();
     currentPath = currentPath + "/Assets/Shaders/";
-    std::string vertPath = currentPath + "triangle2.vert";
-    std::string fragPath = currentPath + "triangle2.frag";
+    std::string vertPath = currentPath + "triangle3D.vert";
+    std::string fragPath = currentPath + "triangle3D.frag";
     Shader_Create(&shader, vertPath, fragPath);
     RPR_CLIENT_INFO("%s", currentPath.c_str());
 
@@ -106,13 +119,18 @@ void EditorLayer_OnAttach() {
     
     VertexArray_Create(&screenVertexArray);
     VertexArray_AddVertexBuffer(&screenVertexArray, &screenVertexBuffer);
+
+    SceneCamera_Create(&sceneCamera, glm::vec3(0.0f, 0.0f, 1.0f));
 }
 
 void EditorLayer_OnDetach() {
 
 }
 
-void EditorLayer_OnUpdate() {
+void EditorLayer_OnUpdate(f32 deltaTime) {
+    handleSceneCameraMovement(deltaTime);
+
+
     Framebuffer_Bind(&framebuffer);
     glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 0.0f);
     //glClearColor(0.0f, 1.0f, 1.0f, 0.0f);
@@ -120,6 +138,12 @@ void EditorLayer_OnUpdate() {
     RenderCommand_SetClearColor(&color);
     RenderCommand_Clear(true, true);
     Shader_Bind(&shader);
+    glm::mat4 model = glm::mat4(1.0f);
+    glm::mat4 view = SceneCamera_GetViewMatrix(&sceneCamera);
+    glm::mat4 projection = SceneCamera_GetProjectinoMatrix(&sceneCamera);
+    Shader_SetMat4(&shader, "model", model);
+    Shader_SetMat4(&shader, "view", view);
+    Shader_SetMat4(&shader, "projection", projection);
     VertexArray_Bind(&vertexArray);
     //glDrawArrays(GL_TRIANGLES, 0, 3);
     RenderCommand_Draw(3);
@@ -134,7 +158,7 @@ void EditorLayer_OnUpdate() {
 void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     ImGui::SetCurrentContext(context); // ImGui global does not persist across dll boundaries 
 
-    //return;
+    return;
     
     static bool dockSpace = true;
     static bool opt_fullscreen_persistent = true;
@@ -203,6 +227,7 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     //ImVec2 viewportMaxRegion = ImGui::GetWindowContentRegionMax();
     //ImVec2 viewportOffset = ImGui::GetWindowPos();
     
+    // TODO: for some reason clear color of framebuffer color attachment is not rendered in imgui image 
     u32 textureID = framebuffer.colorIDs.data[0];
     ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
     ImGui::Image((ImTextureID)textureID, ImVec2(viewportPanelSize.x, viewportPanelSize.y), ImVec2(0, 1), ImVec2(1, 0));

@@ -19,12 +19,12 @@ Layer imGuiLayer;
 #include "Core/MouseCodes.hpp"
 #include "Core/Keycodes.hpp"
 void Application_OnKeyPressed(Event event) {
-    u16 keyPressed = event.KeyPressed;
-    RPR_INFO("Key pressed: %d", keyPressed);
+    //u16 keyPressed = event.KeyPressed;
+    //RPR_INFO("Key pressed: %d", keyPressed);
 }
 void Application_OnMouseButtonPressed(Event event) {
-    u16 mouseButton = event.MouseButtonPressed;
-    RPR_INFO("Mouse button pressed %d", mouseButton);
+    //u16 mouseButton = event.MouseButtonPressed;
+    //RPR_INFO("Mouse button pressed %d", mouseButton);
 }
 
 void Application_Initialize(Application* app) {
@@ -52,6 +52,7 @@ void Application_Initialize(Application* app) {
     Event_AddListener(EVENT_TYPE_MOUSE_BUTTON_PRESSED, Application_OnMouseButtonPressed);
 }
 
+f32 lastFrameTime = 0.0f;
 void Application_Run(Application* app) {
     std::string memoryUsageString = MEMORY_GetMemoryUsageString();
     RPR_DEBUG("%s", memoryUsageString);
@@ -60,6 +61,10 @@ void Application_Run(Application* app) {
     while(app->isRunning) {
         glClearColor(1.0f, 0.0f, 1.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        f32 time = Window_GetTime();
+        float deltaTime = time - lastFrameTime;
+        lastFrameTime = time;
         
 
         if(Input_IsKeyPressed(RPR_KEY_A)) {
@@ -74,7 +79,7 @@ void Application_Run(Application* app) {
             Event_Fire(EVENT_TYPE_MOUSE_BUTTON_PRESSED, mouseButtonPressedEvent);
         }   
 
-        LayerStack_Update();
+        LayerStack_Update(deltaTime);
 
         ImGuiContext* context = ImGuiLayer_Begin();
         LayerStack_ImGuiRender(context);

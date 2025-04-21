@@ -31,9 +31,9 @@ void LayerStack_PopLayer(Layer* layer) {
     //layer->OnDetach();
 }
 
-void LayerStack_Update() {
+void LayerStack_Update(f32 deltaTime) {
     for(int i = 0; i < layerStack.layers.size; i++) {
-        layerStack.layers.data[i]->OnUpdate();
+        layerStack.layers.data[i]->OnUpdate(deltaTime);
     }
 }
 

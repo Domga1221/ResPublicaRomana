@@ -2,6 +2,9 @@
 
 #include "defines.hpp"
 
+#include "Keycodes.hpp"
+#include "MouseCodes.hpp"
+
 void Input_Initialize();
 void Input_Shutdown();
 

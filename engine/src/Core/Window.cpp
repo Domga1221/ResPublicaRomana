@@ -67,3 +67,7 @@ void Window_Update() {
 GLFWwindow* Window_GetGLFWWindowPtr() {
     return window.glfwWindow;
 }
+
+f32 Window_GetTime() {
+    return (f32)glfwGetTime();
+}
