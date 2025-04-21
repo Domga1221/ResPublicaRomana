@@ -40,6 +40,10 @@ void handleSceneCameraMovement(f32 deltaTime) {
     if(Input_IsKeyPressed(RPR_KEY_LEFT_SHIFT)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_DOWN, deltaTime);
 }
 
+#include "Renderer/Texture.hpp"
+#include <glad/glad.h>
+Texture texture;
+
 glm::vec2 viewportSize = glm::vec2(1280, 720);
 
 void EditorLayer_OnAttach() {
@@ -51,9 +55,9 @@ void EditorLayer_OnAttach() {
 
 
     std::string currentPath = std::filesystem::current_path().parent_path().parent_path().string();
-    currentPath = currentPath + "/Assets/Shaders/";
-    std::string vertPath = currentPath + "triangle3D.vert";
-    std::string fragPath = currentPath + "triangle3D.frag";
+
+    std::string vertPath = currentPath + "/Assets/Shaders/triangle3D.vert";
+    std::string fragPath = currentPath + "/Assets/Shaders/triangle3D.frag";
     Shader_Create(&shader, vertPath, fragPath);
     RPR_CLIENT_INFO("%s", currentPath.c_str());
 
@@ -61,7 +65,8 @@ void EditorLayer_OnAttach() {
     BufferLayout bufferLayout;
     BufferLayout_Create(&bufferLayout);
     BufferLayout_AddElement(&bufferLayout, { .name = "aPosition", .shaderDataType = ShaderDataType::Float3 });
-    BufferLayout_AddElement(&bufferLayout, { "aColor", ShaderDataType::Float3});
+    BufferLayout_AddElement(&bufferLayout, { "aColor", ShaderDataType::Float3 });
+    BufferLayout_AddElement(&bufferLayout, { "aTexCoords", ShaderDataType::Float2 });
     BufferLayout_CalculateOffsetAndStride(&bufferLayout);
     
     for(int i = 0; i < bufferLayout.elements.size; i++) {
@@ -69,10 +74,10 @@ void EditorLayer_OnAttach() {
     }
 
     
-    f32 triangleVertices[18] = {
-        -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,
-        0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 1.0f,
+    f32 triangleVertices[24] = {
+        -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
+        0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+        0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 1.0f,   0.5f, 0.5f,
     };
     
     VertexBuffer_Create(&vertexBuffer, triangleVertices, sizeof(triangleVertices));
@@ -94,8 +99,8 @@ void EditorLayer_OnAttach() {
     Framebuffer_Create(&framebuffer, &framebufferProperties);
 
     RPR_CLIENT_INFO("%s", currentPath.c_str());
-    vertPath = currentPath + "screenSpace.vert";
-    fragPath = currentPath + "screenSpace.frag";
+    vertPath = currentPath + "/Assets/Shaders/screenSpace.vert";
+    fragPath = currentPath + "/Assets/Shaders/screenSpace.frag";
     Shader_Create(&screenSpaceShader, vertPath, fragPath);
 
     float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -121,6 +126,10 @@ void EditorLayer_OnAttach() {
     VertexArray_AddVertexBuffer(&screenVertexArray, &screenVertexBuffer);
 
     SceneCamera_Create(&sceneCamera, glm::vec3(0.0f, 0.0f, 1.0f));
+
+    std::string texturePath = currentPath + "/Assets/Textures/bricks10_diffuse_1k.jpg";
+    Texture_Create(&texture, texturePath.c_str());
+    RPR_CLIENT_INFO("Texture channels: %d", texture.numberOfChannels);
 }
 
 void EditorLayer_OnDetach() {
@@ -144,11 +153,18 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     Shader_SetMat4(&shader, "model", model);
     Shader_SetMat4(&shader, "view", view);
     Shader_SetMat4(&shader, "projection", projection);
+    Shader_SetInt(&shader, "texture_0", 0);
+    RenderCommand_ActiveTexture(0);
+    Texture_Bind(&texture);
     VertexArray_Bind(&vertexArray);
     //glDrawArrays(GL_TRIANGLES, 0, 3);
     RenderCommand_Draw(3);
     Framebuffer_Unbind();
 
+    //glActiveTexture(GL_TEXTURE0);
+    //glBindTexture(GL_TEXTURE_2D, framebuffer.colorIDs.data[0]);
+    RenderCommand_ActiveTexture(0);
+    RenderCommand_BindTexture2D(framebuffer.colorIDs.data[0]);
     Shader_Bind(&screenSpaceShader);
     VertexArray_Bind(&screenVertexArray);
     //glDrawArrays(GL_TRIANGLES, 0, 6);
