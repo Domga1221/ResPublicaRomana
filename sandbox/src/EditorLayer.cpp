@@ -39,10 +39,31 @@ void handleSceneCameraMovement(f32 deltaTime) {
     if(Input_IsKeyPressed(RPR_KEY_SPACE)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_UP, deltaTime);
     if(Input_IsKeyPressed(RPR_KEY_LEFT_SHIFT)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_DOWN, deltaTime);
 }
+f32 lastMouseX = 1280 / 2;
+f32 lastMouseY = 720 / 2;
+void handleSceneCameraMouseMovement() {
+
+    f32 currentMouseX = Input_GetMouseX();
+    f32 currentMouseY = Input_GetMouseY();
+
+    //RPR_DEBUG("X: %d, Y: %d", currentMouseX, currentMouseY);
+
+    f32 xOffset = lastMouseX - currentMouseX;
+    f32 yOffset = currentMouseY - lastMouseY;
+    lastMouseX = currentMouseX;
+    lastMouseY = currentMouseY;
+    
+    if(!Input_IsKeyPressed(RPR_MOUSE_BUTTON_2)) return;
+    SceneCamera_ProcessMouseMovement(&sceneCamera, xOffset, yOffset);
+}
 
 #include "Renderer/Texture.hpp"
 #include <glad/glad.h>
 Texture texture;
+
+#include "Renderer/Skybox.hpp"
+Skybox skybox;
+Shader skyboxShader;
 
 glm::vec2 viewportSize = glm::vec2(1280, 720);
 
@@ -93,6 +114,7 @@ void EditorLayer_OnAttach() {
     FramebufferProperties framebufferProperties;
     FramebufferProperties_Create(&framebufferProperties);
     FramebufferProperties_AddAttachment(&framebufferProperties, TEXTURE_FORMAT_RGBA16F);
+    FramebufferProperties_AddAttachment(&framebufferProperties, TEXTURE_FORMAT_DEPTH);
     framebufferProperties.width = 1280;
     framebufferProperties.height = 720;
 
@@ -130,6 +152,8 @@ void EditorLayer_OnAttach() {
     std::string texturePath = currentPath + "/Assets/Textures/bricks10_diffuse_1k.jpg";
     Texture_Create(&texture, texturePath.c_str());
     RPR_CLIENT_INFO("Texture channels: %d", texture.numberOfChannels);
+
+    Skybox_Create(&skybox);
 }
 
 void EditorLayer_OnDetach() {
@@ -138,18 +162,23 @@ void EditorLayer_OnDetach() {
 
 void EditorLayer_OnUpdate(f32 deltaTime) {
     handleSceneCameraMovement(deltaTime);
+    handleSceneCameraMouseMovement();
 
-
+    RenderCommand_EnableDepthTest(true);
+    
+    // TODO: FRAMEBUFFER HAS NO DEPTH ATTACHMENT
     Framebuffer_Bind(&framebuffer);
     glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 0.0f);
     //glClearColor(0.0f, 1.0f, 1.0f, 0.0f);
     //glClear(GL_COLOR_BUFFER_BIT);
     RenderCommand_SetClearColor(&color);
     RenderCommand_Clear(true, true);
-    Shader_Bind(&shader);
-    glm::mat4 model = glm::mat4(1.0f);
+
     glm::mat4 view = SceneCamera_GetViewMatrix(&sceneCamera);
     glm::mat4 projection = SceneCamera_GetProjectinoMatrix(&sceneCamera);
+    // -- triangle
+    Shader_Bind(&shader);
+    glm::mat4 model = glm::mat4(1.0f);
     Shader_SetMat4(&shader, "model", model);
     Shader_SetMat4(&shader, "view", view);
     Shader_SetMat4(&shader, "projection", projection);
@@ -159,7 +188,12 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     VertexArray_Bind(&vertexArray);
     //glDrawArrays(GL_TRIANGLES, 0, 3);
     RenderCommand_Draw(3);
+
+    // -- Skybox
+    Skybox_Render(&skybox, &view, &projection);
+    // -- Skybox End
     Framebuffer_Unbind();
+    RenderCommand_EnableDepthTest(false);
 
     //glActiveTexture(GL_TEXTURE0);
     //glBindTexture(GL_TEXTURE_2D, framebuffer.colorIDs.data[0]);

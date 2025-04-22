@@ -79,6 +79,26 @@ void Framebuffer_Create(Framebuffer* framebuffer, FramebufferProperties* framebu
         glDrawBuffers(framebuffer->colorAttachments.size, buffers);
     }
 
+    if(framebuffer->depthAttachment != TEXTURE_FORMAT_NONE) {
+        glCreateTextures(GL_TEXTURE_2D, 1, &framebuffer->depthID);
+        glBindTexture(GL_TEXTURE_2D, framebuffer->depthID);
+        switch(framebuffer->depthAttachment) {
+            case TEXTURE_FORMAT_DEPTH24STENCIL8: 
+                glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH24_STENCIL8, 
+                    framebufferProperties->width, framebufferProperties->height);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, 
+                    framebuffer->depthID, 0);
+                break;
+            default:
+                    RPR_ERROR("Framebuffer_Create: depth attachment not supported");
+        }
+    }
+
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) 
         RPR_ERROR("Framebuffer_Create: Framebuffer is not complete");
 

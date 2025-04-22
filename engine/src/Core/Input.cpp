@@ -1,6 +1,7 @@
 #include "Input.hpp"
 
 #include "Window.hpp"
+#include "Core/Log.hpp"
 
 #include <GLFW/glfw3.h>
 
