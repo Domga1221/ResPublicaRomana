@@ -79,3 +79,9 @@ void updateCameraVectors(SceneCamera* sceneCamera) {
     sceneCamera->right = glm::normalize(glm::cross(sceneCamera->front, sceneCamera->worldUp));
     sceneCamera->up = glm::normalize(glm::cross(sceneCamera->right, sceneCamera->front));
 }
+
+void SceneCamera_SetViewportSize(SceneCamera* sceneCamera, u32 width, u32 height) {
+    sceneCamera->viewportWidth = width;
+    sceneCamera->viewportHeight = height;
+    sceneCamera->aspectRatio = sceneCamera->viewportWidth / sceneCamera->viewportHeight;
+}

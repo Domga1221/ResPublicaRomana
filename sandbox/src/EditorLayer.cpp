@@ -159,6 +159,20 @@ void EditorLayer_OnDetach() {
 }
 
 void EditorLayer_OnUpdate(f32 deltaTime) {
+
+    // resize
+    if(viewportSize.x > 0.0f && viewportSize.y > 0.0f && 
+            (framebuffer.framebufferProperties.width != (u32)viewportSize.x
+            || framebuffer.framebufferProperties.height != (u32)viewportSize.y)) {
+        Framebuffer_Resize(&framebuffer, (u32)viewportSize.x, (u32)viewportSize.y);
+        SceneCamera_SetViewportSize(&sceneCamera, (u32)viewportSize.x, (u32)viewportSize.y); 
+        __builtin_debugtrap();
+    }
+    //RPR_INFO("viewportSize.x: %d, framebufferwidth: %d", (u32)viewportSize.x, (u32)framebuffer.framebufferProperties.width);
+    //RPR_INFO("viewportSize.y: %d, framebufferheight: %d", (u32)viewportSize.y, (u32)framebuffer.framebufferProperties.height);
+
+
+
     handleSceneCameraMovement(deltaTime);
     handleSceneCameraMouseMovement();
 
@@ -206,7 +220,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
 void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     ImGui::SetCurrentContext(context); // ImGui global does not persist across dll boundaries 
 
-    return;
+    //return;
     
     static bool dockSpace = true;
     static bool opt_fullscreen_persistent = true;
@@ -278,6 +292,8 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     // TODO: for some reason clear color of framebuffer color attachment is not rendered in imgui image 
     u32 textureID = framebuffer.colorIDs.data[0];
     ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
+    viewportSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
+    RPR_WARN("viewportPanelSize: %d, %d", (i32)viewportPanelSize.x, (i32)viewportPanelSize.y);
     ImGui::Image((ImTextureID)textureID, ImVec2(viewportPanelSize.x, viewportPanelSize.y), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::PopStyleVar();
 

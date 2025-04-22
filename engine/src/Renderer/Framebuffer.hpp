@@ -47,3 +47,5 @@ RPR_API void Framebuffer_Create(Framebuffer* framebuffer, FramebufferProperties*
 
 RPR_API void Framebuffer_Bind(Framebuffer* framebuffer);
 RPR_API void Framebuffer_Unbind();
+
+RPR_API void Framebuffer_Resize(Framebuffer* framebuffer, u32 width, u32 height);
