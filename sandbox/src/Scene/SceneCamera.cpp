@@ -51,8 +51,19 @@ void SceneCamera_ProcessKeyboard(SceneCamera* sceneCamera, SceneCameraMovement d
     if(direction == SCENE_CAMERA_MOVEMENT_DOWN) sceneCamera->position -= sceneCamera->up * velocity;    
 }
 
-void SceneCamera_ProcessMouseMovement(SceneCamera* sceneCamera, f32 xOffset, f32 yOffset, b8 contrainPitch) {
-    // TODO:
+void SceneCamera_ProcessMouseMovement(SceneCamera* sceneCamera, f32 xOffset, f32 yOffset, b8 constrainPitch) {
+    xOffset *= sceneCamera->mouseSensitivity;
+    yOffset *= sceneCamera->mouseSensitivity;
+
+    sceneCamera->yaw -= xOffset;
+    sceneCamera->pitch -= yOffset;
+
+    if(constrainPitch) {
+        if(sceneCamera->pitch > 89.0f)  sceneCamera->pitch = 89.0f;
+        if(sceneCamera->pitch < -89.0f) sceneCamera->pitch = -89.0f;
+    }
+
+    updateCameraVectors(sceneCamera);
 }
 
 void SceneCamera_ProcessMouseScroll(SceneCamera* sceneCamera, float yOffset) {

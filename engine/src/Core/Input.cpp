@@ -22,7 +22,7 @@ b8 Input_IsKeyPressed(u32 keycode) {
 b8 Input_IsMouseButtonPressed(u16 button) {
     GLFWwindow* window = Window_GetGLFWWindowPtr();
     i32 state = glfwGetMouseButton(window, button);
-    return state == GLFW_PRESS;
+    return state == GLFW_PRESS ||state == GLFW_REPEAT;
 }
 
 f32 Input_GetMouseX() {

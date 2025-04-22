@@ -46,15 +46,13 @@ void handleSceneCameraMouseMovement() {
     f32 currentMouseX = Input_GetMouseX();
     f32 currentMouseY = Input_GetMouseY();
 
-    //RPR_DEBUG("X: %d, Y: %d", currentMouseX, currentMouseY);
-
     f32 xOffset = lastMouseX - currentMouseX;
     f32 yOffset = currentMouseY - lastMouseY;
     lastMouseX = currentMouseX;
     lastMouseY = currentMouseY;
-    
-    if(!Input_IsKeyPressed(RPR_MOUSE_BUTTON_2)) return;
-    SceneCamera_ProcessMouseMovement(&sceneCamera, xOffset, yOffset);
+
+    if(Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_2)) 
+        SceneCamera_ProcessMouseMovement(&sceneCamera, xOffset, yOffset);
 }
 
 #include "Renderer/Texture.hpp"

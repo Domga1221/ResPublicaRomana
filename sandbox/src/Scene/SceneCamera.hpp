@@ -52,5 +52,5 @@ glm::mat4 SceneCamera_GetViewMatrix(SceneCamera* sceneCamera);
 glm::mat4 SceneCamera_GetProjectinoMatrix(SceneCamera* sceneCamera);
 
 void SceneCamera_ProcessKeyboard(SceneCamera* sceneCamera, SceneCameraMovement direction, f32 deltaTime);
-void SceneCamera_ProcessMouseMovement(SceneCamera* sceneCamera, f32 xOffset, f32 yOffset, b8 contrainPitch = true);
+void SceneCamera_ProcessMouseMovement(SceneCamera* sceneCamera, f32 xOffset, f32 yOffset, b8 constrainPitch = true);
 void SceneCamera_ProcessMouseScroll(SceneCamera* sceneCamera, float yOffset);
