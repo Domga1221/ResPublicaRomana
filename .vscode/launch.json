@@ -13,7 +13,8 @@
             "program": "${workspaceFolder}/bin/Debug/sandbox.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/bin/Debug",
+            //"cwd": "${workspaceFolder}/bin/Debug",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "console": "externalTerminal"
         }

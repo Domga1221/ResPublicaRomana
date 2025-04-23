@@ -73,7 +73,7 @@ void EditorLayer_OnAttach() {
     ContentBrowserPanel_Initialize();
 
 
-    std::string currentPath = std::filesystem::current_path().parent_path().parent_path().string();
+    std::string currentPath = std::filesystem::current_path().string();
 
     std::string vertPath = currentPath + "/Assets/Shaders/triangle3D.vert";
     std::string fragPath = currentPath + "/Assets/Shaders/triangle3D.frag";
@@ -166,7 +166,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
             || framebuffer.framebufferProperties.height != (u32)viewportSize.y)) {
         Framebuffer_Resize(&framebuffer, (u32)viewportSize.x, (u32)viewportSize.y);
         SceneCamera_SetViewportSize(&sceneCamera, (u32)viewportSize.x, (u32)viewportSize.y); 
-        __builtin_debugtrap();
+        //__builtin_debugtrap();
     }
     //RPR_INFO("viewportSize.x: %d, framebufferwidth: %d", (u32)viewportSize.x, (u32)framebuffer.framebufferProperties.width);
     //RPR_INFO("viewportSize.y: %d, framebufferheight: %d", (u32)viewportSize.y, (u32)framebuffer.framebufferProperties.height);
@@ -293,7 +293,7 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     u32 textureID = framebuffer.colorIDs.data[0];
     ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
     viewportSize = glm::vec2(viewportPanelSize.x, viewportPanelSize.y);
-    RPR_WARN("viewportPanelSize: %d, %d", (i32)viewportPanelSize.x, (i32)viewportPanelSize.y);
+    //RPR_WARN("viewportPanelSize: %d, %d", (i32)viewportPanelSize.x, (i32)viewportPanelSize.y);
     ImGui::Image((ImTextureID)textureID, ImVec2(viewportPanelSize.x, viewportPanelSize.y), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::PopStyleVar();
 

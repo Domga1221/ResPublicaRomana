@@ -38,3 +38,5 @@ Makefile
 *.make
 # include libs 
 !engine/Libraries/lib/*
+# imgui 
+imgui.ini

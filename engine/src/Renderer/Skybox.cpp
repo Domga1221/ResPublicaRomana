@@ -63,7 +63,7 @@ void Skybox_Create(Skybox* skybox) {
     VertexArray_Create(&skybox->vertexArray);
     VertexArray_AddVertexBuffer(&skybox->vertexArray, &skybox->vertexBuffer);
 
-    std::string currentPath = std::filesystem::current_path().parent_path().parent_path().string();
+    std::string currentPath = std::filesystem::current_path().string();
     RPR_DEBUG("Skybox_Create: Loading cubemap from path: %s", currentPath.c_str());
     
     

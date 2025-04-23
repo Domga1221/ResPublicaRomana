@@ -60,6 +60,19 @@
         "list": "cpp",
         "sstream": "cpp",
         "unordered_map": "cpp",
-        "xhash": "cpp"
+        "xhash": "cpp",
+        "filesystem": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "xtree": "cpp",
+        "array": "cpp",
+        "chrono": "cpp",
+        "codecvt": "cpp",
+        "deque": "cpp",
+        "forward_list": "cpp",
+        "ranges": "cpp",
+        "ratio": "cpp",
+        "span": "cpp",
+        "unordered_set": "cpp"
     }
 }
