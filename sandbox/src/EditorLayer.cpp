@@ -178,12 +178,18 @@ void EditorLayer_OnAttach() {
     //transform = e.GetComponent<TransformComponent>();
 
     activeScene.root = e;
+    e->GetComponent<TagComponent>().tag = "Root";
     List_Create(&e->children);
 
+    // TODO: move to own function
     GameObject* g1 = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
+    List_Create(&g1->children);
     GameObject_Create(&activeScene, g1);
+    g1->GetComponent<TagComponent>().tag = "1";
     GameObject* g2 = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
+    List_Create(&g2->children);
     GameObject_Create(&activeScene, g2);
+    g2->GetComponent<TagComponent>().tag = "2";
     
 
     List_PushBack(&e->children, g1);

@@ -9,6 +9,8 @@
 #include "Window.hpp"
 #include "Core/Log.hpp"
 
+void ImGuiTheme();
+
 
 void ImGuiLayer_Initialize(Layer* layer) {
     layer->OnAttach = ImGuiLayer_OnAttach;
@@ -44,6 +46,8 @@ void ImGuiLayer_OnAttach() {
     if(!ImGui_ImplOpenGL3_Init("#version 460")) {
         RPR_CRITICAL("Failed to initialize ImGui for OpenGl3");
     }
+
+    ImGuiTheme();
 }
 
 void ImGuiLayer_OnDetach() {
@@ -89,4 +93,76 @@ void ImGuiLayer_End() {
         ImGui::RenderPlatformWindowsDefault();
         glfwMakeContextCurrent(backup_current_context);
     }
+}
+
+void ImGuiTheme() {
+
+    // Fonts
+    ImGuiIO& io = ImGui::GetIO();
+    //io.Fonts->AddFontFromFileTTF("Assets/Fonts/CastoroTitling/CastoroTitling-Regular.ttf", 24.0f);
+    io.FontDefault = io.Fonts->AddFontFromFileTTF("Assets/Fonts/CastoroTitling/CastoroTitling-Regular.ttf", 18.0f);
+
+
+    ImGuiStyle& style = ImGui::GetStyle();
+    // Borders
+    style.TabBarBorderSize = 0;
+    style.WindowBorderSize = 0;
+    style.ChildBorderSize = 0;
+    style.PopupBorderSize = 0;
+    style.FrameBorderSize = 0;
+    // Tabs
+    style.TabBorderSize = 0;
+    style.TabBarBorderSize = 0;
+    style.TabCloseButtonMinWidthSelected = -1;
+    style.TabCloseButtonMinWidthUnselected = 0;
+    style.TabRounding = 0;
+    // Windows 
+    style.WindowMenuButtonPosition = ImGuiDir_None;
+
+
+
+    auto& colors = ImGui::GetStyle().Colors;
+    
+    colors[ImGuiCol_WindowBg] = ImVec4{ 15.0f / 255.0f, 17.0f / 255.0f, 16.0f / 255.0f, 1.0f };
+
+    // Headers
+    colors[ImGuiCol_Header] = ImVec4{ 125.0f / 255.0f, 35.0f / 255.0f, 35.0f / 255.0f, 1.0f };
+    colors[ImGuiCol_HeaderHovered] = ImVec4{ 0.3f, 0.3, 0.3f, 1.0f };
+    colors[ImGuiCol_HeaderActive] = ImVec4{ 196.0f / 255.0f, 40.0f / 255.0f, 43.0f / 255.0f, 1.0f };
+
+    // Tabs
+    //colors[ImGuiCol_Tab] = ImVec4{ 125.0f / 255.0f, 35.0f / 255.0f, 35.0f / 255.0f, 1.0f };
+    colors[ImGuiCol_Tab] = ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f };
+    colors[ImGuiCol_TabHovered] = ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f };      
+    colors[ImGuiCol_TabActive] = ImVec4{ 196.0f / 255.0f, 40.0f / 255.0f, 43.0f / 255.0f, 1.0f };
+    colors[ImGuiCol_TabSelectedOverline] = ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f };
+    
+    colors[ImGuiCol_TabUnfocused] = ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f };
+    colors[ImGuiCol_TabUnfocusedActive] = ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f };
+
+    // Title
+    colors[ImGuiCol_TitleBg] = ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f };
+    colors[ImGuiCol_TitleBgActive] = ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f };
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f };
+    
+    // Menubar
+    colors[ImGuiCol_MenuBarBg] = ImVec4{ 177.0f / 255.0f, 160.0f / 255.0f, 140.0f / 255.0f, 1.0f };
+    //colors[ImGuiCol_MenuBarBg] = ImVec4{ 222.0f / 255.0f, 135.0f / 255.0f, 53.0f / 255.0f, 1.0f };
+
+    // Button
+    colors[ImGuiCol_Button] = ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f };
+    colors[ImGuiCol_ButtonHovered] = ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f };
+    colors[ImGuiCol_ButtonActive] = ImVec4{ 0.1f, 0.1f, 0.1f, 1.0f };
+
+    // Seperator 
+    colors[ImGuiCol_ResizeGripHovered] = ImVec4{ 125.0f / 255.0f, 35.0f / 255.0f, 35.0f / 255.0f, 1.0f };
+    colors[ImGuiCol_ResizeGripActive] = ImVec4{ 196.0f / 255.0f, 40.0f / 255.0f, 43.0f / 255.0f, 1.0f };
+
+    // TODO: 
+    /*
+    // Frame BG
+    colors[ImGuiCol_FrameBg] = ImVec4{ 0.2f, 0.2f, 0.2f, 1.0f };
+    colors[ImGuiCol_FrameBgHovered] = ImVec4{ 0.3f, 0.3f, 0.3f, 1.0f };
+    colors[ImGuiCol_FrameBgActive] = ImVec4{ 0.1f, 0.1f, 0.1f, 1.0f };
+    */
 }

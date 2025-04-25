@@ -10,10 +10,32 @@
 static Scene* activeScene = 0;
 static GameObject* selection;
 
+ImGuiTreeNodeFlags base_flags;
+
 void drawComponents(GameObject* gameObject);
 
 void SceneHierarchyPanel_Initialize(Scene* scene) {
     activeScene = scene;
+    base_flags = ImGuiTreeNodeFlags_DrawLinesFull | ImGuiTreeNodeFlags_DefaultOpen;
+    //base_flags |= ImGuiTreeNodeFlags_DrawLinesToNodes;
+    base_flags |= ImGuiTreeNodeFlags_OpenOnArrow;
+    base_flags |= ImGuiTreeNodeFlags_SpanFullWidth;
+}
+
+void drawTree(GameObject* gameObject) {
+    TagComponent& tc = gameObject->GetComponent<TagComponent>();
+    ImGuiTreeNodeFlags treeNodeFlags = base_flags;
+    if(gameObject == selection)
+        treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
+    if(ImGui::TreeNodeEx((const void*)gameObject->handle, treeNodeFlags, "%s", tc.c_str())) {
+        //RPR_INFO("size %d: \n", gameObject->children.size);
+        for(u32 i = 0; i < gameObject->children.size; i++) {
+            drawTree(gameObject->children.data[i]);
+        }
+        ImGui::TreePop();
+    }
+    if(ImGui::IsItemClicked() && activeScene->root != gameObject) // root not selectable
+        selection = gameObject;
 }
 
 void SceneHierarchyPanel_OnImGuiRender() {
@@ -27,6 +49,7 @@ void SceneHierarchyPanel_OnImGuiRender() {
     //ImGui::Text("Root");
     
 
+    /*
     ImGuiTreeNodeFlags base_flags = ImGuiTreeNodeFlags_DrawLinesFull | ImGuiTreeNodeFlags_DefaultOpen;
     base_flags |= ImGuiTreeNodeFlags_DrawLinesToNodes;
     base_flags |= ImGuiTreeNodeFlags_OpenOnArrow;
@@ -44,6 +67,12 @@ void SceneHierarchyPanel_OnImGuiRender() {
         }
         ImGui::TreePop();
     }
+    */
+    //if(ImGui::TreeNodeEx("Root")) {
+    //        drawTree(activeScene->root);
+    //    ImGui::TreePop();
+    //}
+    drawTree(activeScene->root);
 
 
     if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
