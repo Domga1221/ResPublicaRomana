@@ -9,6 +9,7 @@
 // UI
 #include "UI/ContentBrowserPanel.hpp"
 #include "UI/SceneHierarchyPanel.hpp"
+#include "UI/InspectorPanel.hpp"
 #include <imgui-docking/imgui.h>
 
 #include <Memory/List.hpp>
@@ -79,6 +80,7 @@ void EditorLayer_OnAttach() {
     // UI
     ContentBrowserPanel_Initialize();
     SceneHierarchyPanel_Initialize(&activeScene);
+    InspectorPanel_Initialize();
 
 
     std::string currentPath = std::filesystem::current_path().string();
@@ -325,6 +327,7 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     // Panels
     ContentBrowserPanel_OnImGuiRender();
     SceneHierarchyPanel_OnImGuiRender();
+    InspectorPanel_OnImGuiRender();
 
 
     // viewport 

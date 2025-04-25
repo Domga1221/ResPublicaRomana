@@ -6,13 +6,13 @@
 
 #include <imgui-docking/imgui.h>
 
+#include "InspectorPanel.hpp" // TODO: Use event system 
+
 
 static Scene* activeScene = 0;
 static GameObject* selection;
 
 ImGuiTreeNodeFlags base_flags;
-
-void drawComponents(GameObject* gameObject);
 
 void SceneHierarchyPanel_Initialize(Scene* scene) {
     activeScene = scene;
@@ -34,8 +34,10 @@ void drawTree(GameObject* gameObject) {
         }
         ImGui::TreePop();
     }
-    if(ImGui::IsItemClicked() && activeScene->root != gameObject) // root not selectable
+    if(ImGui::IsItemClicked() && activeScene->root != gameObject)  {
         selection = gameObject;
+        InspectorPanel_SetSelectedGameObject(selection);
+    }
 }
 
 void SceneHierarchyPanel_OnImGuiRender() {
@@ -75,29 +77,13 @@ void SceneHierarchyPanel_OnImGuiRender() {
     drawTree(activeScene->root);
 
 
-    if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered())
+    if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {
         selection = nullptr;
-
-        
-        
-    ImGui::End();
-    
-
-    ImGui::Begin("Inspector");
-    if(selection != nullptr)
-        drawComponents(selection);
-
-    ImGui::End();
-}
-
-void drawComponents(GameObject* gameObject) {
-    if(gameObject->HasComponent<TagComponent>()) {
-        TagComponent& tagComponent = gameObject->GetComponent<TagComponent>();
-        char buffer[256];
-        MEMORY_Zero(&buffer, sizeof(buffer));
-        strcpy_s(buffer, sizeof(buffer), tagComponent.c_str());
-        if(ImGui::InputText("Tag", buffer, sizeof(buffer))) {
-            tagComponent.tag = std::string(buffer);
-        }
+        InspectorPanel_SetSelectedGameObject(nullptr);
     }
+
+        
+        
+    ImGui::End();
 }
+

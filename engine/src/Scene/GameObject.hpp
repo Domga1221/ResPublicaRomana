@@ -7,7 +7,7 @@
 #include "Core/Log.hpp"
 
 #include "Memory/List.hpp"
-
+#include "Components.hpp"
 struct RPR_API GameObject {
     entt::entity handle;
     Scene* scene;
@@ -33,6 +33,23 @@ struct RPR_API GameObject {
     }
 
     // TODO: TryGetComponent
+    /*
+    template<typename T>
+    b8 TryGetComponent(T& out) {
+        if(!HasComponent<T>()) 
+            return false;
+
+        out = GetComponent<T>();
+        return true;
+    }
+    */
+   
+    template<typename T>
+    T* TryGetComponent() {
+        if(!HasComponent<T>()) return 0;
+        T& tc = GetComponent<T>();
+        return &tc;
+    }
 
     template<typename T>
     b8 HasComponent() {
