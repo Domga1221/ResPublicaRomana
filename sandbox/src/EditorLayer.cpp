@@ -8,6 +8,7 @@
 
 // UI
 #include "UI/ContentBrowserPanel.hpp"
+#include "UI/SceneHierarchyPanel.hpp"
 #include <imgui-docking/imgui.h>
 
 #include <Memory/List.hpp>
@@ -32,6 +33,7 @@ SceneCamera sceneCamera;
 #include <Core/Input.hpp>
 #include <Core/Keycodes.hpp>
 void handleSceneCameraMovement(f32 deltaTime) {
+    if(!Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_2)) return;
     if(Input_IsKeyPressed(RPR_KEY_W)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_FORWARD, deltaTime);
     if(Input_IsKeyPressed(RPR_KEY_A)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_LEFT, deltaTime);
     if(Input_IsKeyPressed(RPR_KEY_S)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_BACKWARD, deltaTime);
@@ -63,6 +65,11 @@ Texture texture;
 Skybox skybox;
 Shader skyboxShader;
 
+#include <Scene/GameObject.hpp>
+#include <Scene/Scene.hpp>
+#include <Scene/Components.hpp>
+static Scene activeScene;
+
 glm::vec2 viewportSize = glm::vec2(1280, 720);
 
 void EditorLayer_OnAttach() {
@@ -71,6 +78,7 @@ void EditorLayer_OnAttach() {
 
     // UI
     ContentBrowserPanel_Initialize();
+    SceneHierarchyPanel_Initialize(&activeScene);
 
 
     std::string currentPath = std::filesystem::current_path().string();
@@ -152,6 +160,34 @@ void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Texture channels: %d", texture.numberOfChannels);
 
     Skybox_Create(&skybox);
+
+
+    // Entity test
+    GameObject* e = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
+    GameObject_Create(&activeScene, e);
+    RPR_INFO("gameObject handle: %u", e->handle);
+    RPR_INFO("active scene: %p, gameObject scene: %p", &activeScene, e->scene);
+    TagComponent& tc = e->GetComponent<TagComponent>();
+    RPR_INFO("gameObject tag: %s", tc.c_str());
+    TransformComponent& transform = e->GetComponent<TransformComponent>();
+    RPR_INFO("gameObject transform position: (%d, %d, %d)", transform.position.x, transform.position.y, transform.position.z);
+
+    RPR_INFO("GameObject has transform component: %d", e->HasComponent<TransformComponent>());
+    e->RemoveComponent<TransformComponent>();
+    RPR_INFO("GameObject has transform component: %d", e->HasComponent<TransformComponent>());
+    //transform = e.GetComponent<TransformComponent>();
+
+    activeScene.root = e;
+    List_Create(&e->children);
+
+    GameObject* g1 = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
+    GameObject_Create(&activeScene, g1);
+    GameObject* g2 = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
+    GameObject_Create(&activeScene, g2);
+    
+
+    List_PushBack(&e->children, g1);
+    List_PushBack(&e->children, g2);    
 }
 
 void EditorLayer_OnDetach() {
@@ -279,7 +315,11 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     
     ImGui::End();
 
+    
+    // Panels
     ContentBrowserPanel_OnImGuiRender();
+    SceneHierarchyPanel_OnImGuiRender();
+
 
     // viewport 
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
