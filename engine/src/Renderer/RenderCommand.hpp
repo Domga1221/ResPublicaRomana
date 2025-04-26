@@ -22,6 +22,10 @@ RPR_API inline void RenderCommand_Draw(u32 count) {
     glDrawArrays(GL_TRIANGLES, 0, count);
 }
 
+RPR_API inline void RenderCommand_DrawIndexed(u32 indexCount) {
+    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+}
+
 
 RPR_API inline void RenderCommand_ActiveTexture(u16 textureIndex) {
     glActiveTexture(GL_TEXTURE0 + textureIndex);

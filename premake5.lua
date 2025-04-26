@@ -71,7 +71,7 @@ project "engine"
         "shell32",
         "glfw3_mt",
         "opengl32",
-        -- "assimp-vc143-mt"
+        "assimp-vc143-mt"
     }
 
     defines {
@@ -135,6 +135,7 @@ project "sandbox"
         "shell32",
         "glfw3_mt",
         "opengl32",
+        "assimp-vc143-mt"
     }
 
     defines {

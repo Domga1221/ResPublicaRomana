@@ -14,6 +14,8 @@ void VertexArray_Destroy(VertexArray* vertexArray) {
         VertexBuffer_Destroy(vertexBuffer);
     }
     glDeleteVertexArrays(1, &vertexArray->ID);
+    if(vertexArray->indexBuffer != nullptr) 
+        IndexBuffer_Destroy(vertexArray->indexBuffer);
 }
 
 void VertexArray_AddVertexBuffer(VertexArray* vertexArray, VertexBuffer* vertexBuffer) {
@@ -40,6 +42,13 @@ void VertexArray_AddVertexBuffer(VertexArray* vertexArray, VertexBuffer* vertexB
         glVertexAttribPointer(i, componentCount, glType, normalized, stride, offset);
     }
     List_PushBack(&vertexArray->vertexBuffers, vertexBuffer);
+}
+
+void VertexArray_SetIndexBuffer(VertexArray* vertexArray, IndexBuffer* indexBuffer) {
+    glBindVertexArray(vertexArray->ID);
+    IndexBuffer_Bind(indexBuffer);
+
+    vertexArray->indexBuffer = indexBuffer;
 }
 
 void VertexArray_Bind(VertexArray* vertexArray) {

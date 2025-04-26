@@ -71,6 +71,9 @@ Shader skyboxShader;
 #include <Scene/Components.hpp>
 static Scene activeScene;
 
+#include <Renderer/Mesh.hpp>
+Mesh mesh;
+
 glm::vec2 viewportSize = glm::vec2(1280, 720);
 
 void EditorLayer_OnAttach() {
@@ -155,7 +158,7 @@ void EditorLayer_OnAttach() {
     VertexArray_Create(&screenVertexArray);
     VertexArray_AddVertexBuffer(&screenVertexArray, &screenVertexBuffer);
 
-    SceneCamera_Create(&sceneCamera, glm::vec3(0.0f, 0.0f, 1.0f));
+    SceneCamera_Create(&sceneCamera, glm::vec3(1.0f, 0.5f, 2.0f));
 
     std::string texturePath = currentPath + "/Assets/Textures/bricks10_diffuse_1k.jpg";
     Texture_Create(&texture, texturePath.c_str());
@@ -195,7 +198,12 @@ void EditorLayer_OnAttach() {
     
 
     List_PushBack(&e->children, g1);
-    List_PushBack(&e->children, g2);    
+    List_PushBack(&e->children, g2);   
+    
+
+    // Mesh testing 
+    std::string cube_ownPath = currentPath + "/Assets/Models/cube_own.obj";
+    Mesh_Create(&mesh, cube_ownPath);
 }
 
 void EditorLayer_OnDetach() {
@@ -244,6 +252,10 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     VertexArray_Bind(&vertexArray);
     //glDrawArrays(GL_TRIANGLES, 0, 3);
     RenderCommand_Draw(3);
+
+    // -- cube 
+    Mesh_Bind(&mesh);
+    RenderCommand_DrawIndexed(mesh.indexCount);
 
     // -- Skybox
     Skybox_Render(&skybox, &view, &projection);
