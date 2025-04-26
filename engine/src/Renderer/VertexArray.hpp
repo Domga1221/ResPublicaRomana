@@ -13,7 +13,7 @@ struct VertexArray {
     IndexBuffer* indexBuffer;
 };
 
-RPR_API void VertexArray_Create(VertexArray* vertexArray);
+RPR_API VertexArray* VertexArray_Create();
 RPR_API void VertexArray_Destroy(VertexArray* vertexArray);
 
 RPR_API void VertexArray_AddVertexBuffer(VertexArray* vertexArray, VertexBuffer* vertexBuffer);

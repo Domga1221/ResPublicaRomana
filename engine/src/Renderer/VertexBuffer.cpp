@@ -1,14 +1,23 @@
 #include "VertexBuffer.hpp"
 
-void VertexBuffer_Create(VertexBuffer* vertexBuffer, f32* vertices, u32 vertexCount) {
+VertexBuffer* VertexBuffer_Create(f32* vertices, u32 vertexCount) {
+    VertexBuffer* vertexBuffer = (VertexBuffer*)MEMORY_Allocate(sizeof(VertexBuffer), MEMORY_TAG_RENDERER);
+    BufferLayout_Create(&vertexBuffer->bufferLayout);
+
     glCreateBuffers(1, &vertexBuffer->ID);
     glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->ID);
     glBufferData(GL_ARRAY_BUFFER, vertexCount, vertices, GL_STATIC_DRAW);
     VertexBuffer_Unbind();
+
+    return vertexBuffer;
 }
 
 void VertexBuffer_Destroy(VertexBuffer* vertexBuffer) {
     glDeleteBuffers(1, &vertexBuffer->ID);
+
+    List_Destroy(&vertexBuffer->bufferLayout.elements);
+
+    MEMORY_Free(vertexBuffer, sizeof(VertexBuffer), MEMORY_TAG_RENDERER);
 }
 
 void VertexBuffer_SetLayout(VertexBuffer* vertexBuffer, BufferLayout* bufferLayout) {

@@ -7,8 +7,8 @@
 #include "Shader.hpp"
 
 struct Skybox {
-    VertexBuffer vertexBuffer;
-    VertexArray vertexArray;
+    VertexBuffer* vertexBuffer;
+    VertexArray* vertexArray;
     u32 textureID;
     Shader skyboxShader;
 };

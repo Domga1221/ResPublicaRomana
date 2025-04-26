@@ -12,7 +12,6 @@ void processNode(Mesh* mesh, aiNode* node, const aiScene* scene);
 void processMesh(Mesh* mesh, aiMesh* aiMesh, const aiScene* scene);
 
 void Mesh_Create(Mesh* mesh, std::string& path) {
-    VertexArray_Create(&mesh->vertexArray);
 
     mesh->isLoaded = false;
 
@@ -44,14 +43,13 @@ void Mesh_Create(Mesh* mesh, std::string& path) {
     BufferLayout_AddElement(&bufferLayout, { "aNormal", ShaderDataType::Float3 });
     BufferLayout_AddElement(&bufferLayout, { "aTexCoords", ShaderDataType::Float2 });
     BufferLayout_CalculateOffsetAndStride(&bufferLayout);
-    VertexBuffer* vertexBuffer = (VertexBuffer*) MEMORY_Allocate(sizeof(VertexBuffer), MEMORY_TAG_RENDERER); // TODO: own function 
-    VertexBuffer_Create(vertexBuffer, (f32*)mesh->vertices.data, sizeof(Vertex) * mesh->vertexCount);
+    VertexBuffer* vertexBuffer = VertexBuffer_Create((f32*)mesh->vertices.data, sizeof(Vertex) * mesh->vertexCount);
     VertexBuffer_SetLayout(vertexBuffer, &bufferLayout);
-    VertexArray_Create(&mesh->vertexArray);
-    VertexArray_AddVertexBuffer(&mesh->vertexArray, vertexBuffer);
+    mesh->vertexArray = VertexArray_Create();
+    VertexArray_AddVertexBuffer(mesh->vertexArray, vertexBuffer);
     if(mesh->indexCount > 0) {
         IndexBuffer* indexBuffer = IndexBuffer_Create(mesh->indices.data, mesh->indices.size);
-        VertexArray_SetIndexBuffer(&mesh->vertexArray, indexBuffer);
+        VertexArray_SetIndexBuffer(mesh->vertexArray, indexBuffer);
     }
 }
 
@@ -60,7 +58,7 @@ void Mesh_Destroy(Mesh* mesh) {
 }
 
 void Mesh_Bind(Mesh* mesh) {
-    VertexArray_Bind(&mesh->vertexArray);
+    VertexArray_Bind(mesh->vertexArray);
 }
 
 void processNode(Mesh* mesh, aiNode* node, const aiScene* scene) {

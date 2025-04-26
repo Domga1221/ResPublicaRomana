@@ -21,7 +21,7 @@ struct Mesh {
     List<Vertex> vertices; // TODO: temporary
     List<u32> indices;
 
-    VertexArray vertexArray;
+    VertexArray* vertexArray;
 };
 
 RPR_API void Mesh_Create(Mesh* mesh, std::string& path);

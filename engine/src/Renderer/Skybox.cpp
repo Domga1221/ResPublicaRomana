@@ -57,11 +57,11 @@ void Skybox_Create(Skybox* skybox) {
     BufferLayout_AddElement(&bufferLayout, { "aPosition", ShaderDataType::Float3 });
     BufferLayout_CalculateOffsetAndStride(&bufferLayout);
 
-    VertexBuffer_Create(&skybox->vertexBuffer, skyboxVertices, sizeof(skyboxVertices));
-    VertexBuffer_SetLayout(&skybox->vertexBuffer, &bufferLayout);
+    skybox->vertexBuffer = VertexBuffer_Create(skyboxVertices, sizeof(skyboxVertices));
+    VertexBuffer_SetLayout(skybox->vertexBuffer, &bufferLayout);
 
-    VertexArray_Create(&skybox->vertexArray);
-    VertexArray_AddVertexBuffer(&skybox->vertexArray, &skybox->vertexBuffer);
+    skybox->vertexArray = VertexArray_Create();
+    VertexArray_AddVertexBuffer(skybox->vertexArray, skybox->vertexBuffer);
 
     std::string currentPath = std::filesystem::current_path().string();
     RPR_DEBUG("Skybox_Create: Loading cubemap from path: %s", currentPath.c_str());
@@ -128,7 +128,7 @@ void Skybox_Render(Skybox* skybox, glm::mat4* view, glm::mat4* projection) {
     Shader_SetInt(&skybox->skyboxShader, "skybox", 0);
     Shader_SetMat4(&skybox->skyboxShader, "view", view_upper3x3);
     Shader_SetMat4(&skybox->skyboxShader, "projection", *projection);
-    VertexArray_Bind(&skybox->vertexArray);
+    VertexArray_Bind(skybox->vertexArray);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, skybox->textureID);
     glDrawArrays(GL_TRIANGLES, 0, 36);

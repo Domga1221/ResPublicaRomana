@@ -9,7 +9,7 @@ struct VertexBuffer {
     BufferLayout bufferLayout;
 };
 
-RPR_API void VertexBuffer_Create(VertexBuffer* vertexBuffer, f32* vertices, u32 vertexCount);
+RPR_API VertexBuffer* VertexBuffer_Create(f32* vertices, u32 vertexCount);
 RPR_API void VertexBuffer_Destroy(VertexBuffer* vertexBuffer);
 
 RPR_API void VertexBuffer_SetLayout(VertexBuffer* vertexBuffer, BufferLayout* bufferLayout);

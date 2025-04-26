@@ -2,20 +2,26 @@
 
 #include "ShaderDataType.hpp"
 
-void VertexArray_Create(VertexArray* vertexArray) {
+
+VertexArray* VertexArray_Create() {
+    VertexArray* vertexArray = (VertexArray*)MEMORY_Allocate(sizeof(VertexArray), MEMORY_TAG_RENDERER);
+    List_Create(&vertexArray->vertexBuffers);
+
     glCreateVertexArrays(1, &vertexArray->ID);
-    //vertexArray->vertexBuffers = Vector<VertexBuffer*>();
+
+    return vertexArray;
 }
 
 void VertexArray_Destroy(VertexArray* vertexArray) {
     for(u32 i = 0; i < vertexArray->vertexBuffers.size; i++) {
-        // TODO: delete
         VertexBuffer* vertexBuffer = vertexArray->vertexBuffers.data[i];
         VertexBuffer_Destroy(vertexBuffer);
     }
     glDeleteVertexArrays(1, &vertexArray->ID);
     if(vertexArray->indexBuffer != nullptr) 
         IndexBuffer_Destroy(vertexArray->indexBuffer);
+    
+    List_Destroy(&vertexArray->vertexBuffers);
 }
 
 void VertexArray_AddVertexBuffer(VertexArray* vertexArray, VertexBuffer* vertexBuffer) {

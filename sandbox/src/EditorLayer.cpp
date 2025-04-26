@@ -20,13 +20,13 @@
 #include <Renderer/VertexBuffer.hpp>
 #include <Renderer/VertexArray.hpp>
 Shader shader;
-VertexBuffer vertexBuffer;
-VertexArray vertexArray;
+VertexBuffer* vertexBuffer;
+VertexArray* vertexArray;
 #include <Renderer/Framebuffer.hpp>
 Framebuffer framebuffer;
 Shader screenSpaceShader;
-VertexBuffer screenVertexBuffer;
-VertexArray screenVertexArray;
+VertexBuffer* screenVertexBuffer;
+VertexArray* screenVertexArray;
 #include <Renderer/RenderCommand.hpp>
 
 #include "Scene/SceneCamera.hpp"
@@ -112,13 +112,13 @@ void EditorLayer_OnAttach() {
         0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 1.0f,   0.5f, 0.5f,
     };
     
-    VertexBuffer_Create(&vertexBuffer, triangleVertices, sizeof(triangleVertices));
-    VertexBuffer_SetLayout(&vertexBuffer, &bufferLayout);
+    vertexBuffer = VertexBuffer_Create(triangleVertices, sizeof(triangleVertices));
+    VertexBuffer_SetLayout(vertexBuffer, &bufferLayout);
     
-    BufferLayout_Print(&vertexBuffer.bufferLayout);
+    BufferLayout_Print(&vertexBuffer->bufferLayout);
     
-    VertexArray_Create(&vertexArray);
-    VertexArray_AddVertexBuffer(&vertexArray, &vertexBuffer);
+    vertexArray = VertexArray_Create();
+    VertexArray_AddVertexBuffer(vertexArray, vertexBuffer);
 
 
     // Framebuffer
@@ -152,11 +152,11 @@ void EditorLayer_OnAttach() {
     BufferLayout_AddElement(&screenBufferLayout, { "aTexCoords", ShaderDataType::Float2});
     BufferLayout_CalculateOffsetAndStride(&screenBufferLayout);
 
-    VertexBuffer_Create(&screenVertexBuffer, quadVertices, sizeof(quadVertices));
-    VertexBuffer_SetLayout(&screenVertexBuffer, &screenBufferLayout);
+    screenVertexBuffer = VertexBuffer_Create(quadVertices, sizeof(quadVertices));
+    VertexBuffer_SetLayout(screenVertexBuffer, &screenBufferLayout);
     
-    VertexArray_Create(&screenVertexArray);
-    VertexArray_AddVertexBuffer(&screenVertexArray, &screenVertexBuffer);
+    screenVertexArray = VertexArray_Create();
+    VertexArray_AddVertexBuffer(screenVertexArray, screenVertexBuffer);
 
     SceneCamera_Create(&sceneCamera, glm::vec3(1.0f, 0.5f, 2.0f));
 
@@ -249,7 +249,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     Shader_SetInt(&shader, "texture_0", 0);
     RenderCommand_ActiveTexture(0);
     Texture_Bind(&texture);
-    VertexArray_Bind(&vertexArray);
+    VertexArray_Bind(vertexArray);
     //glDrawArrays(GL_TRIANGLES, 0, 3);
     RenderCommand_Draw(3);
 
@@ -268,7 +268,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     RenderCommand_ActiveTexture(0);
     RenderCommand_BindTexture2D(framebuffer.colorIDs.data[0]);
     Shader_Bind(&screenSpaceShader);
-    VertexArray_Bind(&screenVertexArray);
+    VertexArray_Bind(screenVertexArray);
     //glDrawArrays(GL_TRIANGLES, 0, 6);
     RenderCommand_Draw(6);
 }
