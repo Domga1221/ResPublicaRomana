@@ -5,6 +5,8 @@
 
 #include <filesystem>
 
+#include "ImGuiPayload.hpp"
+
 static std::filesystem::path currentDirectory = "Assets";
 static const std::filesystem::path assetsPath = "Assets";
 
@@ -62,11 +64,22 @@ void ContentBrowserPanel_OnImGuiRender() {
         const std::filesystem::path& path = directoryEntry.path();
         std::string filenameString = path.filename().string();
 
+        std::filesystem::path relativePath = std::filesystem::relative(std::filesystem::path(path), assetsPath);
+        std::cout << "relativePath: " << relativePath << "\n";
+
         ImGui::PushID(filenameString.c_str());
         ImGui::Button(filenameString.c_str(), button_sz);
         if(ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
             if(directoryEntry.is_directory())  
                 currentDirectory.append(path.filename().string());
+        
+        if(ImGui::BeginDragDropSource()) {
+            std::filesystem::path relativePath(path);
+            std::string relativeString = relativePath.string();
+            ImGui::SetDragDropPayload(IMGUI_PAYLOAD_CONTENT_BROWSER_ITEM, 
+                relativeString.c_str(), relativeString.length() + 1 * sizeof(char));
+            ImGui::EndDragDropSource();
+        }
 
         f32 last_button_x2 = ImGui::GetItemRectMax().x;
         // expected position if button was on same line

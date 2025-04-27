@@ -14,6 +14,7 @@ struct Vertex {
 };
 
 struct Mesh {
+    std::string relativePath;
     b8 isLoaded;
     u32 vertexCount;
     u32 indexCount;

@@ -1,0 +1,3 @@
+#include "ImGuiPayload.hpp"
+
+const char* IMGUI_PAYLOAD_CONTENT_BROWSER_ITEM = "CONTENT_BROWSER_ITEM";

@@ -40,3 +40,4 @@ Makefile
 !engine/Libraries/lib/*
 # imgui 
 imgui.ini
+!Assets/**

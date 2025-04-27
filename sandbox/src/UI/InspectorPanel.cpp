@@ -5,6 +5,10 @@
 
 #include <imgui-docking/imgui.h>
 
+#include "ImGuiPayload.hpp"
+
+#include <filesystem>
+
 static GameObject* selected;
 
 void drawComponents(GameObject* gameObject);
@@ -109,7 +113,26 @@ void drawComponents(GameObject* gameObject) {
         //ImGui::Text("%f", transformComponent->position.y);
         //ImGui::Text("%f", transformComponent->position.z);
 
+        ImGui::Columns(1);
         ImGui::PopStyleVar();
     }
 
+    if(MeshComponent* meshComponent = gameObject->TryGetComponent<MeshComponent>()) {
+        ImGui::Text("Mesh");
+        ImGui::Button(meshComponent->mesh.relativePath.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 20.0f));
+        // TODO: drag and drop 
+        if(ImGui::BeginDragDropTarget()) { // TODO: Think about relative and absolute paths
+            if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_CONTENT_BROWSER_ITEM)) {
+                const char* path = (const char*)payload->Data;
+                std::filesystem::path current = std::filesystem::current_path();
+                std::filesystem::path modelPath = std::filesystem::path(path);
+                current /= modelPath;
+                std::string s = current.string(); 
+                Mesh_Destroy(&meshComponent->mesh);
+                Mesh_Create(&meshComponent->mesh, s);
+                if(!meshComponent->mesh.isLoaded) 
+                    RPR_ERROR("Failed to load Mesh");
+            }
+        }
+    }
 }

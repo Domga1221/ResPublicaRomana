@@ -4,6 +4,8 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+#include <filesystem>
+
 #include "Memory/List.hpp"
 
 #include "IndexBuffer.hpp"
@@ -16,6 +18,11 @@ void Mesh_Create(Mesh* mesh, std::string& path) {
     mesh->isLoaded = false;
 
     RPR_WARN("Mesh_Create: Loading mesh at: %s", path.c_str());  
+    std::filesystem::path currentPath = std::filesystem::current_path();
+    std::filesystem::path relativePath = std::filesystem::relative(std::filesystem::path(path), currentPath);
+    RPR_WARN("Relative path: %s", relativePath.string());
+
+    mesh->relativePath = relativePath.string();
 
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -54,10 +61,14 @@ void Mesh_Create(Mesh* mesh, std::string& path) {
 
     List_Destroy(&mesh->vertices);
     List_Destroy(&mesh->indices);
+    mesh->isLoaded = true;
 }
 
 void Mesh_Destroy(Mesh* mesh) {
     VertexArray_Destroy(mesh->vertexArray);
+    mesh->isLoaded = false;
+    mesh->vertexCount = 0;
+    mesh->indexCount = 0;
 }
 
 void Mesh_Bind(Mesh* mesh) {

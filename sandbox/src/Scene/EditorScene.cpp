@@ -11,8 +11,8 @@ static Shader editorShader;
 void EditorScene_Initialze() {
     std::string currentPath = std::filesystem::current_path().string();
 
-    std::string vertPath = currentPath + "/Assets/Shaders/triangle3D.vert";
-    std::string fragPath = currentPath + "/Assets/Shaders/triangle3D.frag";
+    std::string vertPath = currentPath + "/Assets/Shaders/Editor/EditorShader.vert";
+    std::string fragPath = currentPath + "/Assets/Shaders/Editor/EditorShader.frag";
     Shader_Create(&editorShader, vertPath, fragPath);
 }
 
