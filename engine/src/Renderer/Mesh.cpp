@@ -51,10 +51,13 @@ void Mesh_Create(Mesh* mesh, std::string& path) {
         IndexBuffer* indexBuffer = IndexBuffer_Create(mesh->indices.data, mesh->indices.size);
         VertexArray_SetIndexBuffer(mesh->vertexArray, indexBuffer);
     }
+
+    List_Destroy(&mesh->vertices);
+    List_Destroy(&mesh->indices);
 }
 
 void Mesh_Destroy(Mesh* mesh) {
-    // TODO: Destroy
+    VertexArray_Destroy(mesh->vertexArray);
 }
 
 void Mesh_Bind(Mesh* mesh) {

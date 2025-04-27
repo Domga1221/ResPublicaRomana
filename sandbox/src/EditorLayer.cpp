@@ -72,13 +72,18 @@ Shader skyboxShader;
 static Scene activeScene;
 
 #include <Renderer/Mesh.hpp>
-Mesh mesh;
+//Mesh mesh;
+Mesh* mesh;
+
+#include "Scene/EditorScene.hpp"
 
 glm::vec2 viewportSize = glm::vec2(1280, 720);
 
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
 
+
+    EditorScene_Initialze();
 
     // UI
     ContentBrowserPanel_Initialize();
@@ -203,11 +208,19 @@ void EditorLayer_OnAttach() {
 
     // Mesh testing 
     std::string cube_ownPath = currentPath + "/Assets/Models/cube_own.obj";
-    Mesh_Create(&mesh, cube_ownPath);
+    //Mesh_Create(&mesh, cube_ownPath);
+    GameObject* cube = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
+    List_Create(&cube->children);
+    GameObject_Create(&activeScene, cube);
+    cube->GetComponent<TagComponent>().tag = "cube";
+    MeshComponent& meshComponent = cube->AddComponent<MeshComponent>();
+    Mesh_Create(&meshComponent.mesh, cube_ownPath);
+    mesh = &meshComponent.mesh;
+    List_PushBack(&e->children, cube);
 }
 
 void EditorLayer_OnDetach() {
-
+    
 }
 
 void EditorLayer_OnUpdate(f32 deltaTime) {
@@ -254,8 +267,11 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     RenderCommand_Draw(3);
 
     // -- cube 
-    Mesh_Bind(&mesh);
-    RenderCommand_DrawIndexed(mesh.indexCount);
+    //Mesh_Bind(&mesh);
+    //RenderCommand_DrawIndexed(mesh.indexCount);
+
+    // -- EditorScene
+    EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
 
     // -- Skybox
     Skybox_Render(&skybox, &view, &projection);
