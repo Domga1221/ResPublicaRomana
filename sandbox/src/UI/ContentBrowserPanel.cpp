@@ -65,7 +65,6 @@ void ContentBrowserPanel_OnImGuiRender() {
         std::string filenameString = path.filename().string();
 
         std::filesystem::path relativePath = std::filesystem::relative(std::filesystem::path(path), assetsPath);
-        std::cout << "relativePath: " << relativePath << "\n";
 
         ImGui::PushID(filenameString.c_str());
         ImGui::Button(filenameString.c_str(), button_sz);

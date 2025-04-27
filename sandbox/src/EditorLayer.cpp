@@ -77,6 +77,9 @@ Mesh* mesh;
 
 #include "Scene/EditorScene.hpp"
 
+#include <Systems/HexagonGrid.hpp>
+Mesh* hexagon;
+
 glm::vec2 viewportSize = glm::vec2(1280, 720);
 
 void EditorLayer_OnAttach() {
@@ -217,6 +220,9 @@ void EditorLayer_OnAttach() {
     Mesh_Create(&meshComponent.mesh, cube_ownPath);
     mesh = &meshComponent.mesh;
     List_PushBack(&e->children, cube);
+
+    // Hexagon
+    hexagon = Hexagon_CreateMesh();
 }
 
 void EditorLayer_OnDetach() {
@@ -271,7 +277,11 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     //RenderCommand_DrawIndexed(mesh.indexCount);
 
     // -- EditorScene
-    EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
+    ///EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
+
+    // -- Hexagon 
+    VertexArray_Bind(hexagon->vertexArray);
+    RenderCommand_DrawIndexed(hexagon->indexCount);
 
     // -- Skybox
     Skybox_Render(&skybox, &view, &projection);
