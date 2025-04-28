@@ -77,7 +77,7 @@ void Shader_Create(Shader* shader, const char* vertexPath, const char* fragmentP
     if (!success)
     {
         glGetProgramInfoLog(shader->ID, 512, NULL, infoLog);
-        RPR_ERROR("Shader_Create: PROGRAM LINKING FAILED\n {0}", infoLog);
+        RPR_ERROR("Shader_Create: PROGRAM LINKING FAILED\n %s", infoLog);
     }
 
     // delete the shaders as they're linked into our program now and no longer necessary
