@@ -49,8 +49,8 @@ void handleSceneCameraMouseMovement() {
     f32 currentMouseX = Input_GetMouseX();
     f32 currentMouseY = Input_GetMouseY();
 
-    f32 xOffset = lastMouseX - currentMouseX;
-    f32 yOffset = currentMouseY - lastMouseY;
+    f32 xOffset = currentMouseX - lastMouseX;
+    f32 yOffset = lastMouseY - currentMouseY;
     lastMouseX = currentMouseX;
     lastMouseY = currentMouseY;
 
@@ -166,7 +166,7 @@ void EditorLayer_OnAttach() {
     screenVertexArray = VertexArray_Create();
     VertexArray_AddVertexBuffer(screenVertexArray, screenVertexBuffer);
 
-    SceneCamera_Create(&sceneCamera, glm::vec3(1.0f, 0.5f, 2.0f));
+    SceneCamera_Create(&sceneCamera, glm::vec3(1.0f, 0.5f, -2.0f));
 
     std::string texturePath = currentPath + "/Assets/Textures/bricks10_diffuse_1k.jpg";
     Texture_Create(&texture, texturePath.c_str());
@@ -222,7 +222,7 @@ void EditorLayer_OnAttach() {
     List_PushBack(&e->children, cube);
 
     // Hexagon
-    hexagonGrid = HexagonGrid_Create(2, 2);
+    hexagonGrid = HexagonGrid_Create(5, 5);
 }
 
 void EditorLayer_OnDetach() {
