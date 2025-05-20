@@ -80,7 +80,9 @@ Mesh* mesh;
 #include <Systems/HexagonGrid.hpp>
 HexagonGrid* hexagonGrid;
 
-glm::vec2 viewportSize = glm::vec2(1280, 720);
+static glm::vec2 viewportSize = glm::vec2(1280, 720);
+static glm::vec2 viewportBounds[2];
+static glm::vec2 viewportMousePosition;
 
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
@@ -296,6 +298,69 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     VertexArray_Bind(screenVertexArray);
     //glDrawArrays(GL_TRIANGLES, 0, 6);
     RenderCommand_Draw(6);
+
+
+    static bool pressed = false;
+    if(Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_1) && pressed == false) {
+        RPR_WARN("%f, %f", viewportMousePosition.x, viewportMousePosition.y);
+        pressed = true;
+
+        // to ndc
+        // x[-1, 1] y[-1, 1] z[-1, 1]
+        float x = (2.0f * viewportMousePosition.x) / viewportSize.x - 1.0f;
+        float y = (2.0f * viewportMousePosition.y) / viewportSize.y - 1.0f;
+        float z = 1.0f;
+        RPR_WARN("%f, %f, %f", x, y, z);
+
+        // homogenous clip coordinates
+        glm::vec4 ray_clip = glm::vec4(x, y, -1.0f, 1.0f);
+
+        // Camera coordinates, Eye / view space 
+        glm::vec4 ray_eye = glm::inverse(SceneCamera_GetProjectinoMatrix(&sceneCamera)) * ray_clip;
+        ray_eye.z = 1.0f;
+        ray_eye.w = 0.0f;
+
+        // World coordinates
+        glm::vec3 ray_world = glm::inverse(SceneCamera_GetViewMatrix(&sceneCamera)) * ray_eye;
+        ray_world = glm::normalize(ray_world);
+
+        RPR_WARN("%f, %f, %f", ray_world.x, ray_world.y, ray_world.z);
+
+
+        // ray plane intersect
+        glm::vec3 plane_normal = glm::vec3(0.0f, 1.0f, 0.0f);
+        glm::vec3 plane_offset = glm::vec3(0.0f, 0.0f, 0.0f);
+
+        glm::vec3 ray_origin = sceneCamera.position;
+        glm::vec3 ray_direction = ray_world;
+
+        float denom = glm::dot(plane_normal, ray_direction);
+        if(glm::abs(denom) > 0.0001f) {
+            float t = glm::dot((plane_offset - ray_origin), plane_normal) / denom;
+            if(t >= 0) {
+                glm::vec3 hit = ray_origin + ray_direction * t;
+                RPR_WARN("HIT: %f, %f, %f", hit.x, hit.y, hit.z);
+                glm::vec3 axialCoordinates = Hex_PointToHex(glm::vec2(hit.x, hit.z), 1.0f);
+                glm::ivec3 intCubeCoordinates = Hex_FractionalCubeToIntCube(axialCoordinates);
+                RPR_WARN("HEX: %d, %d, %d", intCubeCoordinates.x, intCubeCoordinates.y, intCubeCoordinates.z);
+            }
+        }
+    }
+    if(Input_IsMouseButtonReleased(RPR_MOUSE_BUTTON_1))
+        pressed = false;
+    if(Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_3)) {
+        sceneCamera.position = glm::vec3(0.0f, 0.5f, -1.0f);
+        sceneCamera.front = glm::vec3(0.0f, 0.0f, 1.0f);
+        glm::vec3 front;
+        front.x = cos(glm::radians(sceneCamera.yaw)) * cos(glm::radians(sceneCamera.pitch));
+        front.y = sin(glm::radians(sceneCamera.pitch));
+        front.z = sin(glm::radians(sceneCamera.yaw)) * cos(glm::radians(sceneCamera.pitch));
+        sceneCamera.front = glm::normalize(front);
+        sceneCamera.right = glm::normalize(glm::cross(sceneCamera.front, sceneCamera.worldUp));
+        sceneCamera.up = glm::normalize(glm::cross(sceneCamera.right, sceneCamera.front));
+        RPR_WARN("%f, %f, %f", sceneCamera.position.x, sceneCamera.position.y, sceneCamera.position.z);
+    }
+
 }
 
 void EditorLayer_OnImGuiRender(ImGuiContext* context) {
@@ -371,9 +436,11 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
     ImGui::Begin("Viewport");
 
-    //ImVec2 viewportMinRegion = ImGui::GetWindowContentRegionMin();
-    //ImVec2 viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-    //ImVec2 viewportOffset = ImGui::GetWindowPos();
+    ImVec2 viewportMinRegion = ImGui::GetWindowContentRegionMin();
+    ImVec2 viewportMaxRegion = ImGui::GetWindowContentRegionMax();
+    ImVec2 viewportOffset = ImGui::GetWindowPos();
+    viewportBounds[0] = { viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y };
+    viewportBounds[1] = { viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y };
     
     // TODO: for some reason clear color of framebuffer color attachment is not rendered in imgui image 
     u32 textureID = framebuffer.colorIDs.data[0];
@@ -382,6 +449,19 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     //RPR_WARN("viewportPanelSize: %d, %d", (i32)viewportPanelSize.x, (i32)viewportPanelSize.y);
     ImGui::Image((ImTextureID)textureID, ImVec2(viewportPanelSize.x, viewportPanelSize.y), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::PopStyleVar();
+    
+    // Mouse position
+    ImVec2 mousePos = { 0.0f, 0.0f };
+    if(ImGui::GetCurrentContext() != nullptr)
+        mousePos = ImGui::GetMousePos();
+    float mouseX = mousePos.x - viewportBounds[0].x;
+    float mouseY = mousePos.y - viewportBounds[0].y;
+    glm::vec2 viewportSize = viewportBounds[1] - viewportBounds[0];
+    mouseY = viewportSize.y - mouseY;
+    
+    viewportMousePosition = glm::vec2(mouseX, mouseY); 
+
+   
 
     ImGui::End(); 
     

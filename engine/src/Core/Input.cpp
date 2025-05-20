@@ -25,6 +25,12 @@ b8 Input_IsMouseButtonPressed(u16 button) {
     return state == GLFW_PRESS ||state == GLFW_REPEAT;
 }
 
+b8 Input_IsMouseButtonReleased(u16 button) {
+    GLFWwindow* window = Window_GetGLFWWindowPtr();
+    i32 state = glfwGetMouseButton(window, button);
+    return state == GLFW_RELEASE;
+}
+
 f32 Input_GetMouseX() {
     GLFWwindow* window = Window_GetGLFWWindowPtr();
     double xPos;

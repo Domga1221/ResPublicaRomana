@@ -96,7 +96,7 @@ void HexagonGrid_Render(HexagonGrid* hexagonGrid, glm::mat4& view, glm::mat4& pr
     Shader_SetMat4(&hexagonGridShader, "view", view);
     Shader_SetMat4(&hexagonGridShader, "projection", projection);
 
-    RPR_WARN("--- Hex to Point ---");
+    //RPR_WARN("--- Hex to Point ---");
     for(u32 y = 0; y < hexagonGrid->sizeZ; y++) {
         for(u32 x = 0; x < hexagonGrid->sizeX; x++) {
 
@@ -118,8 +118,8 @@ void HexagonGrid_Render(HexagonGrid* hexagonGrid, glm::mat4& view, glm::mat4& pr
             } else 
                 hex.OffsetToCube(Hex::EVEN);
 
-            RPR_INFO("hex: %s, position: %s, Hex_ToPoint: %s", 
-                Hex_ToString(hex), glm::to_string(position).c_str(), glm::to_string(Hex_ToPoint(hex, 1.0f)));
+            //RPR_INFO("hex: %s, position: %s, Hex_ToPoint: %s", 
+            //    Hex_ToString(hex), glm::to_string(position).c_str(), glm::to_string(Hex_ToPoint(hex, 1.0f)));
 
             glm::mat4 model = glm::translate(glm::mat4(1.0f), position);
             Shader_SetMat4(&hexagonGridShader, "model", model);

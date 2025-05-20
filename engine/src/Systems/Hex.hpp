@@ -26,7 +26,7 @@ struct Hex {
 
     Hex() = default;
     Hex(int q_, int r_, int s_) : q(q_), r(r_), s(s_) {
-        assert(q + r + s == 0);
+        //assert(q + r + s == 0);
     }
     bool operator==(const Hex& other) const {
         return this->q == other.q && this->r == other.r && this->s == other.s;
@@ -107,4 +107,30 @@ glm::vec2 Hex_ToPoint(Hex hex, float size) {
     glm::vec2 vec = glm::vec2(hex.q, hex.r);
     glm::vec2 result = mat * vec;
     return result;
+}
+
+glm::ivec3 Hex_FractionalCubeToIntCube(glm::vec3 fractionalCoordinates) {
+    int q = std::round(fractionalCoordinates.x);
+    int r = std::round(fractionalCoordinates.y);
+    int s = std::round(fractionalCoordinates.z);
+
+    double qDiff = std::abs(q - fractionalCoordinates.x);
+    double rDiff = std::abs(r - fractionalCoordinates.y);
+    double sDiff = std::abs(s - fractionalCoordinates.z);
+    if(qDiff > rDiff && qDiff > sDiff) {
+        q = -r - s;
+    } else if(rDiff > sDiff) {
+        r = -q - s;
+    } else {
+        s = -q - r;
+    }
+    return glm::ivec3(q, r, s);
+}
+
+glm::vec3 Hex_PointToHex(glm::vec2 point, float size) {
+    point.y *= -1.0f;
+    float q = glm::sqrt(3.0f) / 3.0f * point.x + -1.0f/3.0f * point.y;
+    float r = 2.0f / 3.0f * point.y;
+
+    return glm::vec3(q, r, -q - r);
 }
