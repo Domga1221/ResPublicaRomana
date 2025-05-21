@@ -84,6 +84,8 @@ static glm::vec2 viewportSize = glm::vec2(1280, 720);
 static glm::vec2 viewportBounds[2];
 static glm::vec2 viewportMousePosition;
 
+#include "Physics/Raycast.hpp"
+
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
 
@@ -334,6 +336,23 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
         glm::vec3 ray_origin = sceneCamera.position;
         glm::vec3 ray_direction = ray_world;
 
+        Ray ray;
+        ray.origin = ray_origin;
+        ray.direction = ray_direction;
+        Plane plane;
+        plane.origin = plane_offset;
+        plane.normal = plane_normal;
+
+        glm::vec3 hitPoint;
+        bool hit = Physics_RayPlaneIntersection(ray, plane, &hitPoint);
+        if(hit) {
+            RPR_WARN("HIT: %f, %f, %f", hitPoint.x, hitPoint.y, hitPoint.z);
+            glm::vec3 axialCoordinates = Hex_PointToHex(glm::vec2(hitPoint.x, hitPoint.z), 1.0f);
+            glm::ivec3 intCubeCoordinates = Hex_FractionalCubeToIntCube(axialCoordinates);
+            RPR_WARN("HEX: %d, %d, %d", intCubeCoordinates.x, intCubeCoordinates.y, intCubeCoordinates.z);
+        }
+
+        /*
         float denom = glm::dot(plane_normal, ray_direction);
         if(glm::abs(denom) > 0.0001f) {
             float t = glm::dot((plane_offset - ray_origin), plane_normal) / denom;
@@ -345,6 +364,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
                 RPR_WARN("HEX: %d, %d, %d", intCubeCoordinates.x, intCubeCoordinates.y, intCubeCoordinates.z);
             }
         }
+        */
     }
     if(Input_IsMouseButtonReleased(RPR_MOUSE_BUTTON_1))
         pressed = false;
