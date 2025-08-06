@@ -61,6 +61,22 @@ void List_PushBack(List<T>* list, T item) {
 	list->size = size + 1;
 }
 
+// Push back nullptr
+template<typename T>
+void List_PushBack(List<T>* list, nullptr_t) {
+	unsigned int capacity = list->capacity;
+	unsigned int size = list->size;
+	//unsigned int stride = list->stride;
+
+	if (size >= capacity) {
+		List_Resize(list);
+	}
+
+	T* data = list->data;
+	data[size] = 0;
+	list->size = size + 1;
+}
+
 template<typename T>
 void List_RemoveAt(List<T>* list, unsigned int index) {
 	unsigned int size = list->size;

@@ -86,6 +86,9 @@ static glm::vec2 viewportMousePosition;
 
 #include "Physics/Raycast.hpp"
 
+#include "Renderer/Material.hpp"
+Material material;
+
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
 
@@ -227,6 +230,10 @@ void EditorLayer_OnAttach() {
 
     // Hexagon
     hexagonGrid = HexagonGrid_Create(5, 5);
+
+
+    // Material
+    Material_Create(&material, &shader);
 }
 
 void EditorLayer_OnDetach() {
@@ -271,20 +278,20 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     Shader_SetMat4(&shader, "projection", projection);
     Shader_SetInt(&shader, "texture_0", 0);
     RenderCommand_ActiveTexture(0);
-    Texture_Bind(&texture);
+    Texture_Bind(& texture);
     VertexArray_Bind(vertexArray);
     //glDrawArrays(GL_TRIANGLES, 0, 3);
     RenderCommand_Draw(3);
 
     // -- cube 
-    //Mesh_Bind(&mesh);
-    //RenderCommand_DrawIndexed(mesh.indexCount);
+    //Mesh_Bind(mesh);
+    //RenderCommand_DrawIndexed(mesh->indexCount);
 
     // -- EditorScene
-    ///EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
+    EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
 
     // -- Hexagon 
-    HexagonGrid_Render(hexagonGrid, view, projection);
+    //HexagonGrid_Render(hexagonGrid, view, projection);
 
     // -- Skybox
     Skybox_Render(&skybox, &view, &projection);
@@ -304,6 +311,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
 
     static bool pressed = false;
     if(Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_1) && pressed == false) {
+        /*
         RPR_WARN("%f, %f", viewportMousePosition.x, viewportMousePosition.y);
         pressed = true;
 
@@ -351,6 +359,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
             glm::ivec3 intCubeCoordinates = Hex_FractionalCubeToIntCube(axialCoordinates);
             RPR_WARN("HEX: %d, %d, %d", intCubeCoordinates.x, intCubeCoordinates.y, intCubeCoordinates.z);
         }
+        */
 
         /*
         float denom = glm::dot(plane_normal, ray_direction);
@@ -381,6 +390,9 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
         RPR_WARN("%f, %f, %f", sceneCamera.position.x, sceneCamera.position.y, sceneCamera.position.z);
     }
 
+    if(Input_IsKeyPressed(RPR_KEY_ESCAPE)) {
+        std::exit(0);    // TODO: Do this properly
+    }
 }
 
 void EditorLayer_OnImGuiRender(ImGuiContext* context) {
