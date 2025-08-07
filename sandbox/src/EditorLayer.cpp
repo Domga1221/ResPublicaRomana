@@ -89,6 +89,9 @@ static glm::vec2 viewportMousePosition;
 #include "Renderer/Material.hpp"
 Material material;
 
+#include "Memory/String.hpp"
+#include <string>
+
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
 
@@ -233,7 +236,22 @@ void EditorLayer_OnAttach() {
 
 
     // Material
-    Material_Create(&material, &shader);
+    //Material_Create(&material, &shader);
+
+
+    // String
+    String s; 
+    String_Create(&s, "test");
+    std::string memUsage = MEMORY_GetMemoryUsageString();
+    RPR_CLIENT_WARN("%s", memUsage.c_str());
+
+    String_Append(&s, "asdf");
+
+    memUsage = MEMORY_GetMemoryUsageString();
+    RPR_CLIENT_WARN("%s", memUsage.c_str());
+    RPR_CLIENT_WARN("%s", s.sequence);
+
+    String_Destroy(&s);
 }
 
 void EditorLayer_OnDetach() {

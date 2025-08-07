@@ -31,7 +31,7 @@ RPR_API void* MEMORY_Move(void* dest, const void* source, u64 size);
 
 RPR_API const char* MEMORY_GetMemoryUsage_C_String(); // char* to be freed by caller 
 #include <string>
-std::string MEMORY_GetMemoryUsageString();
+RPR_API std::string MEMORY_GetMemoryUsageString();
 
 RPR_API void MEMORY_IncreaseMemoryUsage(u64 size, Memory_Tag memoryTag);
 RPR_API void MEMORY_DecreaseMemoryUsage(u64 size, Memory_Tag memoryTag);
