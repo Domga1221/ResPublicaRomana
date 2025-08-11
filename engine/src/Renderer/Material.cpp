@@ -69,3 +69,32 @@ void Material_Create(Material* material, Shader* shader) {
     }
 }
 
+void Material_SendToShader(Material* material, Uniform* uniform, void* data) {
+    switch (uniform->uniformDataType) {
+        case UniformDataType::None:
+            RPR_WARN("Trying to send UniformDataType::None to shader!");
+            break;
+        case UniformDataType::Bool: 
+            Shader_SetBool(uniform->location, *(bool*)data);
+            break;
+        case UniformDataType::Int:
+            //std::cout << *(int*)data;
+            Shader_SetInt(uniform->location, *(int*)data);
+            break;
+        case UniformDataType::Float:
+            Shader_SetFloat(uniform->location, *(float*)data);
+            break;
+        case UniformDataType::Float3:
+            Shader_SetVec3(uniform->location, *(glm::vec3*)data);
+            break;
+        case UniformDataType::Mat3: 
+            Shader_SetMat3(uniform->location, *(glm::mat3*)data);
+            break;
+        case UniformDataType::Mat4:
+            Shader_SetMat4(uniform->location, *((glm::mat4*)data));
+            break;
+        default:
+            RPR_WARN("Trying to send UniformDataType to shader that is not supported!");
+            break;
+    }
+}

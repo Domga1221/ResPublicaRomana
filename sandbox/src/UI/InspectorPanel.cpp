@@ -8,6 +8,7 @@
 #include "ImGuiPayload.hpp"
 
 #include <filesystem>
+#include <iostream>
 
 static GameObject* selected;
 
@@ -132,6 +133,54 @@ void drawComponents(GameObject* gameObject) {
                 Mesh_Create(&meshComponent->mesh, s);
                 if(!meshComponent->mesh.isLoaded) 
                     RPR_ERROR("Failed to load Mesh");
+            }
+        }
+    }
+
+    if(MaterialComponent* materialComponent = gameObject->TryGetComponent<MaterialComponent>()) {
+        ImGui::NewLine();
+        ImGui::Text("Material");
+        const char* items[] = { "Editor" };
+        static const char* previousItem = NULL;
+        static const char* currentItem = NULL;
+        previousItem = items[0];
+        currentItem = previousItem;
+        if(ImGui::BeginCombo("##materialShader", currentItem)) {
+            for(int n = 0; n < IM_ARRAYSIZE(items); n++) {
+                bool isSelected = (currentItem == items[n]);
+                if(ImGui::Selectable(items[n], isSelected)) {
+                    currentItem = items[n];
+                }
+            }
+            ImGui::EndCombo();
+        }
+
+        for(u32 i = 0; i < materialComponent->material.textureCount; i++) {
+
+            ImVec2 buttonSize = ImGui::GetContentRegionAvail(); buttonSize.y = 0.0f;
+            Texture* texture = materialComponent->material.textures.data[i];
+            const char* buttonString = texture == nullptr ? "No texture" : texture->path.sequence;
+
+            ImGui::Button(buttonString, buttonSize);
+            if (ImGui::BeginDragDropTarget()) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
+                    const char* path = (const char*)payload->Data;
+                    std::filesystem::path current = std::filesystem::current_path();
+                    std::filesystem::path texturePath = std::filesystem::path(path);
+                    current /= texturePath;
+					Texture* newTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
+                    Texture_Create(newTexture, current.string().c_str());
+					RPR_CLIENT_INFO("loading texture from: %s", current.string().c_str());
+					if (newTexture->loaded) {
+						RPR_CLIENT_INFO("texture is loaded, address: %s", newTexture);
+						MEMORY_Free(texture, sizeof(Texture), MEMORY_TAG_RENDERER);
+						materialComponent->material.textures.data[i] = newTexture;
+					}
+					else {
+						RPR_CLIENT_INFO("texture is NOT loaded\n");
+						MEMORY_Free(newTexture, sizeof(Texture), MEMORY_TAG_RENDERER);
+					}
+				}
             }
         }
     }

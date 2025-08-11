@@ -229,6 +229,12 @@ void EditorLayer_OnAttach() {
     MeshComponent& meshComponent = cube->AddComponent<MeshComponent>();
     Mesh_Create(&meshComponent.mesh, cube_ownPath);
     mesh = &meshComponent.mesh;
+    MaterialComponent& materialComponent = cube->AddComponent<MaterialComponent>();
+    Material_Create(&materialComponent.material, &shader);
+    texturePath = currentPath + "/Assets/Textures/bricks10_diffuse_1k.jpg";
+    Texture* materialTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
+    Texture_Create(materialTexture, texturePath.c_str());
+    materialComponent.material.textures.data[0] = materialTexture;
     List_PushBack(&e->children, cube);
 
     // Hexagon
@@ -245,7 +251,7 @@ void EditorLayer_OnAttach() {
     std::string memUsage = MEMORY_GetMemoryUsageString();
     RPR_CLIENT_WARN("%s", memUsage.c_str());
 
-    String_Append(&s, "asdf");
+    String_Append(&s, "asdf"); // TODO: Fix
 
     memUsage = MEMORY_GetMemoryUsageString();
     RPR_CLIENT_WARN("%s", memUsage.c_str());

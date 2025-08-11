@@ -37,14 +37,7 @@ unsigned int UniformDataTypeSize(UniformDataType type) {
 */
 
 
-UniformDataType GLenumToREUniformDataType(GLenum e) {
-	switch (e) {
-		case GL_SAMPLER_2D: return UniformDataType::Sampler2D;
-		case GL_FLOAT_MAT4: return UniformDataType::Mat4;
-		case GL_INT: return UniformDataType::Int;
-        default: return UniformDataType::None;
-	}
-}
+UniformDataType GLenumToREUniformDataType(GLenum e);
 
 
 // TODO: Think about combining this with ShaderDataType

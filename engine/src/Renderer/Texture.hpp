@@ -2,8 +2,10 @@
 
 #include "defines.hpp"
 
+#include "Memory/String.hpp"
+
 struct Texture {
-    const char* path; // TODO: string implementation 
+    String path; // TODO: string implementation 
     bool loaded;
 
     u32 width; 

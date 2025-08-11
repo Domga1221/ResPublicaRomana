@@ -41,6 +41,7 @@ void Texture_Create(Texture* texture, const char* path) {
 
     stbi_image_free(data);
 
+    String_Create(&texture->path, path);
     texture->width = width;
     texture->height = height;
     texture->numberOfChannels = numberOfComponents;
@@ -50,6 +51,7 @@ void Texture_Create(Texture* texture, const char* path) {
 void Texture_Destroy(Texture* texture) {
     glDeleteTextures(1, &texture->ID);
 
+    String_Destroy(&texture->path);
     texture->ID = 0;
     texture->width = 0;
     texture->height = 0;

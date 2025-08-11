@@ -8,6 +8,7 @@
 #include <string>
 
 #include "Renderer/Mesh.hpp"
+#include "Renderer/Material.hpp"
 
 struct TagComponent {
     std::string tag; // TODO: String implementation 
@@ -33,4 +34,8 @@ struct TransformComponent {
 
 struct MeshComponent {
     Mesh mesh;
+};
+
+struct MaterialComponent {
+    Material material;
 };

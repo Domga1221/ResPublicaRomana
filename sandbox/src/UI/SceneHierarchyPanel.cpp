@@ -12,7 +12,7 @@
 static Scene* activeScene = 0;
 static GameObject* selection;
 
-ImGuiTreeNodeFlags base_flags;
+static ImGuiTreeNodeFlags base_flags;
 
 void SceneHierarchyPanel_Initialize(Scene* scene) {
     activeScene = scene;
