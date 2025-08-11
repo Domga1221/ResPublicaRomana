@@ -17,12 +17,14 @@ void EditorScene_Initialze() {
 }
 
 void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera) {
-    auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent>);
+    auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
     for(entt::entity entity : group) {
-        std::tuple<TransformComponent&, MeshComponent&> tuple = group.get<TransformComponent, MeshComponent>(entity);
+        std::tuple<TransformComponent&, MeshComponent&, MaterialComponent&> tuple =
+            group.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
 
         TransformComponent& transformComponent = std::get<TransformComponent&>(tuple);
         MeshComponent& meshComponent = std::get<MeshComponent&>(tuple);
+        MaterialComponent& materialComponent = std::get<MaterialComponent&>(tuple);
 
         //RPR_INFO("(%d, %d, %d)", transformComponent.position.x, transformComponent.position.y, transformComponent.position.z);
 
@@ -34,6 +36,11 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
         Shader_SetMat4(&editorShader, "model", model);
         Shader_SetMat4(&editorShader, "view", view);
         Shader_SetMat4(&editorShader, "projection", projection);
+        RenderCommand_ActiveTexture(0);
+        Texture* albedo = materialComponent.material.textures.data[0];
+        if(albedo != nullptr)
+            Texture_Bind(albedo);
+        Shader_SetInt(&editorShader, "texture_0", 0);
 
         Mesh_Bind(&meshComponent.mesh);
         RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);

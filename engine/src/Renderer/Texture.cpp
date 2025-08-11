@@ -41,8 +41,8 @@ void Texture_Create(Texture* texture, const char* path) {
 
     stbi_image_free(data);
 
-    String_Create(&texture->path, path);
-    texture->width = width;
+    String_Create(&texture->path, path);    // TODO: Texture should probably only save relative path 
+    texture->width = width;                 //       and working directory stored somewhere else 
     texture->height = height;
     texture->numberOfChannels = numberOfComponents;
     texture->loaded = true;
