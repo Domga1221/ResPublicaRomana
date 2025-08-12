@@ -186,8 +186,7 @@ void EditorLayer_OnAttach() {
 
 
     // Entity test
-    GameObject* e = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
-    GameObject_Create(&activeScene, e);
+    GameObject* e = GameObject_Create(&activeScene);
     RPR_INFO("gameObject handle: %u", e->handle);
     RPR_INFO("active scene: %p, gameObject scene: %p", &activeScene, e->scene);
     TagComponent& tc = e->GetComponent<TagComponent>();
@@ -205,13 +204,11 @@ void EditorLayer_OnAttach() {
     List_Create(&e->children);
 
     // TODO: move to own function
-    GameObject* g1 = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
+    GameObject* g1 = GameObject_Create(&activeScene);
     List_Create(&g1->children);
-    GameObject_Create(&activeScene, g1);
     g1->GetComponent<TagComponent>().tag = "1";
-    GameObject* g2 = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
+    GameObject* g2 = GameObject_Create(&activeScene);
     List_Create(&g2->children);
-    GameObject_Create(&activeScene, g2);
     g2->GetComponent<TagComponent>().tag = "2";
     
 
@@ -222,9 +219,8 @@ void EditorLayer_OnAttach() {
     // Mesh testing 
     std::string cube_ownPath = currentPath + "/Assets/Models/cube_own.obj";
     //Mesh_Create(&mesh, cube_ownPath);
-    GameObject* cube = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
+    GameObject* cube = GameObject_Create(&activeScene);
     List_Create(&cube->children);
-    GameObject_Create(&activeScene, cube);
     cube->GetComponent<TagComponent>().tag = "cube";
     MeshComponent& meshComponent = cube->AddComponent<MeshComponent>();
     Mesh_Create(&meshComponent.mesh, cube_ownPath);
@@ -258,6 +254,14 @@ void EditorLayer_OnAttach() {
     RPR_CLIENT_WARN("%s", s.sequence);
 
     String_Destroy(&s);
+
+
+    // entity
+    RPR_CLIENT_INFO("\n---");
+    RPR_CLIENT_INFO("GameObjects under root: ");
+    for(u32 i = 0; i < e->children.size; i++) {
+        RPR_CLIENT_INFO("GameObject: %u", e->children.data[i]);
+    }
 }
 
 void EditorLayer_OnDetach() {

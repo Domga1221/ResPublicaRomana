@@ -22,6 +22,8 @@ void SceneHierarchyPanel_Initialize(Scene* scene) {
     base_flags |= ImGuiTreeNodeFlags_SpanFullWidth;
 }
 
+// TODO: Draw Node Hierarchy
+/*
 void drawTree(GameObject* gameObject) {
     TagComponent& tc = gameObject->GetComponent<TagComponent>();
     ImGuiTreeNodeFlags treeNodeFlags = base_flags;
@@ -37,6 +39,49 @@ void drawTree(GameObject* gameObject) {
     if(ImGui::IsItemClicked() && activeScene->root != gameObject)  {
         selection = gameObject;
         InspectorPanel_SetSelectedGameObject(selection);
+    }
+}
+*/
+
+void drawTreeNode(GameObject* gameObject) { // TODO: Think about using just handles + scene in POD, or try own solution for hierarchy
+    TagComponent& tc = gameObject->GetComponent<TagComponent>();
+
+    ImGuiTreeNodeFlags treeNodeFlags = base_flags;
+    if(gameObject == selection)
+        treeNodeFlags |= ImGuiTreeNodeFlags_Selected;
+    if(ImGui::TreeNodeEx((const void*)gameObject->handle, treeNodeFlags, "%s", tc.c_str())) {
+        ImGui::TreePop();
+    }
+    if(ImGui::IsItemClicked() && activeScene->root != gameObject)  {
+        selection = gameObject;
+        RPR_CLIENT_INFO("Selecting GameObject %u", gameObject->handle);
+        InspectorPanel_SetSelectedGameObject(selection);
+    }
+
+    bool deleted = false; // otherwise ImGui will crash
+    if(ImGui::BeginPopupContextItem()) {
+        if(ImGui::MenuItem("Delete Entity")) 
+            deleted = true;
+        ImGui::EndPopup();
+    }
+
+    if(deleted) {
+        RPR_CLIENT_INFO("\n---");
+        RPR_CLIENT_INFO("Scene before deletion: ");
+        for(u32 i = 0; i < activeScene->root->children.size; i++) {
+            RPR_CLIENT_INFO("GameObject %u", activeScene->root->children.data[i]->handle);
+        }
+
+        RPR_CLIENT_INFO("Deleting GameObject %u", gameObject->handle);
+        List_Remove(&activeScene->root->children, gameObject); // TODO: not efficient
+        selection = nullptr;
+        InspectorPanel_SetSelectedGameObject(nullptr);
+        GameObject_Destroy(activeScene, gameObject);
+
+        RPR_CLIENT_INFO("Scene root now only contains: ");
+        for(u32 i = 0; i < activeScene->root->children.size; i++) {
+            RPR_CLIENT_INFO("GameObject %u", activeScene->root->children.data[i]->handle);
+        }
     }
 }
 
@@ -74,7 +119,11 @@ void SceneHierarchyPanel_OnImGuiRender() {
     //        drawTree(activeScene->root);
     //    ImGui::TreePop();
     //}
-    drawTree(activeScene->root);
+    //drawTree(activeScene->root);
+
+    for(u32 i = 0; i < activeScene->root->children.size; i++) {
+        drawTreeNode(activeScene->root->children.data[i]);
+    }
 
 
     if(ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {

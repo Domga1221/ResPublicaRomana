@@ -10,6 +10,6 @@ struct Scene {
     entt::registry registry;
 };
 
-RPR_API void GameObject_Create(Scene* scene, GameObject* entity);
+RPR_API GameObject* GameObject_Create(Scene* scene);
 RPR_API void GameObject_Destroy(Scene* scene, GameObject* entity);
 

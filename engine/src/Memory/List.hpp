@@ -95,6 +95,32 @@ void List_RemoveAt(List<T>* list, unsigned int index) {
 	list->size = size - 1;
 }
 
+template<typename T>
+void List_Remove(List<T>* list, T toRemove) {
+	unsigned int size = list->size;
+	unsigned int stride = list->stride;
+	T* data = list->data;
+
+	u32 index = -1;
+	for(u32 i = 0; i < size; i++) {
+		if(toRemove == data[i]) {
+			index = i;
+			break;
+		} 
+	}
+
+	if(index == -1) {
+		RPR_WARN("List_Remove: Tried to remove something that is not inside the list, returning...");
+		return;
+	}
+
+	// copy, if element wasn't removed at the end 
+	if(index != size -1) {
+		MEMORY_Move((void*)(data + index), (const void*)(data + index + 1), (size - index) * stride);
+	}
+	list->size = size - 1;
+}
+
 // TODO: Remove by value
 // TODO: Insert at
 // TODO: Remove at end
