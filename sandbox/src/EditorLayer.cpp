@@ -186,6 +186,7 @@ void EditorLayer_OnAttach() {
 
 
     // Entity test
+    /*
     GameObject* e = GameObject_Create(&activeScene);
     RPR_INFO("gameObject handle: %u", e->handle);
     RPR_INFO("active scene: %p, gameObject scene: %p", &activeScene, e->scene);
@@ -198,10 +199,10 @@ void EditorLayer_OnAttach() {
     e->RemoveComponent<TransformComponent>();
     RPR_INFO("GameObject has transform component: %d", e->HasComponent<TransformComponent>());
     //transform = e.GetComponent<TransformComponent>();
+    */
 
-    activeScene.root = e;
-    e->GetComponent<TagComponent>().tag = "Root";
-    List_Create(&e->children);
+    // Scene
+    Scene_Create(&activeScene);
 
     // TODO: move to own function
     GameObject* g1 = GameObject_Create(&activeScene);
@@ -212,8 +213,8 @@ void EditorLayer_OnAttach() {
     g2->GetComponent<TagComponent>().tag = "2";
     
 
-    List_PushBack(&e->children, g1);
-    List_PushBack(&e->children, g2);   
+    //List_PushBack(&e->children, g1);
+    //List_PushBack(&e->children, g2);   
     
 
     // Mesh testing 
@@ -231,7 +232,7 @@ void EditorLayer_OnAttach() {
     Texture* materialTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
     Texture_Create(materialTexture, texturePath.c_str());
     materialComponent.material.textures.data[0] = materialTexture;
-    List_PushBack(&e->children, cube);
+    //List_PushBack(&e->children, cube);
 
     // Hexagon
     hexagonGrid = HexagonGrid_Create(5, 5);
@@ -259,8 +260,8 @@ void EditorLayer_OnAttach() {
     // entity
     RPR_CLIENT_INFO("\n---");
     RPR_CLIENT_INFO("GameObjects under root: ");
-    for(u32 i = 0; i < e->children.size; i++) {
-        RPR_CLIENT_INFO("GameObject: %u", e->children.data[i]);
+    for(u32 i = 0; i < activeScene.root->children.size; i++) {
+        RPR_CLIENT_INFO("GameObject: %u", activeScene.root->children.data[i]);
     }
 }
 

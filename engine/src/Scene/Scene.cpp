@@ -4,6 +4,19 @@
 
 #include "Components.hpp"
 
+
+RPR_API GameObject* Scene_Create(Scene* scene) { 
+    GameObject* root = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_RENDERER);
+    root->handle = scene->registry.create();
+    root->scene = scene;
+    TagComponent& tagComponent = root->AddComponent<TagComponent>();
+    tagComponent.tag = "Root";
+    List_Create(&root->children);
+    
+    scene->root = root;
+    return root;
+}
+
 RPR_API GameObject* GameObject_Create(Scene* scene) {
     GameObject* gameObject = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_RENDERER);
     gameObject->handle = scene->registry.create();
@@ -11,6 +24,7 @@ RPR_API GameObject* GameObject_Create(Scene* scene) {
     gameObject->AddComponent<TransformComponent>();
     TagComponent& tagComponent = gameObject->AddComponent<TagComponent>();
     tagComponent.tag = "New Entity";
+    List_PushBack(&scene->root->children, gameObject);
     return gameObject;
 }
 

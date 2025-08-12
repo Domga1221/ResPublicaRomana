@@ -131,8 +131,14 @@ void SceneHierarchyPanel_OnImGuiRender() {
         InspectorPanel_SetSelectedGameObject(nullptr);
     }
 
-        
-        
+    // right-click on blank space 
+    if(ImGui::BeginPopupContextWindow(0, ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
+        if(ImGui::MenuItem("Create GameObject")) {
+            GameObject_Create(activeScene);
+        }
+        ImGui::EndPopup();
+    }
+
     ImGui::End();
 }
 
