@@ -14,15 +14,48 @@ static GameObject* selected;
 
 void drawComponents(GameObject* gameObject);
 
-void InspectorPanel_Initialize() {
-
+Shader* editorShader; // TODO: temp, remove, from functions as well 
+void InspectorPanel_Initialize(Shader* shader) {
+    editorShader = shader;
 }
 
 void InspectorPanel_OnImGuiRender() {
     ImGui::Begin("Inspector");
-    if(selected != nullptr)
+    if(selected != nullptr) {
         drawComponents(selected);
+
+        ImGui::NewLine();
+        ImGui::Separator();
+        ImGui::NewLine();
+
+        ImGui::SetCursorPosX((ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize("Add Component").x) * 0.5);
+        if(ImGui::Button("Add Component"))
+            ImGui::OpenPopup("AddComponent");
+        
+        if(ImGui::BeginPopup("AddComponent")) {
+            if(ImGui::MenuItem("Mesh")) {
+                if(!selected->HasComponent<MeshComponent>()) {
+                    std::string current = std::filesystem::current_path().string();
+                    std::string relativePath = std::filesystem::current_path().string() + "/Assets/Models/cube_own.obj";
+                    selected->AddComponent<MeshComponent>(relativePath);
+                } else {
+                    RPR_CLIENT_WARN("GameObject: %u, already has MeshComponent");
+                }
+            }
+            if(ImGui::MenuItem("Material")) {
+                if(!selected->HasComponent<MaterialComponent>()) {
+                    selected->AddComponent<MaterialComponent>(editorShader);
+                } else {
+                    RPR_CLIENT_WARN("GameObject: %u, already has MaterialComponent");
+                }
+            }
+
+            ImGui::EndPopup();
+        }
+    }
+
     
+
     ImGui::End();
 }
 

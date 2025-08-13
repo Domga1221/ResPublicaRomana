@@ -3,7 +3,8 @@
 #include "defines.hpp"
 
 typedef struct Scene Scene;
-void InspectorPanel_Initialize();
+typedef struct Shader Shader; // TODO: remove 
+void InspectorPanel_Initialize(Shader* shader);
 void InspectorPanel_OnImGuiRender();
 
 typedef struct GameObject GameObject;

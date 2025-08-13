@@ -101,16 +101,16 @@ void EditorLayer_OnAttach() {
     // UI
     ContentBrowserPanel_Initialize();
     SceneHierarchyPanel_Initialize(&activeScene);
-    InspectorPanel_Initialize();
-
-
+    
+    
     std::string currentPath = std::filesystem::current_path().string();
-
+    
     std::string vertPath = currentPath + "/Assets/Shaders/triangle3D.vert";
     std::string fragPath = currentPath + "/Assets/Shaders/triangle3D.frag";
     Shader_Create(&shader, vertPath, fragPath);
     RPR_CLIENT_INFO("%s", currentPath.c_str());
-
+    
+    InspectorPanel_Initialize(&shader); // TODO: move up
     
     BufferLayout bufferLayout;
     BufferLayout_Create(&bufferLayout);

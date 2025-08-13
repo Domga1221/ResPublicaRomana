@@ -34,8 +34,17 @@ struct TransformComponent {
 
 struct MeshComponent {
     Mesh mesh;
+    MeshComponent() = default;
+    MeshComponent(std::string relativePath) {
+        std::string path = std::string(relativePath);
+        Mesh_Create(&mesh, path);
+    }
 };
 
 struct MaterialComponent {
     Material material;
+    MaterialComponent() = default;
+    MaterialComponent(Shader* shader) {
+        Material_Create(&material, shader);
+    }
 };
