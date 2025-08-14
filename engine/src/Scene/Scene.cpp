@@ -4,6 +4,8 @@
 
 #include "Components.hpp"
 
+#include <Core/ClientLog.hpp>
+
 
 RPR_API GameObject* Scene_Create(Scene* scene) { 
     GameObject* root = (GameObject*)MEMORY_Allocate(sizeof(GameObject), MEMORY_TAG_ENTITY);
@@ -56,7 +58,8 @@ RPR_API GameObject* GameObject_Create(Scene* scene, const char* tag) {
 
 RPR_API void GameObject_Destroy(Scene* scene, GameObject* gameObject) {
     scene->registry.destroy(gameObject->handle);
-    
+    RPR_CLIENT_WARN("address of scene: %u", scene);
+
     List_Remove(&scene->root->children, gameObject);
     List_Destroy(&gameObject->children);
     gameObject->scene = nullptr;

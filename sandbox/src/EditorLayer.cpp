@@ -100,6 +100,8 @@ void openScene();
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
 
+      // Scene
+    Scene_Create(&activeScene);
 
     EditorScene_Initialze();
 
@@ -206,8 +208,6 @@ void EditorLayer_OnAttach() {
     //transform = e.GetComponent<TransformComponent>();
     */
 
-    // Scene
-    Scene_Create(&activeScene);
 
     // TODO: move to own function
     GameObject* g1 = GameObject_Create(&activeScene);
@@ -268,6 +268,8 @@ void EditorLayer_OnAttach() {
     for(u32 i = 0; i < activeScene.root->children.size; i++) {
         RPR_CLIENT_INFO("GameObject: %u", activeScene.root->children.data[i]);
     }
+
+    RPR_CLIENT_WARN("address of scene: %u", &activeScene);
 }
 
 void EditorLayer_OnDetach() {

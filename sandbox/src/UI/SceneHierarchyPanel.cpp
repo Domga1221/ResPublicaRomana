@@ -73,7 +73,6 @@ void drawTreeNode(GameObject* gameObject) { // TODO: Think about using just hand
         }
 
         RPR_CLIENT_INFO("Deleting GameObject %u", gameObject->handle);
-        List_Remove(&activeScene->root->children, gameObject); // TODO: not efficient
         selection = nullptr;
         InspectorPanel_SetSelectedGameObject(nullptr);
         GameObject_Destroy(activeScene, gameObject);
