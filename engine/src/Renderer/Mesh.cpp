@@ -65,7 +65,7 @@ void Mesh_Create(Mesh* mesh, std::string& path) {
 }
 
 void Mesh_Destroy(Mesh* mesh) {
-    VertexArray_Destroy(mesh->vertexArray);
+    //VertexArray_Destroy(mesh->vertexArray);
     mesh->isLoaded = false;
     mesh->vertexCount = 0;
     mesh->indexCount = 0;

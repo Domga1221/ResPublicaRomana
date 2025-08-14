@@ -86,13 +86,14 @@ void drawTreeNode(GameObject* gameObject) { // TODO: Think about using just hand
 }
 
 void SceneHierarchyPanel_OnImGuiRender() {
-    ImGui::Begin("Scene Hierarchy");
-
-    //RPR_INFO("--- SceneHierarchyPanel_OnImGuiRender --- ");
     if(activeScene->root == nullptr) {
         RPR_ERROR("SceneHierarchyPanel_OnImGuiRender root node is null");
         return;
     }
+
+    ImGui::Begin("Scene Hierarchy");
+
+    //RPR_INFO("--- SceneHierarchyPanel_OnImGuiRender --- ");
     //ImGui::Text("Root");
     
 

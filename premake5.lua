@@ -71,7 +71,8 @@ project "engine"
         "shell32",
         "glfw3_mt",
         "opengl32",
-        "assimp-vc143-mt"
+        "assimp-vc143-mt",
+        "Comdlg32" -- 
     }
 
     defines {

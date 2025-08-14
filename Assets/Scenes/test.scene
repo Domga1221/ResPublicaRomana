@@ -1,0 +1,83 @@
+{
+    "Scene": "Untitled",
+    "GameObjects": [
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "cube"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "MeshComponent": {
+                "Directory": "Assets\\Models\\cube_own.obj"
+            }
+        },
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "2"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "1"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "Root"
+            }
+        }
+    ]
+}

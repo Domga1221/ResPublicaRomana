@@ -27,11 +27,14 @@ void Application_OnMouseButtonPressed(Event event) {
     //RPR_INFO("Mouse button pressed %d", mouseButton);
 }
 
+#include "Platform/Filesystem.hpp"
+
 void Application_Initialize(Application* app) {
 
     MEMORY_Initialize();
     LayerStack_Initialize();
     Event_Initialize();
+    Filesystem_Initialize();
 
     WindowProps windowProps { "title", 1280, 720 };
     Window_Initialize(&windowProps);

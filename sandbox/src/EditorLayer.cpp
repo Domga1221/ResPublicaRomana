@@ -92,6 +92,11 @@ Material material;
 #include "Memory/String.hpp"
 #include <string>
 
+#include <Platform/Filesystem.hpp>
+#include "Scene/SceneSerialization.hpp"
+void saveSceneAs();
+void openScene();
+
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
 
@@ -206,10 +211,10 @@ void EditorLayer_OnAttach() {
 
     // TODO: move to own function
     GameObject* g1 = GameObject_Create(&activeScene);
-    List_Create(&g1->children);
+    //List_Create(&g1->children);
     g1->GetComponent<TagComponent>().tag = "1";
     GameObject* g2 = GameObject_Create(&activeScene);
-    List_Create(&g2->children);
+    //List_Create(&g2->children);
     g2->GetComponent<TagComponent>().tag = "2";
     
 
@@ -221,9 +226,9 @@ void EditorLayer_OnAttach() {
     std::string cube_ownPath = currentPath + "/Assets/Models/cube_own.obj";
     //Mesh_Create(&mesh, cube_ownPath);
     GameObject* cube = GameObject_Create(&activeScene);
-    List_Create(&cube->children);
+    //List_Create(&cube->children);
     cube->GetComponent<TagComponent>().tag = "cube";
-    MeshComponent& meshComponent = cube->AddComponent<MeshComponent>();
+    MeshComponent& meshComponent = cube->AddComponent<MeshComponent>("/Assets/Models/cube_own.obj");
     Mesh_Create(&meshComponent.mesh, cube_ownPath);
     mesh = &meshComponent.mesh;
     MaterialComponent& materialComponent = cube->AddComponent<MaterialComponent>();
@@ -475,8 +480,8 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
             //  ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
     
             if (ImGui::MenuItem("New", "Ctrl+N")) std::cout << "New\n";
-            if (ImGui::MenuItem("Open...", "Ctrl+O")) std::cout << "Open\n";
-            if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S")) std::cout << "Save As\n";
+            if (ImGui::MenuItem("Open...", "Ctrl+O")) openScene();
+            if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S")) saveSceneAs();
     
             if (ImGui::MenuItem("Exit")) std::cout << "Exit\n";
             ImGui::EndMenu();
@@ -526,4 +531,31 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
 
     ImGui::End(); 
     
+}
+
+void openScene() {
+    std::string filepath = Filesystem_OpenFile("Scene (*.scene)\0*.scene\0");
+    if(filepath.empty()) {
+        RPR_CLIENT_ERROR("openScene: filepath is empty");
+        return;
+    }
+
+    // TODO: maybe return scene as pointer or something in creation and free it in destroy as well 
+    Scene_Destroy(&activeScene);
+
+    Scene_Create(&activeScene);
+
+    Scene_Deserialize(&activeScene, filepath);
+}
+
+void saveSceneAs() {
+    std::string filepath = Filesystem_SaveFile("Scene (*.scene)\0*.scene\0"); // TODO:
+    filepath += ".scene";
+    if(filepath.empty()) {
+        RPR_CLIENT_ERROR("saveSceneAs: filepath is empty");
+        return;
+    }
+
+    RPR_CLIENT_INFO("saveSceneAs: filepath: %s", filepath.c_str());
+    Scene_Serialize(&activeScene, filepath);
 }

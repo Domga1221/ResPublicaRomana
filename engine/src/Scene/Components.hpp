@@ -39,6 +39,9 @@ struct MeshComponent {
         std::string path = std::string(relativePath);
         Mesh_Create(&mesh, path);
     }
+    ~MeshComponent() {
+        Mesh_Destroy(&mesh);
+    }
 };
 
 struct MaterialComponent {
@@ -46,5 +49,8 @@ struct MaterialComponent {
     MaterialComponent() = default;
     MaterialComponent(Shader* shader) {
         Material_Create(&material, shader);
+    }
+    ~MaterialComponent() {
+        // TODO: Destroy
     }
 };

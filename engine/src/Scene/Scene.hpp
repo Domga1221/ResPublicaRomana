@@ -12,7 +12,9 @@ struct Scene {
 
 // Creates the scene and returns the root GameObject
 RPR_API GameObject* Scene_Create(Scene* scene); 
+RPR_API void Scene_Destroy(Scene* scene);
 
 RPR_API GameObject* GameObject_Create(Scene* scene);
+RPR_API GameObject* GameObject_Create(Scene* scene, const char* tag);
 RPR_API void GameObject_Destroy(Scene* scene, GameObject* entity);
 
