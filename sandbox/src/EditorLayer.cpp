@@ -223,6 +223,7 @@ void EditorLayer_OnAttach() {
     
 
     // Mesh testing 
+    /*
     std::string cube_ownPath = currentPath + "/Assets/Models/cube_own.obj";
     //Mesh_Create(&mesh, cube_ownPath);
     GameObject* cube = GameObject_Create(&activeScene);
@@ -238,6 +239,7 @@ void EditorLayer_OnAttach() {
     Texture_Create(materialTexture, texturePath.c_str());
     materialComponent.material.textures.data[0] = materialTexture;
     //List_PushBack(&e->children, cube);
+    */
 
     // Hexagon
     hexagonGrid = HexagonGrid_Create(5, 5);
@@ -270,6 +272,10 @@ void EditorLayer_OnAttach() {
     }
 
     RPR_CLIENT_WARN("address of scene: %u", &activeScene);
+
+
+    //Scene_Destroy(&activeScene);
+    //Scene_Create(&activeScene);
 }
 
 void EditorLayer_OnDetach() {

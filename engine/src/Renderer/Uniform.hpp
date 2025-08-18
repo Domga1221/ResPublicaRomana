@@ -3,6 +3,7 @@
 #include "defines.hpp"
 
 #include "Core/Log.hpp"
+#include "Memory/String.hpp"
 
 #include <glad/glad.h>
 
@@ -42,7 +43,7 @@ UniformDataType GLenumToREUniformDataType(GLenum e);
 
 // TODO: Think about combining this with ShaderDataType
 typedef struct Uniform {
-    i8* name;
+    String name;
     UniformDataType uniformDataType;
     // glGetUniformLocation returns -1 if uniform is inside block, or if name is not found as active
     i32 location = -99;

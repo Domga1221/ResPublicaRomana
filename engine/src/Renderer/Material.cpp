@@ -25,14 +25,12 @@ void Material_Create(Material* material, Shader* shader) {
         glGetActiveUniform(shader->ID, (GLuint)i, bufSize, &length, & size, &type, name);
         int location = glGetUniformLocation(shader->ID, name);
         //RE_CORE_INFO("Uniform: {0}, Type: {1}, Name: {2}, Location: {3}", i, type, name, location);
-        u32 strLen = strlen(name); 
         Uniform u; 
-        u.name = (i8*)MEMORY_Allocate(strLen + 1, MEMORY_TAG_STRING);
-        MEMORY_Copy(u.name, name, strLen); 
-        u.name[strLen] = '\0';
+        String_Create(&u.name, name);
         u.uniformDataType = GLenumToREUniformDataType(type);
         u.location = location;
         List_PushBack(&material->uniforms, u);
+        RPR_ERROR("string address: %u, string: %s", material->uniforms.data[i].name.sequence, material->uniforms.data[i].name.sequence);
     }
 
     // TODO: sorting
@@ -42,7 +40,7 @@ void Material_Create(Material* material, Shader* shader) {
     for(u32 i = 0; i < material->uniforms.size; i++) {
         Uniform* uniform = &material->uniforms.data[i];
         RPR_INFO("Name: %s, DataType: %d, Location: %d",
-                uniform->name, uniform->uniformDataType, uniform->location);
+                uniform->name.sequence, uniform->uniformDataType, uniform->location);
     }
 
     // TODO: special textures
@@ -51,7 +49,7 @@ void Material_Create(Material* material, Shader* shader) {
         Uniform* uniform = &material->uniforms.data[i];
         if(uniform->uniformDataType == UniformDataType::Sampler2D) {
             material->textureCount++;
-            textureDebugString.push_back(((char*)uniform->name));
+            textureDebugString.push_back(uniform->name.sequence);
         }
     }
 
@@ -60,13 +58,31 @@ void Material_Create(Material* material, Shader* shader) {
     RPR_INFO("Texture Count: %d", material->textureCount);
     // TODO: List resizing
     for(u32 i = 0; i < material->textureCount; i++) {
-        List_PushBack(&material->textures, 0);
+        List_PushBack(&material->textures, 0);  // TODO: currently pushing nullpointer
     }
 
     for(int i = 0; i < material->textures.size; i++) {
         RPR_INFO("texture: %s, \tindex: %d, \tpointerVal: %p",
                 textureDebugString[i], i, material->textures.data[i]);
     }
+
+    material->shader = shader;
+}
+
+RPR_API void Material_Destroy(Material* material) {
+    material->shader = nullptr;
+    material->textureCount = 0;
+    for(u32 i = 0; i < material->textures.size; i++) {
+        Texture_Destroy(material->textures.data[i]);
+    }
+    for(u32 i = 0; i < material->uniforms.size; i++) {
+        RPR_ERROR("String address: %u, string: %s", material->uniforms.data[i].name.sequence, material->uniforms.data[i].name.sequence);
+        String_Destroy(&material->uniforms.data[i].name);
+        material->uniforms.data[i].uniformDataType = UniformDataType::None;
+        material->uniforms.data[i].location = -99;
+    }
+    List_Destroy(&material->textures);
+    List_Destroy(&material->uniforms);
 }
 
 void Material_SendToShader(Material* material, Uniform* uniform, void* data) {

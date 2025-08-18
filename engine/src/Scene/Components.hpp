@@ -10,6 +10,8 @@
 #include "Renderer/Mesh.hpp"
 #include "Renderer/Material.hpp"
 
+#include <Platform/Filesystem.hpp>
+
 struct TagComponent {
     std::string tag; // TODO: String implementation 
     const char* c_str() {
@@ -40,6 +42,7 @@ struct MeshComponent {
         Mesh_Create(&mesh, path);
     }
     ~MeshComponent() {
+        RPR_CLIENT_ERROR("%u", this);
         Mesh_Destroy(&mesh);
     }
 };
@@ -49,8 +52,16 @@ struct MaterialComponent {
     MaterialComponent() = default;
     MaterialComponent(Shader* shader) {
         Material_Create(&material, shader);
+        const char* defaultTexturePath = "/Assets/Textures/bricks10_diffuse_1k.jpg";
+        std::string fullPath = Filesystem_GetCWD();
+        fullPath += defaultTexturePath;
+        Texture* materialTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
+        Texture_Create(materialTexture, fullPath.c_str());
+        material.textures.data[0] = materialTexture;
     }
     ~MaterialComponent() {
-        // TODO: Destroy
+        RPR_CLIENT_ERROR("%u", this);
+        if(material.shader != nullptr)
+            Material_Destroy(&material);
     }
 };

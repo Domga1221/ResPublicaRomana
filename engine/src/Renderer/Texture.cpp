@@ -50,7 +50,7 @@ void Texture_Create(Texture* texture, const char* path) {
 
 void Texture_Destroy(Texture* texture) {
     glDeleteTextures(1, &texture->ID);
-
+ 
     String_Destroy(&texture->path);
     texture->ID = 0;
     texture->width = 0;

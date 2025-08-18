@@ -14,7 +14,7 @@ static GameObject* selected;
 
 void drawComponents(GameObject* gameObject);
 
-Shader* editorShader; // TODO: temp, remove, from functions as well 
+static Shader* editorShader; // TODO: temp, remove, from functions as well 
 void InspectorPanel_Initialize(Shader* shader) {
     editorShader = shader;
 }
@@ -52,10 +52,18 @@ void InspectorPanel_OnImGuiRender() {
 
             ImGui::EndPopup();
         }
+
+        //
+        bool removeComponent = false;
+        if(ImGui::Button("Remove"))
+            removeComponent = true;
+
+        if(removeComponent)
+            selected->RemoveComponent<MaterialComponent>();
+        //
     }
 
     
-
     ImGui::End();
 }
 

@@ -22,6 +22,7 @@ void Mesh_Create(Mesh* mesh, std::string& path) {
     std::filesystem::path relativePath = std::filesystem::relative(std::filesystem::path(path), currentPath);
     RPR_WARN("Relative path: %s", relativePath.string());
 
+    mesh->relativePath = std::string();
     mesh->relativePath = relativePath.string();
 
     Assimp::Importer importer;

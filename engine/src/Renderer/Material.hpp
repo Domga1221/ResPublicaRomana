@@ -16,6 +16,7 @@ typedef struct Material {
 } Material;
 
 RPR_API void Material_Create(Material* material, Shader* shader);
+RPR_API void Material_Destroy(Material* material);
 
 RPR_API void Material_SendToShader(Material* material, Uniform* uniform, void* data);
 
