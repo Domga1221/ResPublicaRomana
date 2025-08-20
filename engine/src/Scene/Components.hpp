@@ -37,9 +37,12 @@ struct TransformComponent {
 struct MeshComponent {
     Mesh mesh;
     MeshComponent() = default;
-    MeshComponent(std::string relativePath) {
+    MeshComponent(std::string& relativePath) {
         std::string path = std::string(relativePath);
         Mesh_Create(&mesh, path);
+    }
+    MeshComponent(MeshComponent&& other) {
+        mesh = other.mesh;
     }
     ~MeshComponent() {
         RPR_CLIENT_ERROR("%u", this);
@@ -52,13 +55,21 @@ struct MaterialComponent {
     MaterialComponent() = default;
     MaterialComponent(Shader* shader) {
         Material_Create(&material, shader);
-        const char* defaultTexturePath = "/Assets/Textures/bricks10_diffuse_1k.jpg";
-        std::string fullPath = Filesystem_GetCWD();
-        fullPath += defaultTexturePath;
+        const char* defaultTexturePath = "Assets/Textures/bricks10_diffuse_1k.jpg";
+        //std::string fullPath = Filesystem_GetCWD();
+        //fullPath += defaultTexturePath;
         Texture* materialTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
-        Texture_Create(materialTexture, fullPath.c_str());
+        Texture_Create(materialTexture, defaultTexturePath);
         material.textures.data[0] = materialTexture;
     }
+
+    // https://github.com/skypjack/entt/issues/456
+    // Should have used C
+    // TODO: is this just a clang thing? need to test on MSVC
+    MaterialComponent(MaterialComponent&& other) {
+        material = other.material;
+    }
+
     ~MaterialComponent() {
         RPR_CLIENT_ERROR("%u", this);
         if(material.shader != nullptr)

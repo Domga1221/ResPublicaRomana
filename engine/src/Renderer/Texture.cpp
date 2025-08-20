@@ -5,15 +5,20 @@
 
 #include <Core/Log.hpp>
 
+#include <Platform/Filesystem.hpp>
+
 void Texture_Create(Texture* texture, const char* path) {
     RPR_DEBUG("Loading Texture at: %s", path);
+
+    const char* CWD = Filesystem_GetCWD();
+    std::string fullPath = CWD + std::string("/") + std::string(path); 
 
     stbi_set_flip_vertically_on_load(true);
 
     i32 width; i32 height; i32 numberOfComponents;
-    unsigned char* data = stbi_load(path, &width, &height, &numberOfComponents, 0);
+    unsigned char* data = stbi_load(fullPath.c_str(), &width, &height, &numberOfComponents, 0);
     if(!data) {
-        RPR_ERROR("Texture_Create: Failed to load texture at: %s", path);
+        RPR_ERROR("Texture_Create: Failed to load texture at: %s", fullPath);
         RPR_ERROR("Texture_Create: stbi_failure_reason: %s", stbi_failure_reason());
         stbi_image_free(data);
         return;

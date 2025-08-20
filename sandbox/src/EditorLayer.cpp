@@ -185,7 +185,7 @@ void EditorLayer_OnAttach() {
 
     SceneCamera_Create(&sceneCamera, glm::vec3(1.0f, 0.5f, -2.0f));
 
-    std::string texturePath = currentPath + "/Assets/Textures/bricks10_diffuse_1k.jpg";
+    std::string texturePath = "Assets/Textures/bricks10_diffuse_1k.jpg";
     Texture_Create(&texture, texturePath.c_str());
     RPR_CLIENT_INFO("Texture channels: %d", texture.numberOfChannels);
 

@@ -7,6 +7,8 @@
 
 #include "ImGuiPayload.hpp"
 
+#include <Core/ClientLog.hpp>
+
 static std::filesystem::path currentDirectory = "Assets";
 static const std::filesystem::path assetsPath = "Assets";
 
@@ -75,6 +77,7 @@ void ContentBrowserPanel_OnImGuiRender() {
         if(ImGui::BeginDragDropSource()) {
             std::filesystem::path relativePath(path);
             std::string relativeString = relativePath.string();
+            RPR_CLIENT_WARN("%s", relativeString.c_str());
             ImGui::SetDragDropPayload(IMGUI_PAYLOAD_CONTENT_BROWSER_ITEM, 
                 relativeString.c_str(), relativeString.length() + 1 * sizeof(char));
             ImGui::EndDragDropSource();

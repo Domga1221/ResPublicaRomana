@@ -18,7 +18,7 @@ void Mesh_Create(Mesh* mesh, std::string& path) {
     mesh->isLoaded = false;
 
     RPR_WARN("Mesh_Create: Loading mesh at: %s", path.c_str());  
-    std::filesystem::path currentPath = std::filesystem::current_path();
+    std::filesystem::path currentPath = std::filesystem::current_path();    // TODO:
     std::filesystem::path relativePath = std::filesystem::relative(std::filesystem::path(path), currentPath);
     RPR_WARN("Relative path: %s", relativePath.string());
 
@@ -66,7 +66,7 @@ void Mesh_Create(Mesh* mesh, std::string& path) {
 }
 
 void Mesh_Destroy(Mesh* mesh) {
-    //VertexArray_Destroy(mesh->vertexArray);
+    VertexArray_Destroy(mesh->vertexArray);
     mesh->isLoaded = false;
     mesh->vertexCount = 0;
     mesh->indexCount = 0;

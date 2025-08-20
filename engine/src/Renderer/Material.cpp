@@ -9,6 +9,7 @@ int sortUniform(const void* u1, const void* u2) {
 void Material_Create(Material* material, Shader* shader) {
     List_Create(&material->uniforms);
     List_Create(&material->textures);
+    material->textureCount = 0;
 
     RPR_WARN("READING UNIFORMS IN SHADER");
     GLint count;

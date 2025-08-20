@@ -166,10 +166,8 @@ void drawComponents(GameObject* gameObject) {
         if(ImGui::BeginDragDropTarget()) { // TODO: Think about relative and absolute paths
             if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_CONTENT_BROWSER_ITEM)) {
                 const char* path = (const char*)payload->Data;
-                std::filesystem::path current = std::filesystem::current_path();
                 std::filesystem::path modelPath = std::filesystem::path(path);
-                current /= modelPath;
-                std::string s = current.string(); 
+                std::string s = modelPath.string(); 
                 Mesh_Destroy(&meshComponent->mesh);
                 Mesh_Create(&meshComponent->mesh, s);
                 if(!meshComponent->mesh.isLoaded) 
@@ -206,12 +204,9 @@ void drawComponents(GameObject* gameObject) {
             if (ImGui::BeginDragDropTarget()) {
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
                     const char* path = (const char*)payload->Data;
-                    std::filesystem::path current = std::filesystem::current_path();
-                    std::filesystem::path texturePath = std::filesystem::path(path);
-                    current /= texturePath;
+					RPR_CLIENT_INFO("loading texture from: %s", path);
 					Texture* newTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
-                    Texture_Create(newTexture, current.string().c_str());
-					RPR_CLIENT_INFO("loading texture from: %s", current.string().c_str());
+                    Texture_Create(newTexture, path);
 					if (newTexture->loaded) {
 						RPR_CLIENT_INFO("texture is loaded, address: %s", newTexture);
 						MEMORY_Free(texture, sizeof(Texture), MEMORY_TAG_RENDERER);
