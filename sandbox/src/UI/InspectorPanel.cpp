@@ -10,6 +10,8 @@
 #include <filesystem>
 #include <iostream>
 
+#include "GUIComponents.hpp"
+
 static GameObject* selected;
 
 void drawComponents(GameObject* gameObject);
@@ -159,10 +161,8 @@ void drawComponents(GameObject* gameObject) {
         ImGui::PopStyleVar();
     }
 
-    if(MeshComponent* meshComponent = gameObject->TryGetComponent<MeshComponent>()) {
-        ImGui::Text("Mesh");
-        ImGui::Button(meshComponent->mesh.relativePath.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 20.0f));
-        // TODO: drag and drop 
+    GUI_DrawComponent<MeshComponent>("Mesh", gameObject, [](MeshComponent* meshComponent) {
+        ImGui::Button(meshComponent->mesh.relativePath.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)); 
         if(ImGui::BeginDragDropTarget()) { // TODO: Think about relative and absolute paths
             if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_CONTENT_BROWSER_ITEM)) {
                 const char* path = (const char*)payload->Data;
@@ -174,11 +174,9 @@ void drawComponents(GameObject* gameObject) {
                     RPR_ERROR("Failed to load Mesh");
             }
         }
-    }
+    });
 
-    if(MaterialComponent* materialComponent = gameObject->TryGetComponent<MaterialComponent>()) {
-        ImGui::NewLine();
-        ImGui::Text("Material");
+    GUI_DrawComponent<MaterialComponent>("Material", gameObject, [](MaterialComponent* materialComponent) {
         const char* items[] = { "Editor" };
         static const char* previousItem = NULL;
         static const char* currentItem = NULL;
@@ -202,22 +200,23 @@ void drawComponents(GameObject* gameObject) {
 
             ImGui::Button(buttonString, buttonSize);
             if (ImGui::BeginDragDropTarget()) {
-				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
+                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
                     const char* path = (const char*)payload->Data;
-					RPR_CLIENT_INFO("loading texture from: %s", path);
-					Texture* newTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
+                    RPR_CLIENT_INFO("loading texture from: %s", path);
+                    Texture* newTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
                     Texture_Create(newTexture, path);
-					if (newTexture->loaded) {
-						RPR_CLIENT_INFO("texture is loaded, address: %s", newTexture);
-						MEMORY_Free(texture, sizeof(Texture), MEMORY_TAG_RENDERER);
-						materialComponent->material.textures.data[i] = newTexture;
-					}
-					else {
-						RPR_CLIENT_INFO("texture is NOT loaded\n");
-						MEMORY_Free(newTexture, sizeof(Texture), MEMORY_TAG_RENDERER);
-					}
-				}
+                    if (newTexture->loaded) {
+                        RPR_CLIENT_INFO("texture is loaded, address: %s", newTexture);
+                        MEMORY_Free(texture, sizeof(Texture), MEMORY_TAG_RENDERER);
+                        materialComponent->material.textures.data[i] = newTexture;
+                    }
+                    else {
+                        RPR_CLIENT_INFO("texture is NOT loaded\n");
+                        MEMORY_Free(newTexture, sizeof(Texture), MEMORY_TAG_RENDERER);
+                    }
+                }
             }
         }
-    }
+    });
+    
 }
