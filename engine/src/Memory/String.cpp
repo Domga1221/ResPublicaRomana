@@ -12,7 +12,7 @@ void String_Create(String* s, const char* sequence) {
 }
 
 void String_Destroy(String* s) {
-    MEMORY_Free(s->sequence, sizeof(char) * s->length + 1, MEMORY_TAG_STRING);
+    MEMORY_Free(s->sequence, sizeof(char) * (s->length + 1), MEMORY_TAG_STRING);
     s->sequence = 0;
     s->length = 0;
 }
@@ -22,7 +22,7 @@ void String_Append(String* s, const char* toAppend) {
     char* newChar = (char*)MEMORY_Allocate(sizeof(char) * (s->length + len + 1), MEMORY_TAG_STRING);
     MEMORY_Copy(newChar, s->sequence, s->length);
     MEMORY_Copy((void*)(newChar + len), toAppend, len);
-    newChar[s->length + len + 1] = '\0';
+    newChar[s->length + len] = '\0';
     
     MEMORY_Free(s->sequence, sizeof(char) * s->length + 1, MEMORY_TAG_STRING);
     
