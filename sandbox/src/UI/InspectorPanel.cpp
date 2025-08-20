@@ -163,7 +163,7 @@ void drawComponents(GameObject* gameObject) {
     });
 
     GUI_DrawComponent<MeshComponent>("Mesh", gameObject, [](MeshComponent* meshComponent) {
-        ImGui::Button(meshComponent->mesh.relativePath.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)); 
+        ImGui::Button(meshComponent->mesh.relativePath.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 0.0f)); 
         if(ImGui::BeginDragDropTarget()) { // TODO: Think about relative and absolute paths
             if(const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(IMGUI_PAYLOAD_CONTENT_BROWSER_ITEM)) {
                 const char* path = (const char*)payload->Data;

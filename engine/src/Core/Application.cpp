@@ -36,7 +36,7 @@ void Application_Initialize(Application* app) {
     Event_Initialize();
     Filesystem_Initialize();
 
-    WindowProps windowProps { "title", 1280, 720 };
+    WindowProps windowProps { "REngine", 1600, 900 };
     Window_Initialize(&windowProps);
 
     app->isRunning = true;
