@@ -54,15 +54,6 @@ void InspectorPanel_OnImGuiRender() {
 
             ImGui::EndPopup();
         }
-
-        //
-        bool removeComponent = false;
-        if(ImGui::Button("Remove"))
-            removeComponent = true;
-
-        if(removeComponent)
-            selected->RemoveComponent<MaterialComponent>();
-        //
     }
 
     
@@ -85,7 +76,8 @@ void drawComponents(GameObject* gameObject) {
         }
     }
 
-
+    // TODO: Cleanup 
+    /*
     if(TransformComponent* transformComponent = gameObject->TryGetComponent<TransformComponent>()) {
         
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{ 4, 4 });
@@ -160,6 +152,15 @@ void drawComponents(GameObject* gameObject) {
         ImGui::Columns(1);
         ImGui::PopStyleVar();
     }
+    */
+
+    GUI_DrawComponent<TransformComponent>("Transform", gameObject, [](TransformComponent* transformComponent) {
+        GUI_DrawVec3Control("Translation", transformComponent->position, 0.0f, 150.0f);
+        glm::vec3 rotation = glm::degrees(transformComponent->rotation);
+        GUI_DrawVec3Control("Rotation", rotation, 0.0f, 150.0f);
+        transformComponent->rotation = glm::radians(rotation);
+        GUI_DrawVec3Control("Scale", transformComponent->scale, 1.0f, 150.0f);
+    });
 
     GUI_DrawComponent<MeshComponent>("Mesh", gameObject, [](MeshComponent* meshComponent) {
         ImGui::Button(meshComponent->mesh.relativePath.c_str(), ImVec2(ImGui::GetContentRegionAvail().x, 20.0f)); 

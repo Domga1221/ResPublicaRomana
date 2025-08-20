@@ -117,8 +117,8 @@ void ImGuiTheme() {
     style.TabCloseButtonMinWidthUnselected = 0;
     style.TabRounding = 0;
     // Windows 
-    style.WindowMenuButtonPosition = ImGuiDir_None;
-
+    style.WindowMenuButtonPosition = ImGuiDir_None; //Disable this to get back Arrow on Tabbar
+    
 
 
     auto& colors = ImGui::GetStyle().Colors;

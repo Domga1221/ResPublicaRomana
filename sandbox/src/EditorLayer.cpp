@@ -97,6 +97,9 @@ Material material;
 void saveSceneAs();
 void openScene();
 
+
+Texture playButton;
+
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
 
@@ -276,6 +279,9 @@ void EditorLayer_OnAttach() {
 
     //Scene_Destroy(&activeScene);
     //Scene_Create(&activeScene);
+
+    // 
+    Texture_Create(&playButton, "Resources/PlayButton64.png");
 }
 
 void EditorLayer_OnDetach() {
@@ -476,7 +482,7 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     // Dockspace 
     ImGuiIO& io = ImGui::GetIO();
     ImGuiStyle& style = ImGui::GetStyle();
-    float minWinSizeX = style.WindowMinSize.x;
+    float minWinSizeX = 370.0f;
     if(io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
         ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
         ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
@@ -504,6 +510,32 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     ContentBrowserPanel_OnImGuiRender();
     SceneHierarchyPanel_OnImGuiRender();
     InspectorPanel_OnImGuiRender();
+
+
+    // toolbar
+    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemInnerSpacing, ImVec2{ 0, 0 });
+    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+    auto& colors = ImGui::GetStyle().Colors;
+    const auto& buttonHovered = colors[ImGuiCol_ButtonHovered];
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(buttonHovered.x, buttonHovered.y, buttonHovered.z, 0.5f));
+    const auto& buttonActive = colors[ImGuiCol_ButtonActive];
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(buttonActive.x, buttonActive.y, buttonActive.z, 0.5));
+
+    ImGui::Begin("##toolbar", nullptr, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse
+        | ImGuiWindowFlags_NoTitleBar
+        //ImGuiWindowFlags_None
+    );
+
+    float size = ImGui::GetWindowHeight() - 4.0f;
+    Texture* icon = &playButton;
+    ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
+    if (ImGui::ImageButton("PlayButton", (ImTextureID)icon->ID, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1))) {
+        RPR_INFO("Scene State Changed");
+    }
+    ImGui::PopStyleVar(2);
+    ImGui::PopStyleColor(3);
+    ImGui::End();
 
 
     // viewport 

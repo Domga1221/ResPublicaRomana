@@ -38,7 +38,7 @@ RPR_API GameObject* GameObject_Create(Scene* scene) {
     gameObject->scene = scene;
     gameObject->AddComponent<TransformComponent>();
     TagComponent& tagComponent = gameObject->AddComponent<TagComponent>();
-    tagComponent.tag = "New Entity";
+    tagComponent.tag = "New GameObject";
     List_Create(&gameObject->children);
     List_PushBack(&scene->root->children, gameObject);
     return gameObject;
