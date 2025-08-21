@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/engine/src/**",
                 "${workspaceFolder}/engine/Libraries/include/**",
-                "${workspaceFolder}/imgui-docking"
+                "${workspaceFolder}/imgui-docking",
+                "${workspaceFolder}/sandbox/src/**"
             ],
             "defines": [
                 "RPR_EXPORT",

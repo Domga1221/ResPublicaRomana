@@ -34,7 +34,7 @@ void Material_Create(Material* material, Shader* shader) {
         RPR_ERROR("string address: %u, string: %s", material->uniforms.data[i].name.sequence, material->uniforms.data[i].name.sequence);
     }
 
-    // TODO: sorting
+    // sorting
     qsort(material->uniforms.data, material->uniforms.size, sizeof(Uniform), sortUniform);
 
     RPR_INFO("--- PRINTING UNIFORMS ---");
@@ -44,11 +44,17 @@ void Material_Create(Material* material, Shader* shader) {
                 uniform->name.sequence, uniform->uniformDataType, uniform->location);
     }
 
-    // TODO: special textures
+    // TODO: special textures, use map or something 
+    std::string brdfLutString = "brdfLUT";
+    std::string shadowMapString = "shadowMap";
+    std::string ssaoString = "SSAOBlurTexture"; // TODO: string comparison
     std::vector<std::string> textureDebugString;
     for(u32 i = 0; i < material->uniforms.size; i++) {
         Uniform* uniform = &material->uniforms.data[i];
-        if(uniform->uniformDataType == UniformDataType::Sampler2D) {
+        if(uniform->uniformDataType == UniformDataType::Sampler2D 
+            && brdfLutString != std::string(uniform->name.sequence)
+            && shadowMapString != std::string(uniform->name.sequence)
+            && ssaoString != std::string(uniform->name.sequence)) {
             material->textureCount++;
             textureDebugString.push_back(uniform->name.sequence);
         }

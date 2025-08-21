@@ -12,13 +12,16 @@
 
 #include "GUIComponents.hpp"
 
+#include "Scene/ShaderPool.hpp"
+
+
 static GameObject* selected;
 
 void drawComponents(GameObject* gameObject);
 
-static Shader* editorShader; // TODO: temp, remove, from functions as well 
+
 void InspectorPanel_Initialize(Shader* shader) {
-    editorShader = shader;
+
 }
 
 void InspectorPanel_OnImGuiRender() {
@@ -46,7 +49,7 @@ void InspectorPanel_OnImGuiRender() {
             }
             if(ImGui::MenuItem("Material")) {
                 if(!selected->HasComponent<MaterialComponent>()) {
-                    selected->AddComponent<MaterialComponent>(editorShader);
+                    selected->AddComponent<MaterialComponent>(ShaderPool_GetEditorShader());
                 } else {
                     RPR_CLIENT_WARN("GameObject: %u, already has MaterialComponent");
                 }
@@ -178,10 +181,13 @@ void drawComponents(GameObject* gameObject) {
     });
 
     GUI_DrawComponent<MaterialComponent>("Material", gameObject, [](MaterialComponent* materialComponent) {
-        const char* items[] = { "Editor" };
+        const char* items[] = { "Editor", "PBR" };
         static const char* previousItem = NULL;
         static const char* currentItem = NULL;
-        previousItem = items[0];
+        if(materialComponent->material.shader == ShaderPool_GetEditorShader())
+            previousItem = items[0];
+        else if(materialComponent->material.shader == ShaderPool_GetPBRShader())
+            previousItem = items[1];
         currentItem = previousItem;
         if(ImGui::BeginCombo("##materialShader", currentItem)) {
             for(int n = 0; n < IM_ARRAYSIZE(items); n++) {
@@ -199,6 +205,7 @@ void drawComponents(GameObject* gameObject) {
             Texture* texture = materialComponent->material.textures.data[i];
             const char* buttonString = texture == nullptr ? "No texture" : texture->path.sequence;
 
+            ImGui::PushID(i);
             ImGui::Button(buttonString, buttonSize);
             if (ImGui::BeginDragDropTarget()) {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
@@ -217,7 +224,21 @@ void drawComponents(GameObject* gameObject) {
                     }
                 }
             }
+            ImGui::PopID();
+        }
+
+        if(currentItem != previousItem) {
+            Shader* shader = ShaderPool_GetEditorShader();
+            if(currentItem == items[0])
+                shader = ShaderPool_GetEditorShader();
+            if(currentItem == items[1])
+                shader = ShaderPool_GetPBRShader();
+            RPR_INFO("InspectorPanel drawComponents: Changing Material to: %s", currentItem);
+            Material_Destroy(&materialComponent->material);
+            Material_Create(&materialComponent->material, shader);
+            currentItem = previousItem;
         }
     });
+
     
 }
