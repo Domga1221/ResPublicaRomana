@@ -342,7 +342,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     //HexagonGrid_Render(hexagonGrid, view, projection);
 
     // -- Skybox
-    Skybox_Render(&skybox, &view, &projection);
+    //Skybox_Render(&skybox, &view, &projection);
     // -- Skybox End
     Framebuffer_Unbind();
     RenderCommand_EnableDepthTest(false);

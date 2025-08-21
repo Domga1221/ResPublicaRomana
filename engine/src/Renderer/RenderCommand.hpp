@@ -41,3 +41,8 @@ RPR_API inline void RenderCommand_EnableDepthTest(b8 depthTest) {
     else            
         glDisable(GL_DEPTH_TEST);
 }
+
+
+RPR_API inline void RenderCommand_BindTexture(u16 textureID) {
+    glBindTexture(GL_TEXTURE_2D, textureID);
+}

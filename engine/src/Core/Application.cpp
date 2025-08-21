@@ -28,6 +28,7 @@ void Application_OnMouseButtonPressed(Event event) {
 }
 
 #include "Platform/Filesystem.hpp"
+#include "Renderer/Primitives.hpp"
 
 void Application_Initialize(Application* app) {
 
@@ -35,24 +36,27 @@ void Application_Initialize(Application* app) {
     LayerStack_Initialize();
     Event_Initialize();
     Filesystem_Initialize();
-
+    
     WindowProps windowProps { "REngine", 1600, 900 };
     Window_Initialize(&windowProps);
-
+    
     app->isRunning = true;
-
+    
     std::string memoryUsageString = MEMORY_GetMemoryUsageString();
     RPR_DEBUG("%s", memoryUsageString);
-
+    
     
     ImGuiLayer_Initialize(&imGuiLayer); 
     // right now imguilayer is pushed as first layer into stack, then sandbox editorlayer is pushed
     LayerStack_PushLayer(&imGuiLayer);
-
-
+    
+    
     // event 
     Event_AddListener(EVENT_TYPE_KEY_PRESSED, Application_OnKeyPressed);
     Event_AddListener(EVENT_TYPE_MOUSE_BUTTON_PRESSED, Application_OnMouseButtonPressed);
+    
+    // Renderer
+    Primitives_Initialize();
 }
 
 f32 lastFrameTime = 0.0f;
