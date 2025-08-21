@@ -80,7 +80,8 @@ RPR_API void Material_Destroy(Material* material) {
     material->shader = nullptr;
     material->textureCount = 0;
     for(u32 i = 0; i < material->textures.size; i++) {
-        Texture_Destroy(material->textures.data[i]);
+        if(material->textures.data[i] != 0)
+            Texture_Destroy(material->textures.data[i]);
     }
     for(u32 i = 0; i < material->uniforms.size; i++) {
         RPR_ERROR("String address: %u, string: %s", material->uniforms.data[i].name.sequence, material->uniforms.data[i].name.sequence);
