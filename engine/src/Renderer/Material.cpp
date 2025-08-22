@@ -9,6 +9,7 @@ int sortUniform(const void* u1, const void* u2) {
 void Material_Create(Material* material, Shader* shader) {
     List_Create(&material->uniforms);
     List_Create(&material->textures);
+    List_Create(&material->textureNames);
     material->textureCount = 0;
 
     RPR_WARN("READING UNIFORMS IN SHADER");
@@ -48,7 +49,7 @@ void Material_Create(Material* material, Shader* shader) {
     std::string brdfLutString = "brdfLUT";
     std::string shadowMapString = "shadowMap";
     std::string ssaoString = "SSAOBlurTexture"; // TODO: string comparison
-    std::vector<std::string> textureDebugString;
+    //std::vector<std::string> textureDebugString;
     for(u32 i = 0; i < material->uniforms.size; i++) {
         Uniform* uniform = &material->uniforms.data[i];
         if(uniform->uniformDataType == UniformDataType::Sampler2D 
@@ -56,21 +57,24 @@ void Material_Create(Material* material, Shader* shader) {
             && shadowMapString != std::string(uniform->name.sequence)
             && ssaoString != std::string(uniform->name.sequence)) {
             material->textureCount++;
-            textureDebugString.push_back(uniform->name.sequence);
+            String string;
+            String_Create(&string, uniform->name.sequence);
+            List_PushBack(&material->textureNames, string);
         }
     }
 
 
-    RPR_INFO("--- PRINTING TEXTURES ---");
-    RPR_INFO("Texture Count: %d", material->textureCount);
     // TODO: List resizing
     for(u32 i = 0; i < material->textureCount; i++) {
         List_PushBack(&material->textures, 0);  // TODO: currently pushing nullpointer
     }
-
+    
+    RPR_INFO("--- PRINTING TEXTURES ---");
+    RPR_INFO("Texture Count: %d", material->textureCount);
     for(int i = 0; i < material->textures.size; i++) {
         RPR_INFO("texture: %s, \tindex: %d, \tpointerVal: %p",
-                textureDebugString[i], i, material->textures.data[i]);
+                material->textureNames.data[i].sequence, i, material->textures.data[i]);
+        
     }
 
     material->shader = shader;
@@ -120,5 +124,20 @@ void Material_SendToShader(Material* material, Uniform* uniform, void* data) {
         default:
             RPR_WARN("Trying to send UniformDataType to shader that is not supported!");
             break;
+    }
+}
+
+void Material_BindTextures(Material* material) {
+    for(u32 i = 0; i < material->textures.size; i++) {
+        glActiveTexture(GL_TEXTURE0 + i);
+        if(material->textures.data[i] != nullptr)
+            Texture_Bind(material->textures.data[i]); 
+    }
+
+    for(u32 i = 0; i < material->uniforms.size; i++) {
+        if(material->uniforms.data->uniformDataType == UniformDataType::Sampler2D) {
+            Shader_SetInt(material->uniforms.data[i].location, i);
+            i++;
+        }
     }
 }

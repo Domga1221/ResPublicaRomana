@@ -13,7 +13,7 @@ void Texture_Create(Texture* texture, const char* path) {
     const char* CWD = Filesystem_GetCWD();
     std::string fullPath = CWD + std::string("/") + std::string(path); 
 
-    stbi_set_flip_vertically_on_load(true);
+    stbi_set_flip_vertically_on_load(false);
 
     i32 width; i32 height; i32 numberOfComponents;
     unsigned char* data = stbi_load(fullPath.c_str(), &width, &height, &numberOfComponents, 0);

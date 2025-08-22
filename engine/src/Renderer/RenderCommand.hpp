@@ -46,3 +46,7 @@ RPR_API inline void RenderCommand_EnableDepthTest(b8 depthTest) {
 RPR_API inline void RenderCommand_BindTexture(u16 textureID) {
     glBindTexture(GL_TEXTURE_2D, textureID);
 }
+
+RPR_API inline void RenderCommand_BindCubemap(u32 textureID) {
+    glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+}

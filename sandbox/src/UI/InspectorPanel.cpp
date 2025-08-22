@@ -206,6 +206,8 @@ void drawComponents(GameObject* gameObject) {
             const char* buttonString = texture == nullptr ? "No texture" : texture->path.sequence;
 
             ImGui::PushID(i);
+            ImGui::Dummy(ImVec2(0.0f, 2.0f));
+            ImGui::Text("%s", materialComponent->material.textureNames.data[i].sequence);
             ImGui::Button(buttonString, buttonSize);
             if (ImGui::BeginDragDropTarget()) {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {

@@ -98,7 +98,9 @@ void saveSceneAs();
 void openScene();
 
 
-Texture playButton;
+static Texture playButton;
+static Texture stopButton;
+static b8 playMode = false;
 
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
@@ -282,6 +284,7 @@ void EditorLayer_OnAttach() {
 
     // 
     Texture_Create(&playButton, "Resources/PlayButton64.png");
+    Texture_Create(&stopButton, "Resources/StopButton64.png");
 }
 
 void EditorLayer_OnDetach() {
@@ -336,7 +339,10 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     //RenderCommand_DrawIndexed(mesh->indexCount);
 
     // -- EditorScene
-    EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
+    if(!playMode)
+        EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
+    else 
+        EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera);
 
     // -- Hexagon 
     //HexagonGrid_Render(hexagonGrid, view, projection);
@@ -528,10 +534,12 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     );
 
     float size = ImGui::GetWindowHeight() - 4.0f;
-    Texture* icon = &playButton;
+    Texture* icon = playMode ? &stopButton : &playButton;
     ImGui::SetCursorPosX((ImGui::GetWindowContentRegionMax().x * 0.5f) - (size * 0.5f));
     if (ImGui::ImageButton("PlayButton", (ImTextureID)icon->ID, ImVec2(size, size), ImVec2(0, 0), ImVec2(1, 1))) {
-        RPR_INFO("Scene State Changed");
+        playMode = !playMode;
+        const char* state = playMode ? "Play" : "Edit";
+        RPR_INFO("Scene State Changed: %s", state);
     }
     ImGui::PopStyleVar(2);
     ImGui::PopStyleColor(3);

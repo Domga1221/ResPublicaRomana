@@ -219,7 +219,7 @@ void main()
 
     vec3 kS = F;
     vec3 kD = 1.0 - kS;
-    kD *= 1.0 - metallic; // soll die zeile da rein??? keine ahnung LearnOpenGL weiß es auch nicht :)
+    kD *= 1.0 - metallic; // soll die zeile da rein??? keine ahnung LearnOpenGL weiï¿½ es auch nicht :)
     vec3 irradiance = texture(irradianceMap, N).rgb;
     vec3 diffuse    = irradiance * albedo;
 
