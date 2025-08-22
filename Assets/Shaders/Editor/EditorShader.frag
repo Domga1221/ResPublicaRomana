@@ -1,13 +1,25 @@
-#version 460
+#version 450 core
 
 layout(location = 0) out vec4 FragColor;
+layout(location = 1) out int entityID;
 
-layout(location = 0) in vec3 inColor;
-layout(location = 1) in vec2 inTexCoords;
+in vec3 FragPos;
+in vec3 Normal;
+in vec2 TexCoords;
 
-layout(location = 3) uniform sampler2D texture_0;
+layout(location = 3) uniform sampler2D diffuse;
+layout(location = 4) uniform int u_entityID;
+layout(location = 5) uniform bool colorCorrect;
 
 void main() {
-    vec3 color = texture(texture_0, inTexCoords).rgb;
-    FragColor = vec4(color.r, color.g, color.b, 1.0f); 
+	vec3 color = texture(diffuse, TexCoords).rgb;
+	
+	if(colorCorrect) {
+		color = pow(color, vec3(2.2)); 
+		color = color * (color + vec3(1.0));
+	}
+
+	FragColor = vec4(color, 1.0);
+
+	entityID = u_entityID;
 }

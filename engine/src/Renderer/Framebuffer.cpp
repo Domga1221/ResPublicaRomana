@@ -72,7 +72,6 @@ void Framebuffer_Create(Framebuffer* framebuffer, FramebufferProperties* framebu
         }
     }
 
-    // TODO: Depth attachment
     if(framebuffer->colorAttachments.size > 4) {
         RPR_ERROR("Framebuffer_Create: Only 4 color attachments supported right now");
         GLenum buffers[4] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3 };

@@ -300,6 +300,8 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
         Framebuffer_Resize(&framebuffer, (u32)viewportSize.x, (u32)viewportSize.y);
         SceneCamera_SetViewportSize(&sceneCamera, (u32)viewportSize.x, (u32)viewportSize.y); 
         //__builtin_debugtrap();
+        // TODO: handle resizing properly with events 
+        EditorScene_OnViewportResize((u32)viewportSize.x, (u32)viewportSize.y);
     }
     //RPR_INFO("viewportSize.x: %d, framebufferwidth: %d", (u32)viewportSize.x, (u32)framebuffer.framebufferProperties.width);
     //RPR_INFO("viewportSize.y: %d, framebufferheight: %d", (u32)viewportSize.y, (u32)framebuffer.framebufferProperties.height);
@@ -342,7 +344,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     if(!playMode)
         EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
     else 
-        EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera);
+        EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera, &framebuffer);
 
     // -- Hexagon 
     //HexagonGrid_Render(hexagonGrid, view, projection);

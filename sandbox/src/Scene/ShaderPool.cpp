@@ -8,8 +8,8 @@ static Shader pbrShader;
 void ShaderPool_Initialize() {
     std::string currentPath = Filesystem_GetCWD();
 
-    std::string vertPath = currentPath + "/Assets/Shaders/Editor/EditorShader.vert";
-    std::string fragPath = currentPath + "/Assets/Shaders/Editor/EditorShader.frag";
+    std::string vertPath = currentPath + "/Assets/Shaders/Editor/editorShader.vert";
+    std::string fragPath = currentPath + "/Assets/Shaders/Editor/editorShader.frag";
     Shader_Create(&editorShader, vertPath, fragPath);
 
     vertPath = currentPath + "/Assets/Shaders/PBR/PBR.vert";

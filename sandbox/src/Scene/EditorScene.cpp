@@ -14,11 +14,16 @@ ImageBasedLighting ibl;
 
 #include "ShaderPool.hpp"
 
+#include "Renderer/Renderpasses/PostProcessing/Bloom.hpp"
+#include "Renderer/Renderpasses/PostProcessing/ColorCorrect.hpp"
+Bloom bloom;
 
 void EditorScene_Initialze() {
     ShaderPool_Initialize();
     std::string hdrPath = std::string("Assets/HDR/newport_loft.hdr");
     ImageBasedLighting_Initialize(&ibl, hdrPath.c_str());
+    Bloom_Initialize(&bloom);
+    ColorCorrect_Initialize();
 }
 
 void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera) {
@@ -49,6 +54,8 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
             Texture_Bind(albedo);
         Shader_SetInt(editorShader, "texture_0", 0);
 
+        Shader_SetInt(editorShader, "colorCorrect", 0);
+
         Mesh_Bind(&meshComponent.mesh);
         RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
     }
@@ -70,12 +77,13 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
     ImageBasedLighting_RenderSkybox(&ibl, view, projection, true);
 }
 
-void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera) {
+void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera, Framebuffer* framebuffer) {
     RenderCommand_ActiveTexture(0);
-
+    
     // TODO: renderpasses 
-
-
+    bool colorCorrect = true;
+    
+    
     glm::mat4 view = SceneCamera_GetViewMatrix(sceneCamera);
     glm::mat4 projection = SceneCamera_GetProjectinoMatrix(sceneCamera);
 
@@ -101,6 +109,8 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
             if(albedo != nullptr)
                 Texture_Bind(albedo);
             Shader_SetInt(shader, "texture_0", 0);
+
+            Shader_SetInt(shader, "colorCorrect", colorCorrect);
 
             Mesh_Bind(&meshComponent.mesh);
             RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
@@ -137,7 +147,8 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
             Shader_SetBool(shader, "applySSAO", 0);
             // TODO: lights
 
-            Shader_SetInt(shader, "colorCorrect", 1);
+            // color correct
+            Shader_SetInt(shader, "colorCorrect", colorCorrect); // TODO: do properly when loading textures or something
 
             Mesh_Bind(&meshComponent.mesh);
             RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
@@ -145,5 +156,16 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
     }
 
     
-    ImageBasedLighting_RenderSkybox(&ibl, view, projection, true);
+    ImageBasedLighting_RenderSkybox(&ibl, view, projection, !colorCorrect);
+
+
+    // bloom 
+    //Bloom_Render(&bloom, framebuffer);
+    if(colorCorrect)
+        ColorCorrect_Render(framebuffer);
+}
+
+
+void EditorScene_OnViewportResize(u32 width, u32 height) {
+    Bloom_OnResize(&bloom, width, height);
 }

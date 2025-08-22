@@ -27,7 +27,7 @@ struct FramebufferProperties {
 };
 
 RPR_API void FramebufferProperties_Create(FramebufferProperties* framebufferProperties);
-
+// TODO: Destroy
 RPR_API void FramebufferProperties_AddAttachment(FramebufferProperties* framebufferProperties, 
     Texture_Format textureFormat);
 

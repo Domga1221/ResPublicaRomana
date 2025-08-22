@@ -88,13 +88,18 @@ RPR_API void Material_Destroy(Material* material) {
             Texture_Destroy(material->textures.data[i]);
     }
     for(u32 i = 0; i < material->uniforms.size; i++) {
-        RPR_ERROR("String address: %u, string: %s", material->uniforms.data[i].name.sequence, material->uniforms.data[i].name.sequence);
+        //RPR_ERROR("String address: %u, string: %s", material->uniforms.data[i].name.sequence, 
+        //  material->uniforms.data[i].name.sequence);
         String_Destroy(&material->uniforms.data[i].name);
         material->uniforms.data[i].uniformDataType = UniformDataType::None;
         material->uniforms.data[i].location = -99;
     }
+    for(u32 i = 0; i < material->textureNames.size; i++) {
+        String_Destroy(&material->textureNames.data[i]);
+    }
     List_Destroy(&material->textures);
     List_Destroy(&material->uniforms);
+    List_Destroy(&material->textureNames);
 }
 
 void Material_SendToShader(Material* material, Uniform* uniform, void* data) {
