@@ -160,7 +160,7 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
 
 
     // bloom 
-    //Bloom_Render(&bloom, framebuffer);
+    Bloom_Render(&bloom, framebuffer);
     if(colorCorrect)
         ColorCorrect_Render(framebuffer);
 }

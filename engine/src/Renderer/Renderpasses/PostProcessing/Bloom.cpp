@@ -52,8 +52,8 @@ void Bloom_Initialize(Bloom* bloom) {
     f = currentDir + "/Assets/Shaders/PostProcessing/Bloom/combine.frag";
     Shader_Create(&bloom->combineShader, v.c_str(), f.c_str());
 
-    v = currentDir + "/Assets/Shaders/debug_quad.vert";
-    f = currentDir + "/Assets/Shaders/debug_quad.frag";
+    v = currentDir + "/Assets/Shaders/square.vert"; // TODO: figure out naming for shaders and structure
+    f = currentDir + "/Assets/Shaders/square.frag";
     Shader_Create(&debugQuadShader, v.c_str(), f.c_str());
 }
 
@@ -67,8 +67,8 @@ void Bloom_Render(Bloom* bloom, Framebuffer* framebuffer) {
     glClearColor(0.5f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, bloom->combineFramebuffer.colorIDs.data[0]);
-    glBindTexture(GL_TEXTURE_2D, bloom->framebuffer.colorIDs.data[0]);
+    glBindTexture(GL_TEXTURE_2D, bloom->combineFramebuffer.colorIDs.data[0]);
+    //glBindTexture(GL_TEXTURE_2D, bloom->framebuffer.colorIDs.data[0]);
     Shader_Bind(&debugQuadShader);
     Shader_SetInt(&debugQuadShader, "u_texture", 0);
     Primitives_RenderQuad();
@@ -87,6 +87,17 @@ void Bloom_OnResize(Bloom* bloom, u32 x, u32 y) {
 
 void Bloom_RenderToTexture(Bloom* bloom, const u32 hdrTexture) {
     Framebuffer_Bind(&bloom->framebuffer);
+    // test
+    /*
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    Shader_Bind(&debugQuadShader);
+    Shader_SetInt(&debugQuadShader, "u_texture", 0);
+    glBindTexture(GL_TEXTURE_2D, hdrTexture);
+    glActiveTexture(GL_TEXTURE0);
+    Primitives_RenderQuad();
+    return;
+    */
+    // test end 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     Shader_Bind(&bloom->brightPixelShader);
     RenderCommand_ActiveTexture(0);
@@ -94,7 +105,7 @@ void Bloom_RenderToTexture(Bloom* bloom, const u32 hdrTexture) {
     Shader_SetInt(&bloom->brightPixelShader, "hdrTexture", 0);
     Primitives_RenderQuad();
 
-    /*
+    
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -102,6 +113,7 @@ void Bloom_RenderToTexture(Bloom* bloom, const u32 hdrTexture) {
     bool horizontal = true, first_iteration = true;
     int amount = 10;
     Shader_Bind(&bloom->blurShader);
+    RenderCommand_ActiveTexture(0);
     Shader_SetInt(&bloom->blurShader, "image", 0);
     for(u32 i = 0; i < amount; i++) {
         Framebuffer_Bind(&bloom->pingPongFramebuffers[horizontal]);
@@ -137,5 +149,4 @@ void Bloom_RenderToTexture(Bloom* bloom, const u32 hdrTexture) {
     Primitives_RenderQuad();
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    */
 }
