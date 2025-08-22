@@ -102,6 +102,8 @@ static Texture playButton;
 static Texture stopButton;
 static b8 playMode = false;
 
+#include "UI/PostProcessingPanel.hpp"
+
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
 
@@ -113,6 +115,7 @@ void EditorLayer_OnAttach() {
     // UI
     ContentBrowserPanel_Initialize();
     SceneHierarchyPanel_Initialize(&activeScene);
+    PostProcessingPanel_Initialize(); // Does nothing currently
     
     
     std::string currentPath = std::filesystem::current_path().string();
@@ -344,7 +347,8 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     if(!playMode)
         EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
     else 
-        EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera, &framebuffer);
+        EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera, &framebuffer,
+            PostProcessingPanel_GetBloom(), PostProcessingPanel_GetSSAO(), PostProcessingPanel_GetColorCorrect());
 
     // -- Hexagon 
     //HexagonGrid_Render(hexagonGrid, view, projection);
@@ -518,6 +522,7 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     ContentBrowserPanel_OnImGuiRender();
     SceneHierarchyPanel_OnImGuiRender();
     InspectorPanel_OnImGuiRender();
+    PostProcessingPanel_OnImGuiRender();
 
 
     // toolbar

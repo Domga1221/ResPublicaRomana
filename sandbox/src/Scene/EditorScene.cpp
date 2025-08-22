@@ -77,11 +77,11 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
     ImageBasedLighting_RenderSkybox(&ibl, view, projection, true);
 }
 
-void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera, Framebuffer* framebuffer) {
+void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera, Framebuffer* framebuffer,
+    b8 bloomEnabled, b8 ssaoEnabled, b8 colorCorrectEnabled) {
     RenderCommand_ActiveTexture(0);
     
     // TODO: renderpasses 
-    bool colorCorrect = true;
     
     
     glm::mat4 view = SceneCamera_GetViewMatrix(sceneCamera);
@@ -110,7 +110,7 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
                 Texture_Bind(albedo);
             Shader_SetInt(shader, "texture_0", 0);
 
-            Shader_SetInt(shader, "colorCorrect", colorCorrect);
+            Shader_SetInt(shader, "colorCorrect", colorCorrectEnabled);
 
             Mesh_Bind(&meshComponent.mesh);
             RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
@@ -148,7 +148,7 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
             // TODO: lights
 
             // color correct
-            Shader_SetInt(shader, "colorCorrect", colorCorrect); // TODO: do properly when loading textures or something
+            Shader_SetInt(shader, "colorCorrect", colorCorrectEnabled); // TODO: do properly when loading textures or something
 
             Mesh_Bind(&meshComponent.mesh);
             RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
@@ -156,12 +156,13 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
     }
 
     
-    ImageBasedLighting_RenderSkybox(&ibl, view, projection, !colorCorrect);
+    ImageBasedLighting_RenderSkybox(&ibl, view, projection, !colorCorrectEnabled);
 
 
     // bloom 
+    if(bloomEnabled)
     Bloom_Render(&bloom, framebuffer);
-    if(colorCorrect)
+    if(colorCorrectEnabled)
         ColorCorrect_Render(framebuffer);
 }
 
