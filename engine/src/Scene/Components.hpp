@@ -84,6 +84,14 @@ struct LightComponent {
     PointLight pointLight;
     Shadowmap* shadowmap = nullptr;
     LightComponent() = default;
+    LightComponent(LightComponent&& other) {
+        pointLight = other.pointLight;
+        shadowmap = other.shadowmap;
+    }
+    ~LightComponent() {
+        if(shadowmap != nullptr) 
+        DestroyShadowmap();
+    }
     void CreateShadowmap() {
         shadowmap = (Shadowmap*) MEMORY_Allocate(sizeof(Shadowmap), MEMORY_TAG_RENDERER);
         Shadowmap_Create(shadowmap);
@@ -93,9 +101,4 @@ struct LightComponent {
         MEMORY_Free(shadowmap, sizeof(Shadowmap), MEMORY_TAG_RENDERER);
         shadowmap = nullptr;
     }
-    ~LightComponent() {
-        if(shadowmap != nullptr) 
-            DestroyShadowmap();
-    }
-    // TODO: move constructor
 };
