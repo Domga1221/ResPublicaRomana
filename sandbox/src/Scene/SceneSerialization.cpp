@@ -8,6 +8,7 @@
 #include <fstream>
 
 #include <Core/Log.hpp>
+#include <Scene/ShaderPool.hpp>
 
 void serializeGameObject(nlohmann::ordered_json* gameObjectsArray, GameObject gameObject) {
     nlohmann::ordered_json entityObj = nlohmann::json::object();
@@ -34,26 +35,25 @@ void serializeGameObject(nlohmann::ordered_json* gameObjectsArray, GameObject ga
     if (MaterialComponent* mc = gameObject.TryGetComponent<MaterialComponent>()) {
         // TODO: 
         
-        //entityObj["MaterialComponent"] = nlohmann::json::object();
+        entityObj["MaterialComponent"] = nlohmann::json::object();
 
-        /*
-        if (mc.material->GetShader() == ShaderPool::Get().GetPBRShader())
+        if (mc->material.shader == ShaderPool_GetPBRShader())
             entityObj["MaterialComponent"]["type"] = "PBR";
-        else if (mc.material->GetShader() == ShaderPool::Get().GetEditorShader())
+        else if (mc->material.shader == ShaderPool_GetEditorShader())
             entityObj["MaterialComponent"]["type"] = "Editor";
         else
-            RE_CORE_ERROR("SCENESERIALIZER:: Material Shader not found and saved!");
+            RPR_ERROR("Scene_Serialize: serializeGameObject: Material Shader not found and saved!");
 
-        int textureCount = 0;
-        for (Texture* texture : mc.material->GetTextures()) {
+        i32 textureCount = 0; // TODO: use saved texture count 
+        for (u32 i = 0; i < mc->material.textures.size; i++) {
+            Texture* texture = mc->material.textures.data[i];
             if (texture != nullptr) {
-                const std::string& texturePath = texture->GetPath();
+                const std::string& texturePath = texture->path.sequence;
                 entityObj["MaterialComponent"]["texture-" + std::to_string(textureCount)] = texturePath;
-
                 textureCount++;
             }
         }
-        */
+        
     }
 
     gameObjectsArray->push_back(entityObj);
@@ -107,7 +107,7 @@ void Scene_Deserialize(Scene* scene, const std::string& filepath) {
         
         // Transform
         if (entityObj.contains("TransformComponent")) {
-            TransformComponent tc = deserializedEntity->GetComponent<TransformComponent>();
+            TransformComponent& tc = deserializedEntity->GetComponent<TransformComponent>();
             float X = entityObj["TransformComponent"]["position"][0];
             float Y = entityObj["TransformComponent"]["position"][1];
             float Z = entityObj["TransformComponent"]["position"][2];
@@ -128,6 +128,42 @@ void Scene_Deserialize(Scene* scene, const std::string& filepath) {
             MeshComponent& mc = deserializedEntity->AddComponent<MeshComponent>();
             //mc.mesh.LoadMesh(relativeDirectory);
             Mesh_Create(&mc.mesh, relativeDirectory);
+        }
+
+        // MaterialComponent
+        if (entityObj.contains("MaterialComponent")) {
+            std::string materialType = entityObj["MaterialComponent"]["type"];
+            if (materialType == "PBR") {
+                //std::cout << "PBR true" << "\n";
+                RPR_INFO("Loading PBR Material");
+                deserializedEntity->AddComponent<MaterialComponent>(ShaderPool_GetPBRShader());
+            }
+            else if (materialType == "Editor") {
+                RPR_INFO("Loading Editor Material");
+                deserializedEntity->AddComponent<MaterialComponent>(ShaderPool_GetEditorShader());
+            }
+            // Load textures
+            if (deserializedEntity->HasComponent<MaterialComponent>()) {
+                MaterialComponent& mc = deserializedEntity->GetComponent<MaterialComponent>();
+                for(u32 i = 0; i < mc.material.textures.size; i++) {
+                    // TODO: fix string stuff 
+                    std::string readString = entityObj["MaterialComponent"]["texture-" + std::to_string(i)];
+                    std::filesystem::path texturePath(readString);
+                    std::string textureString = texturePath.string();
+                    
+                    Texture* newTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
+                    Texture_Create(newTexture, textureString.c_str());
+                    RPR_INFO("Scene_Deserialize: Loading Texture from: %s", textureString.c_str());
+                    if(newTexture->loaded) {
+                        RPR_CLIENT_INFO("Texture is loaded");
+                        mc.material.textures.data[i] = newTexture;
+                    } else {
+                        RPR_CLIENT_ERROR("Scene_Deserialize: Failed to load texture from: %s", textureString.c_str());
+                        Texture_Destroy(newTexture);
+                        MEMORY_Free(newTexture, sizeof(Texture), MEMORY_TAG_RENDERER);
+                    }
+                }
+            }
         }
     }
 }
