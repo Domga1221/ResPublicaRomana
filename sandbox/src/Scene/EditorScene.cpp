@@ -134,7 +134,6 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
 
         // BEGIN SSAO
         // render SSAO texture
-        /*
         RenderCommand_BindFramebuffer(gBuffer.ssaoFBO);
         RenderCommand_Clear(true ,true);
         Shader_Bind(&gBuffer.SSAOShader);
@@ -153,14 +152,12 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
         RenderCommand_ActiveTexture(2);
         RenderCommand_BindTexture2D(gBuffer.noiseTexture);
         Shader_SetInt(&gBuffer.SSAOShader, "texNoise", 2);
-        Shader_SetMat4(&gBuffer.SSAOShader, "projection", projection);
+        Shader_SetMat4(&gBuffer.SSAOShader, "projection", projectionRH);
         Primitives_RenderQuad();
         RenderCommand_BindFramebuffer(0);
-        */
         // END SSAO
 
         // BEGIN SSAO BLUR
-        /*
         RenderCommand_BindFramebuffer(gBuffer.ssaoBlurFBO);
         RenderCommand_SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         RenderCommand_Clear(true, true);
@@ -168,11 +165,16 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
         Shader_SetInt(&gBuffer.SSAOBlurShader, "ssaoInput", 0);
         RenderCommand_ActiveTexture(0);
         RenderCommand_BindTexture2D(gBuffer.ssaoColorBuffer);
-        */
-        // END SSAO BLUR
+        Primitives_RenderQuad();
+        RenderCommand_BindFramebuffer(0);
         RenderCommand_EnableBlend();
+        // END SSAO BLUR
     }
 
+    // BEGIN GAMEOBJECTS
+    RenderCommand_BindTexture2D(0);
+    RenderCommand_ActiveTexture(0);
+    Framebuffer_Bind(framebuffer);
     auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
     for(entt::entity entity : group) {
         std::tuple<TransformComponent&, MeshComponent&, MaterialComponent&> tuple =
@@ -242,33 +244,36 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
             // TODO: lights
 
             // color correct
-            Shader_SetInt(shader, "colorCorrect", colorCorrectEnabled); // TODO: do properly when loading textures or something
+            Shader_SetInt(shader, "colorCorrect", !colorCorrectEnabled); // TODO: do properly when loading textures or something
 
             Mesh_Bind(&meshComponent.mesh);
             RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
         }
     }
+    // END GAMEOBJECTS
 
     
     ImageBasedLighting_RenderSkybox(&ibl, view, projectionRH, !colorCorrectEnabled);
 
 
-    // bloom 
+    // Bloom 
     if(bloomEnabled)
         Bloom_Render(&bloom, framebuffer);
     if(colorCorrectEnabled)
         ColorCorrect_Render(framebuffer);
 
-    // test
+    // SSAO Debug, NOTE: change square.frag 
+    /*
     if(ssaoEnabled) {
         Framebuffer_Bind(framebuffer);
         RenderCommand_Clear(true, true);
         Shader_Bind(&debugQuadShader);
         RenderCommand_ActiveTexture(0);
         Shader_SetInt(&debugQuadShader, "u_texture", 0);
-        RenderCommand_BindTexture2D(gBuffer.gPosition);
+        RenderCommand_BindTexture2D(gBuffer.ssaoBlurColorBuffer);
         Primitives_RenderQuad();
     }
+    */
 }
 
 
