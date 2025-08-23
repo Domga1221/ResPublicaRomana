@@ -70,3 +70,11 @@ RPR_API inline void RenderCommand_EnableBlend() {
 RPR_API inline void RenderCommand_DisableBlend() {
     glDisable(GL_BLEND);
 }
+
+RPR_API inline void RenderCommand_CullFrontFace() {
+    glCullFace(GL_FRONT);
+}
+
+RPR_API inline void RenderCommand_CullBackFace() {
+    glCullFace(GL_BACK);
+}

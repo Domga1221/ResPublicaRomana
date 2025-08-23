@@ -13,15 +13,17 @@ static ImageBasedLighting ibl;
 
 #include "ShaderPool.hpp"
 
-#include "Renderer/Renderpasses/PostProcessing/Bloom.hpp"
-#include "Renderer/Renderpasses/PostProcessing/ColorCorrect.hpp"
-#include "Renderer/Renderpasses/PostProcessing/GBuffer.hpp"
+#include <Renderer/Renderpasses/PostProcessing/Bloom.hpp>
+#include <Renderer/Renderpasses/PostProcessing/ColorCorrect.hpp>
+#include <Renderer/Renderpasses/PostProcessing/GBuffer.hpp>
 static Bloom bloom;
 static GBuffer gBuffer;
 
 static glm::vec2 viewportSize = glm::vec2(1600, 900);
 
 Shader debugQuadShader;
+
+#include <glm/matrix.hpp>
 
 void EditorScene_Initialze() {
     ShaderPool_Initialize();
@@ -170,13 +172,55 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
         RenderCommand_EnableBlend();
         // END SSAO BLUR
     }
+    
+    auto lights = scene->registry.view<TransformComponent, LightComponent>();
+    auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
+    
+    Shadowmap* shadowmap = nullptr;
+    glm::vec3 lightPosition;
+    // TODO: check why i can't iterate with for(auto entity : lights)
+    lights.each([&shadowmap, &lightPosition](TransformComponent& transformComponent, LightComponent& lightComponent) {
+        if(lightComponent.shadowmap != nullptr) {
+            shadowmap = lightComponent.shadowmap;
+            lightPosition = transformComponent.position;
+        }
+    });
+    if(shadowmap != nullptr) {
+        RenderCommand_CullFrontFace();
+        // render to depth map 
+        shadowmap->directionalLightPosition = lightPosition;
+        shadowmap->lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, shadowmap->nearPlane, shadowmap->farPlane);
+        shadowmap->lightView = glm::lookAt(lightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        shadowmap->lightSpaceMatrix = shadowmap->lightProjection * shadowmap->lightView;
+
+        // render scene from lights point of view
+        Shader_Bind(&shadowmap->simpleDepthShader);
+        Shader_SetMat4(&shadowmap->simpleDepthShader, "lightSpaceMatrix", shadowmap->lightSpaceMatrix);
+
+        RenderCommand_SetViewportSize(shadowmap->SHADOW_WIDTH, shadowmap->SHADOW_HEIGHT);
+        RenderCommand_BindFramebuffer(shadowmap->depthMapFBO);
+        RenderCommand_Clear(false, true);
+
+        for(entt::entity entity : group) {
+            std::tuple<TransformComponent&, MeshComponent&> tuple =
+                group.get<TransformComponent, MeshComponent>(entity);
+
+            TransformComponent& transformComponent = std::get<TransformComponent&>(tuple);
+            MeshComponent& meshComponent = std::get<MeshComponent&>(tuple);
+
+            glm::mat4 model = transformComponent.GetTransform();
+            Shader_SetMat4(&shadowmap->simpleDepthShader, "model", model);
+            Mesh_Bind(&meshComponent.mesh);
+            RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
+        }    
+        RenderCommand_CullBackFace();
+    }
+    RenderCommand_SetViewportSize(viewportSize.x, viewportSize.y);
 
     // BEGIN GAMEOBJECTS
     RenderCommand_BindTexture2D(0);
     RenderCommand_ActiveTexture(0);
     Framebuffer_Bind(framebuffer);
-    auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
-    auto lights = scene->registry.view<TransformComponent, LightComponent>();
     //scene->registry.view<TransformComponent, LightComponent>().each([](auto& t, auto& l) {
 
     //});
@@ -234,7 +278,18 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
             Shader_SetInt(shader, "brdfLUT", 7);
 
             // TODO: shadowmap
-            Shader_SetBool(shader, "applyShadow", false);
+            if(shadowmap != nullptr) {
+                Shader_SetVec3(shader, "directionalLightPos", shadowmap->directionalLightPosition);
+                Shader_SetMat4(shader, "lightSpaceMatrix", shadowmap->lightSpaceMatrix);
+                RenderCommand_ActiveTexture(8);
+                RenderCommand_BindTexture2D(shadowmap->depthMap);
+                Shader_SetInt(shader, "shadowMap", 8);
+                Shader_SetBool(shader, "applyShadow", true);
+            }
+            else { 
+                Shader_SetBool(shader, "applyShadow", false);
+            }
+
             // TODO: SSAO
             if(ssaoEnabled) {
                 Shader_SetInt(shader, "applySSAO", 1);

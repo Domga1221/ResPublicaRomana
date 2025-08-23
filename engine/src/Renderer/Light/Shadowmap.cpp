@@ -5,6 +5,7 @@
 #include <string>
 #include "Platform/Filesystem.hpp"
 
+#include <glm/gtc/matrix_transform.hpp>
 
 void Shadowmap_Create(Shadowmap* shadowmap) {
     glGenFramebuffers(1, &shadowmap->depthMapFBO);
@@ -39,7 +40,3 @@ void Shadowmap_Destroy(Shadowmap* shadowmap) {
 
 }
 
-
-void Shadowmap_RenderToDepthMap(Shadowmap* shadowmap) {
-
-}

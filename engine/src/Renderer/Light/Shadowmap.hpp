@@ -24,5 +24,3 @@ typedef struct Shadowmap {
 
 RPR_API void Shadowmap_Create(Shadowmap* shadowmap);
 RPR_API void Shadowmap_Destroy(Shadowmap* shadowmap); // TODO: 
-
-RPR_API void Shadowmap_RenderToDepthMap(Shadowmap* shadowmap);

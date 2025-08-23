@@ -14,6 +14,11 @@
 
 #include "Scene/ShaderPool.hpp"
 
+#include <Renderer/Framebuffer.hpp>
+#include <Renderer/RenderCommand.hpp>
+#include <Renderer/Shader.hpp>
+#include <Renderer/Primitives.hpp>
+static Framebuffer debugFramebuffer;
 
 static GameObject* selected;
 
@@ -21,7 +26,13 @@ void drawComponents(GameObject* gameObject);
 
 
 void InspectorPanel_Initialize(Shader* shader) {
-
+    FramebufferProperties framebufferProperties;
+    FramebufferProperties_Create(&framebufferProperties);
+    FramebufferProperties_AddAttachment(&framebufferProperties, TEXTURE_FORMAT_RGBA16F);
+    FramebufferProperties_AddAttachment(&framebufferProperties, TEXTURE_FORMAT_DEPTH);
+    framebufferProperties.width = 200;
+    framebufferProperties.height = 200;
+    Framebuffer_Create(&debugFramebuffer, &framebufferProperties);
 }
 
 void InspectorPanel_OnImGuiRender() {
@@ -262,15 +273,25 @@ void drawComponents(GameObject* gameObject) {
                 lightComponent->DestroyShadowmap();
         }
 
-        /*
-        if (component.shadowmap != nullptr) {
-            m_DebugFramebuffer->Bind();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            component.shadowmap->renderDepthDebugQuad();
-            unsigned int texture = m_DebugFramebuffer->GetColorAttachmentRendererID(0);
-            ImGui::Image((void*)texture, ImVec2{ 400, 400 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
-            m_DebugFramebuffer->Unbind();
+        if (lightComponent->shadowmap != nullptr) {
+            Framebuffer_Bind(&debugFramebuffer);
+            RenderCommand_Clear(true, true);
+
+            // render depth debug quad
+            Shader_Bind(&lightComponent->shadowmap->debugDepthQuadShader);
+            Shader_SetFloat(&lightComponent->shadowmap->debugDepthQuadShader, "near_plane", 
+                lightComponent->shadowmap->nearPlane);
+            Shader_SetFloat(&lightComponent->shadowmap->debugDepthQuadShader, "far_plane", 
+                lightComponent->shadowmap->farPlane);
+            Shader_SetInt(&lightComponent->shadowmap->debugDepthQuadShader, "depthMap", 0);
+            RenderCommand_ActiveTexture(0);
+            RenderCommand_BindTexture2D(lightComponent->shadowmap->depthMap);
+            Primitives_RenderQuad();
+            
+            u32 texture = debugFramebuffer.colorIDs.data[0];
+            ImGui::Image((ImTextureID)texture, ImVec2{ 400, 400 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+            RenderCommand_BindFramebuffer(0);
         }
-        */
+        
     });
 }
