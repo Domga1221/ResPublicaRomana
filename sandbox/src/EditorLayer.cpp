@@ -49,8 +49,8 @@ void handleSceneCameraMouseMovement() {
     f32 currentMouseX = Input_GetMouseX();
     f32 currentMouseY = Input_GetMouseY();
 
-    f32 xOffset = currentMouseX - lastMouseX;
-    f32 yOffset = lastMouseY - currentMouseY;
+    f32 xOffset = lastMouseX - currentMouseX;
+    f32 yOffset = currentMouseY - lastMouseY;
     lastMouseX = currentMouseX;
     lastMouseY = currentMouseY;
 
@@ -325,7 +325,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     RenderCommand_Clear(true, true);
 
     glm::mat4 view = SceneCamera_GetViewMatrix(&sceneCamera);
-    glm::mat4 projection = SceneCamera_GetProjectinoMatrix(&sceneCamera);
+    glm::mat4 projection = SceneCamera_GetProjectionMatrixRH(&sceneCamera);
     // -- triangle
     Shader_Bind(&shader);
     glm::mat4 model = glm::mat4(1.0f);

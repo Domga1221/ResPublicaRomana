@@ -49,7 +49,8 @@ void SceneCamera_Create(SceneCamera* sceneCamera,
     float yaw = SCENE_CAMERA_CONSTANT_YAW, float pitch = SCENE_CAMERA_CONSTANT_PITCH);
 
 glm::mat4 SceneCamera_GetViewMatrix(SceneCamera* sceneCamera);
-glm::mat4 SceneCamera_GetProjectinoMatrix(SceneCamera* sceneCamera);
+glm::mat4 SceneCamera_GetProjectionMatrix(SceneCamera* sceneCamera);
+glm::mat4 SceneCamera_GetProjectionMatrixRH(SceneCamera* sceneCamera);
 
 void SceneCamera_ProcessKeyboard(SceneCamera* sceneCamera, SceneCameraMovement direction, f32 deltaTime);
 void SceneCamera_ProcessMouseMovement(SceneCamera* sceneCamera, f32 xOffset, f32 yOffset, b8 constrainPitch = true);

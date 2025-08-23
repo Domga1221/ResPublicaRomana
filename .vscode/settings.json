@@ -76,6 +76,7 @@
         "unordered_set": "cpp",
         "any": "cpp",
         "numeric": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "random": "cpp"
     }
 }

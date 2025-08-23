@@ -35,16 +35,21 @@ glm::mat4 SceneCamera_GetViewMatrix(SceneCamera* sceneCamera) {
         sceneCamera->position + sceneCamera->front, sceneCamera->up);
 }
 
-glm::mat4 SceneCamera_GetProjectinoMatrix(SceneCamera* sceneCamera) {
+glm::mat4 SceneCamera_GetProjectionMatrix(SceneCamera* sceneCamera) {
     return glm::perspectiveLH(glm::radians(sceneCamera->zoom), sceneCamera->aspectRatio, 
+        sceneCamera->nearClip, sceneCamera->farClip);
+}
+
+glm::mat4 SceneCamera_GetProjectionMatrixRH(SceneCamera* sceneCamera) {
+    return glm::perspectiveRH(glm::radians(sceneCamera->zoom), sceneCamera->aspectRatio, 
     sceneCamera->nearClip, sceneCamera->farClip);
 }
 
 
 void SceneCamera_ProcessKeyboard(SceneCamera* sceneCamera, SceneCameraMovement direction, f32 deltaTime) {
     f32 velocity = sceneCamera->movementSpeed * deltaTime;
-    if(direction == SCENE_CAMERA_MOVEMENT_FORWARD) sceneCamera->position -= sceneCamera->front * velocity;
-    if(direction == SCENE_CAMERA_MOVEMENT_BACKWARD) sceneCamera->position += sceneCamera->front * velocity;
+    if(direction == SCENE_CAMERA_MOVEMENT_FORWARD) sceneCamera->position += sceneCamera->front * velocity;
+    if(direction == SCENE_CAMERA_MOVEMENT_BACKWARD) sceneCamera->position -= sceneCamera->front * velocity;
     if(direction == SCENE_CAMERA_MOVEMENT_RIGHT) sceneCamera->position += sceneCamera->right * velocity;
     if(direction == SCENE_CAMERA_MOVEMENT_LEFT) sceneCamera->position -= sceneCamera->right * velocity;
     if(direction == SCENE_CAMERA_MOVEMENT_UP) sceneCamera->position += sceneCamera->up * velocity;
