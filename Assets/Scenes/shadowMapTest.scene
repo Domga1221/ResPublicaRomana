@@ -1,0 +1,118 @@
+{
+    "Scene": "Untitled",
+    "GameObjects": [
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "Marble2"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.800000011920929,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.004999999888241291,
+                    0.004999999888241291,
+                    0.004999999888241291
+                ]
+            },
+            "MeshComponent": {
+                "Directory": "Assets\\MarbleDesk\\Desk.fbx"
+            },
+            "MaterialComponent": {
+                "type": "PBR",
+                "texture-0": "Assets\\MarbleDesk\\Desk_Diffuse_4k.png",
+                "texture-1": "Assets\\MarbleDesk\\Desk_Normal_256px.png",
+                "texture-2": "Assets\\MarbleDesk\\Desk_Metallic_1px.png",
+                "texture-3": "Assets\\MarbleDesk\\Desk_Roughness_1px.png",
+                "texture-4": "Assets\\MarbleDesk\\Desk_AO_1px.png"
+            }
+        },
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "Marble1"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    0.009999999776482582,
+                    0.009999999776482582,
+                    0.009999999776482582
+                ]
+            },
+            "MeshComponent": {
+                "Directory": "Assets\\MarbleDesk\\Desk.fbx"
+            },
+            "MaterialComponent": {
+                "type": "PBR",
+                "texture-0": "Assets\\MarbleDesk\\Desk_Diffuse_4k.png",
+                "texture-1": "Assets\\MarbleDesk\\Desk_Normal_256px.png",
+                "texture-2": "Assets\\MarbleDesk\\Desk_Metallic_1px.png",
+                "texture-3": "Assets\\MarbleDesk\\Desk_Roughness_1px.png",
+                "texture-4": "Assets\\MarbleDesk\\Desk_AO_1px.png"
+            }
+        },
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "PointLight"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    7.199999809265137,
+                    1.899999976158142
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "MeshComponent": {
+                "Directory": "Assets\\Models\\cube_own.obj"
+            },
+            "MaterialComponent": {
+                "type": "Editor",
+                "texture-0": "Assets/Textures/bricks10_diffuse_1k.jpg"
+            },
+            "LightComponent": {
+                "Color": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "Intensity": 1.0,
+                "hasShadowmap": true
+            }
+        },
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "Root"
+            }
+        }
+    ]
+}

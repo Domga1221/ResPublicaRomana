@@ -8,6 +8,12 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 void Shadowmap_Create(Shadowmap* shadowmap) {
+    // TODO: Shadowmap doesn't render, when looking straight from the top at the origin of the scene
+    shadowmap->nearPlane = 1.0f;
+    shadowmap->farPlane = 7.5f;
+    shadowmap->SHADOW_WIDTH = 2048;
+    shadowmap->SHADOW_HEIGHT = 2048;
+
     glGenFramebuffers(1, &shadowmap->depthMapFBO);
 
     glGenTextures(1, &shadowmap->depthMap);

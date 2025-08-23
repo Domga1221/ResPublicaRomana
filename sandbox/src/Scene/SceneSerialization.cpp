@@ -53,7 +53,16 @@ void serializeGameObject(nlohmann::ordered_json* gameObjectsArray, GameObject ga
                 textureCount++;
             }
         }
-        
+    }
+
+    if (LightComponent* lc = gameObject.TryGetComponent<LightComponent>()) {
+        entityObj["LightComponent"] = nlohmann::json::object();
+        entityObj["LightComponent"]["Color"] = { lc->pointLight.color.x, lc->pointLight.color.y, lc->pointLight.color.z };
+        entityObj["LightComponent"]["Intensity"] = lc->pointLight.intensity;
+        if (lc->shadowmap != nullptr)
+            entityObj["LightComponent"]["hasShadowmap"] = true;
+        else
+            entityObj["LightComponent"]["hasShadowmap"] = false;
     }
 
     gameObjectsArray->push_back(entityObj);
@@ -164,6 +173,23 @@ void Scene_Deserialize(Scene* scene, const std::string& filepath) {
                     }
                 }
             }
+        }
+
+        if (entityObj.contains("LightComponent")) {
+            LightComponent& lc = deserializedEntity->AddComponent<LightComponent>();
+            float R = entityObj["LightComponent"]["Color"][0];
+            float G = entityObj["LightComponent"]["Color"][1];
+            float B = entityObj["LightComponent"]["Color"][2];	
+            lc.pointLight.color = glm::vec3(R, G, B);
+
+            float intensity = entityObj["LightComponent"]["Intensity"];
+            lc.pointLight.intensity = intensity;
+
+            bool hasShadowmap = entityObj["LightComponent"]["hasShadowmap"];
+            if (hasShadowmap)
+                lc.CreateShadowmap();
+            else 
+                lc.shadowmap = nullptr;
         }
     }
 }

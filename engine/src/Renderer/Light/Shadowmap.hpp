@@ -10,11 +10,11 @@ typedef struct Shadowmap {
     glm::vec3 directionalLightPosition;
     u32 depthMapFBO;
     u32 depthMap;
-    float nearPlane = 1.0f;
-    float farPlane = 7.5f;
+    float nearPlane;
+    float farPlane;
 
-    const u32 SHADOW_WIDTH = 2048;
-    const u32 SHADOW_HEIGHT = 2048;
+    u32 SHADOW_WIDTH;
+    u32 SHADOW_HEIGHT;
 
     Shader simpleDepthShader;   // TODO: initialize shaders once, when initializing renderer, 
     Shader debugDepthQuadShader; // instead of creating them every time when creating a shadowmap, etc. 
