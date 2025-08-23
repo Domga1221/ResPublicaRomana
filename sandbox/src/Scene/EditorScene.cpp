@@ -176,6 +176,10 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
     RenderCommand_ActiveTexture(0);
     Framebuffer_Bind(framebuffer);
     auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
+    auto lights = scene->registry.view<TransformComponent, LightComponent>();
+    //scene->registry.view<TransformComponent, LightComponent>().each([](auto& t, auto& l) {
+
+    //});
     for(entt::entity entity : group) {
         std::tuple<TransformComponent&, MeshComponent&, MaterialComponent&> tuple =
             group.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
@@ -245,6 +249,22 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
 
             // color correct
             Shader_SetInt(shader, "colorCorrect", !colorCorrectEnabled); // TODO: do properly when loading textures or something
+
+            if(lights.size_hint() > 4) 
+                RPR_WARN("EditorScene_OnUpdateRuntime: Rendering using more than 4 lights, only 4 lights supported!");
+            Shader_SetInt(shader, "lightCount", lights.size_hint());
+            if(lights.size_hint() >= 1) {
+                int i = 0;
+                lights.each([shader, &i](auto& transformComponent, auto& lightComponent) {
+                    glm::vec3& lightPos = transformComponent.position;
+                    std::string lightPosString = "lightPositions[" + std::to_string(i) + "]";
+                    std::string lightColorsString = "lightColors[" + std::to_string(i) + "]";
+                    Shader_SetVec3(shader, lightPosString.c_str(), lightPos);
+                    Shader_SetVec3(shader, lightColorsString.c_str(), 
+                        PointLight_GetIntensifiedColor(&lightComponent.pointLight));
+                    i++;
+                });
+            }
 
             Mesh_Bind(&meshComponent.mesh);
             RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);

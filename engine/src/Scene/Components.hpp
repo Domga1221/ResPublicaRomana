@@ -12,6 +12,9 @@
 
 #include <Platform/Filesystem.hpp>
 
+#include <Renderer/Light/PointLight.hpp>
+#include <Renderer/Light/Shadowmap.hpp>
+
 struct TagComponent {
     std::string tag; // TODO: String implementation 
     const char* c_str() {
@@ -75,4 +78,24 @@ struct MaterialComponent {
         if(material.shader != nullptr)
             Material_Destroy(&material);
     }
+};
+
+struct LightComponent {
+    PointLight pointLight;
+    Shadowmap* shadowmap = nullptr;
+    LightComponent() = default;
+    void CreateShadowmap() {
+        shadowmap = (Shadowmap*) MEMORY_Allocate(sizeof(Shadowmap), MEMORY_TAG_RENDERER);
+        Shadowmap_Create(shadowmap);
+    }
+    void DestroyShadowmap() {
+        Shadowmap_Destroy(shadowmap); // TODO:
+        MEMORY_Free(shadowmap, sizeof(Shadowmap), MEMORY_TAG_RENDERER);
+        shadowmap = nullptr;
+    }
+    ~LightComponent() {
+        if(shadowmap != nullptr) 
+            DestroyShadowmap();
+    }
+    // TODO: move constructor
 };

@@ -44,14 +44,22 @@ void InspectorPanel_OnImGuiRender() {
                     std::string relativePath = std::filesystem::current_path().string() + "/Assets/Models/cube_own.obj";
                     selected->AddComponent<MeshComponent>(relativePath);
                 } else {
-                    RPR_CLIENT_WARN("GameObject: %u, already has MeshComponent");
+                    RPR_CLIENT_WARN("GameObject: %u, already has MeshComponent", selected->handle);
                 }
             }
             if(ImGui::MenuItem("Material")) {
                 if(!selected->HasComponent<MaterialComponent>()) {
                     selected->AddComponent<MaterialComponent>(ShaderPool_GetEditorShader());
                 } else {
-                    RPR_CLIENT_WARN("GameObject: %u, already has MaterialComponent");
+                    RPR_CLIENT_WARN("GameObject: %u, already has MaterialComponent", selected->handle);
+                }
+            }
+
+            if(ImGui::MenuItem("Light")) {
+                if(!selected->HasComponent<LightComponent>()) {
+                    selected->AddComponent<LightComponent>();
+                } else {
+                    RPR_CLIENT_WARN("GameObject: %u", "already has LightComponent", selected->handle);
                 }
             }
 
@@ -242,5 +250,27 @@ void drawComponents(GameObject* gameObject) {
         }
     });
 
-    
+    GUI_DrawComponent<LightComponent>("Light", gameObject, [](LightComponent* lightComponent) {
+        ImGui::ColorEdit3("Color", &lightComponent->pointLight.color.x);
+        ImGui::SliderFloat("Intensity", &lightComponent->pointLight.intensity, 0.0f, 100.0f);
+
+        bool hasShadowmap = lightComponent->shadowmap != nullptr;
+        if (ImGui::Checkbox("Shadowmap", &hasShadowmap)) {
+            if(lightComponent->shadowmap == nullptr) 
+                lightComponent->CreateShadowmap();
+            else 
+                lightComponent->DestroyShadowmap();
+        }
+
+        /*
+        if (component.shadowmap != nullptr) {
+            m_DebugFramebuffer->Bind();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            component.shadowmap->renderDepthDebugQuad();
+            unsigned int texture = m_DebugFramebuffer->GetColorAttachmentRendererID(0);
+            ImGui::Image((void*)texture, ImVec2{ 400, 400 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+            m_DebugFramebuffer->Unbind();
+        }
+        */
+    });
 }
