@@ -30,12 +30,14 @@ void Application_OnMouseButtonPressed(Event event) {
 #include "Platform/Filesystem.hpp"
 #include "Renderer/Primitives.hpp"
 
+#include "Renderer/ParticleSystem/Random.hpp"
 void Application_Initialize(Application* app) {
 
     MEMORY_Initialize();
     LayerStack_Initialize();
     Event_Initialize();
     Filesystem_Initialize();
+    Random_Initialize();
     
     WindowProps windowProps { "REngine", 1600, 900 };
     Window_Initialize(&windowProps);

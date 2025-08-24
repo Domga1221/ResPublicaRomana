@@ -22,6 +22,8 @@ void VertexArray_Destroy(VertexArray* vertexArray) {
         IndexBuffer_Destroy(vertexArray->indexBuffer);
     
     List_Destroy(&vertexArray->vertexBuffers);
+    
+    MEMORY_Free(vertexArray, sizeof(VertexArray), MEMORY_TAG_RENDERER);
 }
 
 void VertexArray_AddVertexBuffer(VertexArray* vertexArray, VertexBuffer* vertexBuffer) {

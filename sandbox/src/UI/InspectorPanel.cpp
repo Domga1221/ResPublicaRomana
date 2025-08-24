@@ -65,12 +65,18 @@ void InspectorPanel_OnImGuiRender() {
                     RPR_CLIENT_WARN("GameObject: %u, already has MaterialComponent", selected->handle);
                 }
             }
-
             if(ImGui::MenuItem("Light")) {
                 if(!selected->HasComponent<LightComponent>()) {
                     selected->AddComponent<LightComponent>();
                 } else {
                     RPR_CLIENT_WARN("GameObject: %u", "already has LightComponent", selected->handle);
+                }
+            }
+            if(ImGui::MenuItem("Particle System")) {
+                if(!selected->HasComponent<ParticleSystemComponent>()) {
+                    selected->AddComponent<ParticleSystemComponent>();
+                } else {
+                    RPR_CLIENT_WARN("GameObject: %u", "already has ParticleSystemComponent", selected->handle);
                 }
             }
 
@@ -290,6 +296,57 @@ void drawComponents(GameObject* gameObject) {
             
             u32 texture = debugFramebuffer.colorIDs.data[0];
             ImGui::Image((ImTextureID)texture, ImVec2{ 400, 400 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
+            RenderCommand_BindFramebuffer(0);
+        }
+        
+    });
+
+    GUI_DrawComponent<ParticleSystemComponent>("Particle System", gameObject, 
+            [](ParticleSystemComponent* particleSystemComponent) {
+        	ParticleProps& props = particleSystemComponent->particleProps;
+        GUI_DrawVec3Control("Position", props.position);
+        GUI_DrawVec3Control("Velocity", props.velocity);
+        GUI_DrawVec3Control("Velocity Variation", props.velocityVariation);
+        ImGui::Dummy(ImVec2(0.0f, 2.0f));
+        ImGui::ColorEdit4("Color Begin", &(props.colorBegin.x));
+        ImGui::ColorEdit4("Color End", &(props.colorEnd.x));
+        ImGui::DragFloat("Size Begin", &props.sizeBegin, 0.1f, 0.0f, 10.0f, "%.2f");
+        ImGui::DragFloat("Size End", &props.sizeEnd, 0.1f, 0.0f, 10.0f, "%.2f");
+        ImGui::DragFloat("Size SizeVariation", &props.sizeVariation, 0.1f, 0.0f, 10.0f, "%.2f");
+        ImGui::DragFloat("Life Time", &props.lifeTime, 0.1f, 0.0f, 10.0f, "%.2f");
+        ImGui::Checkbox("Billboard", (bool*)&props.billboard); // TODO: Maybe memory issue, since sizeof(bool) is either 1 or 4, depending on implementation 
+
+        // sprite
+        Texture* texture = particleSystemComponent->particleSystem->sprite;
+        ImVec2 buttonSize = ImGui::GetContentRegionAvail(); buttonSize.y = 0.0f;
+        std::string buttonString = texture == nullptr ? "No texture" : texture->path.sequence;
+        ImGui::Button(buttonString.c_str(), buttonSize);
+        if (ImGui::BeginDragDropTarget()) {
+            if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
+                const char* path = (const char*)payload->Data;
+                std::filesystem::path texturePath(path); std::string textureString = texturePath.string();
+                Texture* newTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
+                Texture_Create(newTexture, textureString.c_str());
+                std::cout << "loading texture from: " << textureString << "\n";
+                if (newTexture->loaded) {
+                    std::cout << "texture is loaded, address:" << newTexture << "\n";
+                    delete texture;
+                    particleSystemComponent->particleSystem->sprite = newTexture;
+                }
+                else {
+                    std::cout << "texture is NOT loaded\n";
+                    MEMORY_Free(newTexture, sizeof(Texture), MEMORY_TAG_RENDERER);
+                }
+            }
+        }
+
+        
+        texture = particleSystemComponent->particleSystem->sprite;
+        if (texture != nullptr) {
+            Framebuffer_Bind(&debugFramebuffer);
+            RenderCommand_Clear(true, true);
+            u32 textureID = texture->ID;
+            ImGui::Image((ImTextureID)textureID, ImVec2{ 200, 200 }, ImVec2{ 0, 1 }, ImVec2{ 1, 0 });
             RenderCommand_BindFramebuffer(0);
         }
         

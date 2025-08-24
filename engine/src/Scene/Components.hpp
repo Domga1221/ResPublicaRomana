@@ -14,6 +14,7 @@
 
 #include <Renderer/Light/PointLight.hpp>
 #include <Renderer/Light/Shadowmap.hpp>
+#include <Renderer/ParticleSystem/ParticleSystem.hpp>
 
 struct TagComponent {
     std::string tag; // TODO: String implementation 
@@ -101,4 +102,27 @@ struct LightComponent {
         MEMORY_Free(shadowmap, sizeof(Shadowmap), MEMORY_TAG_RENDERER);
         shadowmap = nullptr;
     }
+};
+
+struct ParticleSystemComponent {
+    ParticleProps particleProps;
+    ParticleSystem* particleSystem = nullptr;
+
+    ParticleSystemComponent() {
+	    particleProps.colorBegin = { 254 / 255.0f, 212 / 255.0f, 123 / 255.0f, 1.0f };
+        particleProps.colorEnd = { 254 / 255.0f, 109 / 255.0f, 41 / 255.0f, 1.0f };
+        particleProps.sizeBegin = 0.5f, particleProps.sizeVariation = 0.3f, particleProps.sizeEnd = 0.0f;
+        particleProps.lifeTime = 1.0f;
+        particleProps.velocity = { 0.0f, 0.0f, 0.0f };
+        particleProps.velocityVariation = { 3.0f, 1.0f, 0.0f };
+        particleProps.position = { 0.0f, 0.0f, 0.0f };
+
+        particleSystem = (ParticleSystem*)MEMORY_Allocate(sizeof(ParticleSystem), MEMORY_TAG_RENDERER);
+        ParticleSystem_Create(particleSystem);
+    }
+    ~ParticleSystemComponent() {
+        // TODO:
+    }
+
+    // TODO: Move constructor
 };
