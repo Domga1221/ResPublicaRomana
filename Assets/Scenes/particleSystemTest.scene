@@ -1,0 +1,115 @@
+{
+    "Scene": "Untitled",
+    "GameObjects": [
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "New GameObject"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            "ParticleSystemComponent": {
+                "position": [
+                    0.10000000149011612,
+                    0.20000000298023224,
+                    0.30000001192092896
+                ],
+                "velocity": [
+                    0.009999999776482582,
+                    0.20000000298023224,
+                    0.30000001192092896
+                ],
+                "velocityVariation": [
+                    0.30000001192092896,
+                    0.30000001192092896,
+                    0.4000000059604645
+                ],
+                "colorBegin": [
+                    0.0,
+                    1.0,
+                    0.038609981536865234,
+                    1.0
+                ],
+                "colorEnd": [
+                    1.0,
+                    0.0,
+                    0.9729733467102051,
+                    1.0
+                ],
+                "sizeBegin": 1.2000000476837158,
+                "sizeEnd": 0.0,
+                "sizeVariation": 0.10000000149011612,
+                "lifeTime": 0.699999988079071,
+                "billboard": 1,
+                "sprite": "Assets\\Textures\\particleTexture.png"
+            }
+        },
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "2"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "1"
+            },
+            "TransformComponent": {
+                "position": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "rotation": [
+                    0.0,
+                    0.0,
+                    0.0
+                ],
+                "scale": [
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        },
+        {
+            "Entity": 123456789,
+            "TagComponent": {
+                "Tag": "Root"
+            }
+        }
+    ]
+}

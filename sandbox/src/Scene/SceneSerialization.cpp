@@ -65,6 +65,27 @@ void serializeGameObject(nlohmann::ordered_json* gameObjectsArray, GameObject ga
             entityObj["LightComponent"]["hasShadowmap"] = false;
     }
 
+    if (ParticleSystemComponent* pc = gameObject.TryGetComponent<ParticleSystemComponent>()) {
+        ParticleProps* p = &pc->particleProps;
+        entityObj["ParticleSystemComponent"] = nlohmann::json::object();
+        entityObj["ParticleSystemComponent"]["position"] = { p->position.x, p->position.y, p->position.z };
+        entityObj["ParticleSystemComponent"]["velocity"] = { p->velocity.x, p->position.y, p->position.z };
+        entityObj["ParticleSystemComponent"]["velocityVariation"] = 
+            { p->velocityVariation.x, p->velocityVariation.y, p->velocityVariation.z };
+        entityObj["ParticleSystemComponent"]["colorBegin"] = { p->colorBegin.x, p->colorBegin.y, p->colorBegin.z, p->colorBegin.w };
+        entityObj["ParticleSystemComponent"]["colorEnd"] = { p->colorEnd.x, p->colorEnd.y, p->colorEnd.z, p->colorEnd.w };
+        entityObj["ParticleSystemComponent"]["sizeBegin"] = p->sizeBegin;
+        entityObj["ParticleSystemComponent"]["sizeEnd"] = p->sizeEnd;
+        entityObj["ParticleSystemComponent"]["sizeVariation"] = p->sizeVariation;
+        entityObj["ParticleSystemComponent"]["lifeTime"] = p->lifeTime;
+        entityObj["ParticleSystemComponent"]["billboard"] = p->billboard;
+
+        if(pc->particleSystem->sprite != nullptr) {
+            const std::string& texturePath = pc->particleSystem->sprite->path.sequence;
+            entityObj["ParticleSystemComponent"]["sprite"] = texturePath;
+        }
+    }
+
     gameObjectsArray->push_back(entityObj);
 }
 
@@ -190,6 +211,55 @@ void Scene_Deserialize(Scene* scene, const std::string& filepath) {
                 lc.CreateShadowmap();
             else 
                 lc.shadowmap = nullptr;
+        }
+        
+        if (entityObj.contains("ParticleSystemComponent")) {
+            ParticleSystemComponent& pc = deserializedEntity->AddComponent<ParticleSystemComponent>();
+            ParticleProps& p = pc.particleProps;
+            p.position.x = entityObj["ParticleSystemComponent"]["position"][0];
+            p.position.y = entityObj["ParticleSystemComponent"]["position"][1];
+            p.position.z = entityObj["ParticleSystemComponent"]["position"][2];
+            p.velocity.x = entityObj["ParticleSystemComponent"]["velocity"][0];
+            p.velocity.y = entityObj["ParticleSystemComponent"]["velocity"][1];
+            p.velocity.z = entityObj["ParticleSystemComponent"]["velocity"][2];
+            p.velocityVariation.x = entityObj["ParticleSystemComponent"]["velocityVariation"][0];
+            p.velocityVariation.y = entityObj["ParticleSystemComponent"]["velocityVariation"][1];
+            p.velocityVariation.z = entityObj["ParticleSystemComponent"]["velocityVariation"][2];
+            p.colorBegin.x = entityObj["ParticleSystemComponent"]["colorBegin"][0];
+            p.colorBegin.y = entityObj["ParticleSystemComponent"]["colorBegin"][1];
+            p.colorBegin.z = entityObj["ParticleSystemComponent"]["colorBegin"][2];
+            p.colorBegin.w = entityObj["ParticleSystemComponent"]["colorBegin"][3];     
+            p.colorEnd.x = entityObj["ParticleSystemComponent"]["colorEnd"][0];
+            p.colorEnd.y = entityObj["ParticleSystemComponent"]["colorEnd"][1];
+            p.colorEnd.z = entityObj["ParticleSystemComponent"]["colorEnd"][2];
+            p.colorEnd.w = entityObj["ParticleSystemComponent"]["colorEnd"][3];           
+            p.sizeBegin = entityObj["ParticleSystemComponent"]["sizeBegin"];
+            p.sizeEnd = entityObj["ParticleSystemComponent"]["sizeBegin"];
+            p.sizeVariation = entityObj["ParticleSystemComponent"]["sizeVariation"];
+            p.lifeTime = (float)entityObj["ParticleSystemComponent"]["lifeTime"];
+            auto s = entityObj["ParticleSystemComponent"]["billboard"];
+            bool b = s.is_number_integer();
+            RPR_WARN("%d", b);
+            p.billboard =(b8)(int)entityObj["ParticleSystemComponent"]["billboard"];
+
+            bool hasSprite = entityObj["ParticleSystemComponent"].contains("sprite");
+            if(hasSprite) {
+                std::string readString = entityObj["ParticleSystemComponent"]["sprite"];
+                std::filesystem::path texturePath(readString);
+                std::string textureString = texturePath.string();
+                
+                Texture* newTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
+                Texture_Create(newTexture, textureString.c_str());
+                RPR_INFO("Scene_Deserialize: Loading Texture from: %s", textureString.c_str());
+                if(newTexture->loaded) {
+                    RPR_CLIENT_INFO("Texture is loaded");
+                    pc.particleSystem->sprite = newTexture;
+                } else {
+                    RPR_CLIENT_ERROR("Scene_Deserialize: Failed to load texture from: %s", textureString.c_str());
+                    Texture_Destroy(newTexture);
+                    MEMORY_Free(newTexture, sizeof(Texture), MEMORY_TAG_RENDERER);
+                }
+            }
         }
     }
 }
