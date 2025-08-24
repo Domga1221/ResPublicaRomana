@@ -3,13 +3,20 @@
 #include "Platform/Filesystem.hpp"
 
 #include "ParticleUtility.hpp"
+#include "Renderer/RenderCommand.hpp"
 
 #include "Random.hpp"
 
 #include <glm/gtc/constants.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/compatibility.hpp>
 
 
 void ParticleSystem_Create(ParticleSystem* particleSystem) {
+    // TODO: Placement new 
+    new (&particleSystem->particlePool) std::vector<Particle>();
+    particleSystem->poolIndex = 999;
+
     particleSystem->particleVAO = VertexArray_Create();
     BufferLayout bufferLayout;
     BufferLayout_Create(&bufferLayout);
@@ -37,6 +44,7 @@ void ParticleSystem_Create(ParticleSystem* particleSystem) {
 }
 
 void ParticleSystem_Destroy(ParticleSystem* particleSystem) {
+    particleSystem->particlePool.~vector();
     VertexArray_Destroy(particleSystem->particleVAO);
     Texture_Destroy(particleSystem->sprite);
     MEMORY_Free(particleSystem->sprite, sizeof(Texture), MEMORY_TAG_RENDERER);
@@ -58,8 +66,39 @@ void ParticleSystem_Update(ParticleSystem* particleSystem, f32 deltaTime) {
     }
 }
 
-void ParticleSystem_Render(glm::mat4* translation, glm::mat4* view, glm::mat4* projection, b8 colorCorrect) {
+void ParticleSystem_Render(ParticleSystem* particleSystem, 
+        glm::mat4* translation, glm::mat4* view, glm::mat4* projection, b8 colorCorrect) {
+    Shader_Bind(&particleSystem->particleShader);
+    Shader_SetMat4(&particleSystem->particleShader, "view", *view); // TODO: Pass pointer or reference? C or C++ API?
+    Shader_SetMat4(&particleSystem->particleShader, "projection", *projection);
+    
+    for(Particle& particle : particleSystem->particlePool) {
+        if(!particle.active) 
+            continue;
 
+        // lerp fade and scale 
+        f32 life = particle.lifeRemaining / particle.lifeTime;
+        glm::vec4 color = glm::lerp(particle.colorEnd, particle.colorBegin, life);
+        f32 size = glm::lerp(particle.sizeEnd, particle.sizeBegin, life);
+
+        // render
+        glm::mat4 model = 
+            glm::translate(*translation, glm::vec3(particle.position.x, particle.position.y, particle.position.z))
+            * glm::rotate(glm::mat4(1.0f), particle.rotation, glm::vec3(0.0f, 0.0f, 1.0f))
+            * glm::scale(glm::mat4(1.0f), glm::vec3(size, size, 1.0f));
+        if(particleSystem->sprite != nullptr) {
+            Texture_Bind(particleSystem->sprite); 
+            RenderCommand_ActiveTexture(0);
+            Shader_SetInt(&particleSystem->particleShader, "sprite", 0);
+        }
+
+        Shader_SetMat4(&particleSystem->particleShader, "model", model);
+        Shader_SetVec4(&particleSystem->particleShader, "color", color);
+        Shader_SetBool(&particleSystem->particleShader, "billboard", particle.billboard);
+        Shader_SetBool(&particleSystem->particleShader, "colorCorrect", colorCorrect);
+        VertexArray_Bind(particleSystem->particleVAO);
+        RenderCommand_DrawIndexed(6);
+    }
 }
 
 void ParticleSystem_Emit(ParticleSystem* particleSystem, const ParticleProps* particleProps) {

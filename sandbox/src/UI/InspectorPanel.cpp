@@ -306,13 +306,13 @@ void drawComponents(GameObject* gameObject) {
         	ParticleProps& props = particleSystemComponent->particleProps;
         GUI_DrawVec3Control("Position", props.position);
         GUI_DrawVec3Control("Velocity", props.velocity);
-        GUI_DrawVec3Control("Velocity Variation", props.velocityVariation);
+        GUI_DrawVec3Control("Variation", props.velocityVariation);
         ImGui::Dummy(ImVec2(0.0f, 2.0f));
         ImGui::ColorEdit4("Color Begin", &(props.colorBegin.x));
         ImGui::ColorEdit4("Color End", &(props.colorEnd.x));
         ImGui::DragFloat("Size Begin", &props.sizeBegin, 0.1f, 0.0f, 10.0f, "%.2f");
         ImGui::DragFloat("Size End", &props.sizeEnd, 0.1f, 0.0f, 10.0f, "%.2f");
-        ImGui::DragFloat("Size SizeVariation", &props.sizeVariation, 0.1f, 0.0f, 10.0f, "%.2f");
+        ImGui::DragFloat("SizeVariation", &props.sizeVariation, 0.1f, 0.0f, 10.0f, "%.2f");
         ImGui::DragFloat("Life Time", &props.lifeTime, 0.1f, 0.0f, 10.0f, "%.2f");
         ImGui::Checkbox("Billboard", (bool*)&props.billboard); // TODO: Maybe memory issue, since sizeof(bool) is either 1 or 4, depending on implementation 
 

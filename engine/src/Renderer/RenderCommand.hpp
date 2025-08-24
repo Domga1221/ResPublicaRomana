@@ -78,3 +78,18 @@ RPR_API inline void RenderCommand_CullFrontFace() {
 RPR_API inline void RenderCommand_CullBackFace() {
     glCullFace(GL_BACK);
 }
+
+
+// TODO: think about this either two separate functions or one function with parameter 
+RPR_API inline void RenderCommand_BlendEquation_Add() {
+    glBlendEquation(GL_FUNC_ADD);
+}
+
+RPR_API inline void RenderCommand_BlendFunc_SrcAlpha_One() {
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+}
+
+// GL_TRUE = 1, GL_FALSE = 0
+RPR_API inline void RenderCommand_DepthMask(b8 toggle) {
+    glDepthMask(toggle); 
+}

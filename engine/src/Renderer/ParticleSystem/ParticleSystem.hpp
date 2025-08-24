@@ -49,7 +49,8 @@ typedef struct ParticleSystem {
 RPR_API void ParticleSystem_Create(ParticleSystem* particleSystem);
 RPR_API void ParticleSystem_Destroy(ParticleSystem* particleSystem); // TODO: 
 
-RPR_API void ParticleSystem_Update(f32 deltaTime);
-RPR_API void ParticleSystem_Render(glm::mat4* translation, glm::mat4* view, glm::mat4* projection, b8 colorCorrect);
+RPR_API void ParticleSystem_Update(ParticleSystem* particleSystem, f32 deltaTime);
+RPR_API void ParticleSystem_Render(ParticleSystem* particleSystem, 
+    glm::mat4* translation, glm::mat4* view, glm::mat4* projection, b8 colorCorrect);
 
 RPR_API void ParticleSystem_Emit(ParticleSystem* particleSystem, const ParticleProps* particleProps);

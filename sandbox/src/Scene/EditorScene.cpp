@@ -330,6 +330,22 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
     
     ImageBasedLighting_RenderSkybox(&ibl, view, projectionRH, !colorCorrectEnabled);
 
+    // BEGIN PARTICLESYSTEM
+    RenderCommand_EnableBlend();
+    RenderCommand_BlendEquation_Add();
+    RenderCommand_BlendFunc_SrcAlpha_One(); 
+    RenderCommand_DepthMask(false);
+    auto particleSystemComponents = scene->registry.view<ParticleSystemComponent, TransformComponent>();
+    particleSystemComponents.each([deltaTime, &view, &projectionRH](ParticleSystemComponent& pc, TransformComponent& tc) {
+        glm::mat4 model = tc.GetTransform();
+        ParticleSystem_Emit(pc.particleSystem, &pc.particleProps);
+        ParticleSystem_Update(pc.particleSystem, deltaTime);
+        ParticleSystem_Render(pc.particleSystem, &model, &view, &projectionRH, false);
+    });
+    RenderCommand_DepthMask(true);
+    RenderCommand_DisableBlend();
+    // END PARTICLESYSTEM
+
 
     // Bloom 
     if(bloomEnabled)
