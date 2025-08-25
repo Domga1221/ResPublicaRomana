@@ -19,7 +19,7 @@ typedef struct Bloom {
 
 void RPR_API Bloom_Initialize(Renderpass* bloomRenderpass);
 void RPR_API Bloom_Render(Renderpass* bloomRenderpass, RenderProperties* renderProperties); // TODO: Renderpass
-void RPR_API Bloom_OnResize(Renderpass* bloomRenderpass, u32 width, u32 height);
+void RPR_API Bloom_Resize(Renderpass* bloomRenderpass, u32 width, u32 height);
 void RPR_API Bloom_Shutdown(Renderpass* bloomRenderpass);
 
 

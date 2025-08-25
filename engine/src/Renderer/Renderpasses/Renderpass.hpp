@@ -3,6 +3,10 @@
 #include "defines.hpp"
 
 #include "Renderer/Framebuffer.hpp"
+#include "Renderer/Shader.hpp"
+
+#include <entt/entt.hpp>
+#include <glm/glm.hpp>
 
 enum RenderpassType {
     RENDERPASS_NONE,
@@ -19,6 +23,12 @@ enum RenderpassType {
 typedef struct RenderProperties {
     f32 deltaTime;
     Framebuffer* framebuffer;
+    glm::mat4* view;
+    glm::mat4* projection;
+
+    // TODO: passing these for now
+    entt::registry* registry;
+    Shader* pbrShader;
 } RenderProperties;
 
 

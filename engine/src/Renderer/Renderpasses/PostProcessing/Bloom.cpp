@@ -79,7 +79,7 @@ void Bloom_Render(Renderpass* bloomRenderpass, RenderProperties* renderPropertie
     Primitives_RenderQuad();
 }
 
-void Bloom_OnResize(Renderpass* bloomRenderpass, u32 width, u32 height) {
+void Bloom_Resize(Renderpass* bloomRenderpass, u32 width, u32 height) {
     Bloom* bloom = (Bloom*)bloomRenderpass->internalData;
     // framebuffers should all be the same size
     const FramebufferProperties& spec = bloom->framebuffer.framebufferProperties;

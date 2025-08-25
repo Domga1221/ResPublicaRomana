@@ -23,6 +23,12 @@ float lerp(float a, float b, float f) {
 
 Shader debugQuadShader;
 void GBuffer_Initialize(GBuffer* gBuffer) {
+    gBuffer->viewportSize = glm::vec2(1600, 900);
+    // TODO: placement new for now 
+    new (&gBuffer->ssaoKernel) std::vector<glm::vec3>();
+    new (&gBuffer->ssaoNoise) std::vector<glm::vec3>();
+
+
     std::string currentDir = Filesystem_GetCWD();
 
     std::string v = currentDir + "/Assets/Shaders/PostProcessing/SSAO/g_buffer.vert";
@@ -283,3 +289,77 @@ void GBuffer_OnResize(GBuffer* gBuffer, u32 width, u32 height) {
     }
 }
 
+
+void GBuffer_Render(GBuffer* gBuffer, glm::mat4* view, glm::mat4* projectionRH, entt::registry* registry,
+        Shader* pbrShader) {
+    // BEGIN G BUFFER PASS
+    RenderCommand_DisableBlend();
+
+    // render to gbuffer
+    RenderCommand_BindFramebuffer(gBuffer->gBuffer);
+    RenderCommand_SetViewportSize(gBuffer->viewportSize.x, gBuffer->viewportSize.y);
+    RenderCommand_Clear(true, true);
+    Shader_Bind(&gBuffer->gBufferShader);
+    Shader_SetMat4(&gBuffer->gBufferShader, "view", *view);
+    Shader_SetMat4(&gBuffer->gBufferShader, "projection", *projectionRH);
+
+    auto group = registry->group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
+    for (auto entity : group) {
+        //std::cout << "in for\n";
+        std::tuple<TransformComponent&, MeshComponent&, MaterialComponent&> tuple =
+            group.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
+
+        TransformComponent& transform = std::get<TransformComponent&>(tuple);
+        MeshComponent& meshComponent = std::get<MeshComponent&>(tuple);
+        Material& material = std::get<MaterialComponent&>(tuple).material;
+
+        Shader* shader = material.shader;
+        if (shader == pbrShader) {
+            glm::mat4 model = transform.GetTransform();
+            Shader_SetMat4(&gBuffer->gBufferShader, "model", model);
+            Mesh_Bind(&meshComponent.mesh);
+            RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
+        }
+    }
+    RenderCommand_BindFramebuffer(0);
+    // END G BUFFER PASS
+
+
+    // BEGIN SSAO
+    // render SSAO texture
+    RenderCommand_BindFramebuffer(gBuffer->ssaoFBO);
+    RenderCommand_Clear(true ,true);
+    Shader_Bind(&gBuffer->SSAOShader);
+    // send kernel + rotation
+    for (unsigned int i = 0; i < 64; i++) {
+        std::string s = "samples[" + std::to_string(i) + "]";
+        Shader_SetVec3(&gBuffer->SSAOShader, s.c_str(), gBuffer->ssaoKernel[i]);
+    }
+    //SAOShader.setMat4("projection", projection);
+    RenderCommand_ActiveTexture(0);
+    RenderCommand_BindTexture2D(gBuffer->gPosition);
+    Shader_SetInt(&gBuffer->SSAOShader, "gPosition", 0);
+    RenderCommand_ActiveTexture(1);
+    RenderCommand_BindTexture2D(gBuffer->gNormal);
+    Shader_SetInt(&gBuffer->SSAOShader, "gNormal", 1);
+    RenderCommand_ActiveTexture(2);
+    RenderCommand_BindTexture2D(gBuffer->noiseTexture);
+    Shader_SetInt(&gBuffer->SSAOShader, "texNoise", 2);
+    Shader_SetMat4(&gBuffer->SSAOShader, "projection", *projectionRH);
+    Primitives_RenderQuad();
+    RenderCommand_BindFramebuffer(0);
+    // END SSAO
+
+    // BEGIN SSAO BLUR
+    RenderCommand_BindFramebuffer(gBuffer->ssaoBlurFBO);
+    RenderCommand_SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    RenderCommand_Clear(true, true);
+    Shader_Bind(&gBuffer->SSAOBlurShader);
+    Shader_SetInt(&gBuffer->SSAOBlurShader, "ssaoInput", 0);
+    RenderCommand_ActiveTexture(0);
+    RenderCommand_BindTexture2D(gBuffer->ssaoColorBuffer);
+    Primitives_RenderQuad();
+    RenderCommand_BindFramebuffer(0);
+    RenderCommand_EnableBlend();
+    // END SSAO BLUR
+}

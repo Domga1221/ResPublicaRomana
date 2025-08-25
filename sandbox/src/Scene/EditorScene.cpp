@@ -28,14 +28,25 @@ Shader debugQuadShader;
 
 #include <Renderer/Renderpasses/Renderpass.hpp>
 Renderpass bloomRenderpass;
+Renderpass colorCorrectRenderpass;
+Renderpass ssaoRenderpass;
 
 void EditorScene_Initialze() {
     ShaderPool_Initialize();
     std::string hdrPath = std::string("Assets/HDR/newport_loft.hdr");
     ImageBasedLighting_Initialize(&ibl, hdrPath.c_str());
     //Bloom_Initialize(&bloom);
-    ColorCorrect_Initialize();
+    //ColorCorrect_Initialize();
     GBuffer_Initialize(&gBuffer);
+
+    // Renderpasses
+    Renderpass_Create(&colorCorrectRenderpass, RENDERPASS_COLOR_CORRECT);
+    colorCorrectRenderpass.Initialize(&colorCorrectRenderpass);
+    Renderpass_Create(&bloomRenderpass, RENDERPASS_BLOOM);
+    bloomRenderpass.Initialize(&bloomRenderpass);
+    Renderpass_Create(&ssaoRenderpass, RENDERPASS_SSAO);
+    ssaoRenderpass.Initialize(&ssaoRenderpass);
+    // Renderpasses end
 
     Renderpass_Create(&bloomRenderpass, RENDERPASS_BLOOM);
     bloomRenderpass.Initialize(&bloomRenderpass);
@@ -93,114 +104,53 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
     model = glm::translate(glm::mat4(1.0f), glm::vec3(6.0f, 0.0f, 0.0f));
     Shader_SetMat4(editorShader, "model", model);
     Primitives_RenderCube();
-
+    
     // ibl
     ImageBasedLighting_RenderSkybox(&ibl, view, projectionRH, true);
 }
 
 void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera, Framebuffer* framebuffer,
     b8 bloomEnabled, b8 ssaoEnabled, b8 colorCorrectEnabled) {
-    RenderCommand_ActiveTexture(0);
-    
-    glm::mat4 view = SceneCamera_GetViewMatrix(sceneCamera);
-    //glm::mat4 projection = SceneCamera_GetProjectionMatrix(sceneCamera);
-    glm::mat4 projectionRH = SceneCamera_GetProjectionMatrixRH(sceneCamera);
+        RenderCommand_ActiveTexture(0);
+        
+        glm::mat4 view = SceneCamera_GetViewMatrix(sceneCamera);
+        //glm::mat4 projection = SceneCamera_GetProjectionMatrix(sceneCamera);
+        glm::mat4 projectionRH = SceneCamera_GetProjectionMatrixRH(sceneCamera);
+        
+        RenderProperties renderProperties;
+        renderProperties.deltaTime = deltaTime;
+        renderProperties.framebuffer = framebuffer;
+        renderProperties.view = &view;
+        renderProperties.projection = &projectionRH;
+        renderProperties.registry = &scene->registry;
+        renderProperties.pbrShader = ShaderPool_GetPBRShader();
 
-    // TODO: renderpasses 
-    if(ssaoEnabled) {            
-        // BEGIN G BUFFER PASS
-        RenderCommand_DisableBlend();
-
-        // render to gbuffer
-        RenderCommand_BindFramebuffer(gBuffer.gBuffer);
-        RenderCommand_SetViewportSize(gBuffer.viewportSize.x, gBuffer.viewportSize.y);
-        RenderCommand_Clear(true, true);
-        Shader_Bind(&gBuffer.gBufferShader);
-        Shader_SetMat4(&gBuffer.gBufferShader, "view", view);
-        Shader_SetMat4(&gBuffer.gBufferShader, "projection", projectionRH);
-
+        // TODO: renderpasses 
+        if(ssaoEnabled) {            
+            ssaoRenderpass.Render(&ssaoRenderpass, &renderProperties);
+        }
+        
+        auto lights = scene->registry.view<TransformComponent, LightComponent>();
         auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
-        for (auto entity : group) {
-            //std::cout << "in for\n";
-            std::tuple<TransformComponent&, MeshComponent&, MaterialComponent&> tuple =
-                group.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
-
-            TransformComponent& transform = std::get<TransformComponent&>(tuple);
-            MeshComponent& meshComponent = std::get<MeshComponent&>(tuple);
-            Material& material = std::get<MaterialComponent&>(tuple).material;
-
-            Shader* shader = material.shader;
-            if (shader == ShaderPool_GetPBRShader()) {
-                glm::mat4 model = transform.GetTransform();
-                Shader_SetMat4(&gBuffer.gBufferShader, "model", model);
-                Mesh_Bind(&meshComponent.mesh);
-                RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
+        
+        Shadowmap* shadowmap = nullptr;
+        glm::vec3 lightPosition;
+        // TODO: check why i can't iterate with for(auto entity : lights)
+        lights.each([&shadowmap, &lightPosition](TransformComponent& transformComponent, LightComponent& lightComponent) {
+            if(lightComponent.shadowmap != nullptr) {
+                shadowmap = lightComponent.shadowmap;
+                lightPosition = transformComponent.position;
             }
-        }
-        RenderCommand_BindFramebuffer(0);
-        // END G BUFFER PASS
-
-
-        // BEGIN SSAO
-        // render SSAO texture
-        RenderCommand_BindFramebuffer(gBuffer.ssaoFBO);
-        RenderCommand_Clear(true ,true);
-        Shader_Bind(&gBuffer.SSAOShader);
-        // send kernel + rotation
-        for (unsigned int i = 0; i < 64; i++) {
-            std::string s = "samples[" + std::to_string(i) + "]";
-            Shader_SetVec3(&gBuffer.SSAOShader, s.c_str(), gBuffer.ssaoKernel[i]);
-        }
-        //SAOShader.setMat4("projection", projection);
-        RenderCommand_ActiveTexture(0);
-        RenderCommand_BindTexture2D(gBuffer.gPosition);
-        Shader_SetInt(&gBuffer.SSAOShader, "gPosition", 0);
-        RenderCommand_ActiveTexture(1);
-        RenderCommand_BindTexture2D(gBuffer.gNormal);
-        Shader_SetInt(&gBuffer.SSAOShader, "gNormal", 1);
-        RenderCommand_ActiveTexture(2);
-        RenderCommand_BindTexture2D(gBuffer.noiseTexture);
-        Shader_SetInt(&gBuffer.SSAOShader, "texNoise", 2);
-        Shader_SetMat4(&gBuffer.SSAOShader, "projection", projectionRH);
-        Primitives_RenderQuad();
-        RenderCommand_BindFramebuffer(0);
-        // END SSAO
-
-        // BEGIN SSAO BLUR
-        RenderCommand_BindFramebuffer(gBuffer.ssaoBlurFBO);
-        RenderCommand_SetClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-        RenderCommand_Clear(true, true);
-        Shader_Bind(&gBuffer.SSAOBlurShader);
-        Shader_SetInt(&gBuffer.SSAOBlurShader, "ssaoInput", 0);
-        RenderCommand_ActiveTexture(0);
-        RenderCommand_BindTexture2D(gBuffer.ssaoColorBuffer);
-        Primitives_RenderQuad();
-        RenderCommand_BindFramebuffer(0);
-        RenderCommand_EnableBlend();
-        // END SSAO BLUR
-    }
-    
-    auto lights = scene->registry.view<TransformComponent, LightComponent>();
-    auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
-    
-    Shadowmap* shadowmap = nullptr;
-    glm::vec3 lightPosition;
-    // TODO: check why i can't iterate with for(auto entity : lights)
-    lights.each([&shadowmap, &lightPosition](TransformComponent& transformComponent, LightComponent& lightComponent) {
-        if(lightComponent.shadowmap != nullptr) {
-            shadowmap = lightComponent.shadowmap;
-            lightPosition = transformComponent.position;
-        }
-    });
-    if(shadowmap != nullptr) {
-        RenderCommand_CullFrontFace();
-        // render to depth map 
-        shadowmap->directionalLightPosition = lightPosition;
-        shadowmap->lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, shadowmap->nearPlane, shadowmap->farPlane);
-        shadowmap->lightView = glm::lookAt(lightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        shadowmap->lightSpaceMatrix = shadowmap->lightProjection * shadowmap->lightView;
-
-        // render scene from lights point of view
+        });
+        if(shadowmap != nullptr) {
+            RenderCommand_CullFrontFace();
+            // render to depth map 
+            shadowmap->directionalLightPosition = lightPosition;
+            shadowmap->lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, shadowmap->nearPlane, shadowmap->farPlane);
+            shadowmap->lightView = glm::lookAt(lightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            shadowmap->lightSpaceMatrix = shadowmap->lightProjection * shadowmap->lightView;
+            
+            // render scene from lights point of view
         Shader_Bind(&shadowmap->simpleDepthShader);
         Shader_SetMat4(&shadowmap->simpleDepthShader, "lightSpaceMatrix", shadowmap->lightSpaceMatrix);
 
@@ -301,7 +251,8 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
             if(ssaoEnabled) {
                 Shader_SetInt(shader, "applySSAO", 1);
                 RenderCommand_ActiveTexture(9);
-                RenderCommand_BindTexture2D(gBuffer.ssaoBlurColorBuffer);
+                RenderCommand_BindTexture2D(((GBuffer*)ssaoRenderpass.internalData)->ssaoBlurColorBuffer);
+                //RenderCommand_BindTexture2D(gBuffer.ssaoBlurColorBuffer);
                 Shader_SetInt(shader, "SSAOBlurTexture", 9);
                 Shader_SetVec3(shader, "u_resolution", glm::vec3(viewportSize.x, viewportSize.y, 0.0));
             } else { 
@@ -338,6 +289,7 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
     ImageBasedLighting_RenderSkybox(&ibl, view, projectionRH, !colorCorrectEnabled);
 
     // BEGIN PARTICLESYSTEM
+    /*
     RenderCommand_EnableBlend();
     RenderCommand_BlendEquation_Add();
     RenderCommand_BlendFunc_SrcAlpha_One(); 
@@ -351,18 +303,16 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
     });
     RenderCommand_DepthMask(true);
     RenderCommand_DisableBlend();
+    */
     // END PARTICLESYSTEM
 
 
-    RenderProperties renderProperties;
-    renderProperties.deltaTime = deltaTime;
-    renderProperties.framebuffer = framebuffer;
     // Bloom 
     if(bloomEnabled)
         //Bloom_Render(&bloom, framebuffer);
         bloomRenderpass.Render(&bloomRenderpass, &renderProperties);
     if(colorCorrectEnabled)
-        ColorCorrect_Render(framebuffer);
+        colorCorrectRenderpass.Render(&colorCorrectRenderpass, &renderProperties);
 
     // SSAO Debug, NOTE: change square.frag 
     /*
@@ -382,6 +332,7 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
 void EditorScene_OnViewportResize(u32 width, u32 height) {
     //Bloom_OnResize(&bloom, width, height);
     bloomRenderpass.Resize(&bloomRenderpass, width, height);
+    ssaoRenderpass.Resize(&ssaoRenderpass, width, height);
     GBuffer_OnResize(&gBuffer, width, height);
     viewportSize.x = width;
     viewportSize.y = height;

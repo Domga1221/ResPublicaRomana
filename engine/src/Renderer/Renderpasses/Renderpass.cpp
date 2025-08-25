@@ -3,21 +3,29 @@
 #include "Core/Log.hpp"
 
 #include "PostProcessing/Bloom.hpp"
+#include "PostProcessing/ColorCorrect.hpp"
+#include "PostProcessing/SSAO.hpp"
 
 void Renderpass_Create(Renderpass* renderpass, RenderpassType type) {
     if(type == RENDERPASS_BLOOM) {
         renderpass->Initialize = Bloom_Initialize;
         renderpass->Render = Bloom_Render;
-        renderpass->Resize = Bloom_OnResize;
+        renderpass->Resize = Bloom_Resize;
         renderpass->Shutdown = Bloom_Shutdown;
     }
 
     if(type == RENDERPASS_SSAO) {
-
+        renderpass->Initialize = SSAO_Initialize;
+        renderpass->Render = SSAO_Render;
+        renderpass->Resize = SSAO_Resize;
+        renderpass->Shutdown = SSAO_Shutdown;
     }
 
     if(type == RENDERPASS_COLOR_CORRECT) {
-
+        renderpass->Initialize = ColorCorrect_Initialize;
+        renderpass->Render = ColorCorrect_Render;
+        renderpass->Resize = ColorCorrect_Resize;
+        renderpass->Shutdown = ColorCorrect_Shutdown;
     }
     
     if(type == RENDERPASS_NONE) {
