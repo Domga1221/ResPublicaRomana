@@ -25,13 +25,20 @@ Shader debugQuadShader;
 
 #include <glm/matrix.hpp>
 
+
+#include <Renderer/Renderpasses/Renderpass.hpp>
+Renderpass bloomRenderpass;
+
 void EditorScene_Initialze() {
     ShaderPool_Initialize();
     std::string hdrPath = std::string("Assets/HDR/newport_loft.hdr");
     ImageBasedLighting_Initialize(&ibl, hdrPath.c_str());
-    Bloom_Initialize(&bloom);
+    //Bloom_Initialize(&bloom);
     ColorCorrect_Initialize();
     GBuffer_Initialize(&gBuffer);
+
+    Renderpass_Create(&bloomRenderpass, RENDERPASS_BLOOM);
+    bloomRenderpass.Initialize(&bloomRenderpass);
 
     std::string currentDir = Filesystem_GetCWD();
     std::string v = currentDir + "/Assets/Shaders/square.vert";
@@ -347,9 +354,13 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
     // END PARTICLESYSTEM
 
 
+    RenderProperties renderProperties;
+    renderProperties.deltaTime = deltaTime;
+    renderProperties.framebuffer = framebuffer;
     // Bloom 
     if(bloomEnabled)
-        Bloom_Render(&bloom, framebuffer);
+        //Bloom_Render(&bloom, framebuffer);
+        bloomRenderpass.Render(&bloomRenderpass, &renderProperties);
     if(colorCorrectEnabled)
         ColorCorrect_Render(framebuffer);
 
@@ -369,7 +380,8 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
 
 
 void EditorScene_OnViewportResize(u32 width, u32 height) {
-    Bloom_OnResize(&bloom, width, height);
+    //Bloom_OnResize(&bloom, width, height);
+    bloomRenderpass.Resize(&bloomRenderpass, width, height);
     GBuffer_OnResize(&gBuffer, width, height);
     viewportSize.x = width;
     viewportSize.y = height;

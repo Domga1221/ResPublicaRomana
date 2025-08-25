@@ -2,8 +2,10 @@
 
 #include "defines.hpp"
 
-#include <Renderer/Framebuffer.hpp>
-#include <Renderer/Shader.hpp>
+#include "Renderer/Framebuffer.hpp"
+#include "Renderer/Shader.hpp"
+
+#include "Renderer/Renderpasses/Renderpass.hpp"
 
 typedef struct Bloom {
     Framebuffer framebuffer;
@@ -15,10 +17,10 @@ typedef struct Bloom {
     Shader combineShader;
 } Bloom;
 
-void RPR_API Bloom_Initialize(Bloom* bloom);
-void RPR_API Bloom_Shutdown();
+void RPR_API Bloom_Initialize(Renderpass* bloomRenderpass);
+void RPR_API Bloom_Render(Renderpass* bloomRenderpass, RenderProperties* renderProperties); // TODO: Renderpass
+void RPR_API Bloom_OnResize(Renderpass* bloomRenderpass, u32 width, u32 height);
+void RPR_API Bloom_Shutdown(Renderpass* bloomRenderpass);
 
-void RPR_API Bloom_Render(Bloom* bloom, Framebuffer* framebuffer); // TODO: Renderpass
-void RPR_API Bloom_RenderToTexture(Bloom* bloom, const u32 hdrTexture);
 
-void RPR_API Bloom_OnResize(Bloom* bloom, u32 width, u32 height);
+void RPR_API Bloom_RenderToTexture(Bloom* bloom, const u32 hdrTexture); // TODO: should only be internal 

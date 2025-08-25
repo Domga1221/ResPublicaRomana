@@ -6,8 +6,13 @@
 #include <Renderer/RenderCommand.hpp>
 #include <Renderer/Primitives.hpp>
 
+
 static Shader debugQuadShader;
-void Bloom_Initialize(Bloom* bloom) {
+void Bloom_Initialize(Renderpass* bloomRenderpass) {
+    bloomRenderpass->internalData = (Bloom*)MEMORY_Allocate(sizeof(Bloom), MEMORY_TAG_RENDERER);
+    Bloom* bloom = (Bloom*)bloomRenderpass->internalData;
+
+
     // setup framebuffers and textures 
     FramebufferProperties framebufferProperties;
     FramebufferProperties_Create(&framebufferProperties);
@@ -57,31 +62,32 @@ void Bloom_Initialize(Bloom* bloom) {
     Shader_Create(&debugQuadShader, v.c_str(), f.c_str());
 }
 
-void Bloom_Shutdown() {
-
+void Bloom_Shutdown(Renderpass* bloomRenderpass) {
+    // TODO:
 }
 
-void Bloom_Render(Bloom* bloom, Framebuffer* framebuffer) {
-    Bloom_RenderToTexture(bloom, framebuffer->colorIDs.data[0]);
-    Framebuffer_Bind(framebuffer);
+void Bloom_Render(Renderpass* bloomRenderpass, RenderProperties* renderProperties) {
+    Bloom* bloom = (Bloom*)bloomRenderpass->internalData;
+    Bloom_RenderToTexture(bloom, renderProperties->framebuffer->colorIDs.data[0]);
+    Framebuffer_Bind(renderProperties->framebuffer);
     glClearColor(0.5f, 0.0f, 0.0f, 0.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, bloom->combineFramebuffer.colorIDs.data[0]);
-    //glBindTexture(GL_TEXTURE_2D, bloom->framebuffer.colorIDs.data[0]);
     Shader_Bind(&debugQuadShader);
     Shader_SetInt(&debugQuadShader, "u_texture", 0);
     Primitives_RenderQuad();
 }
 
-void Bloom_OnResize(Bloom* bloom, u32 x, u32 y) {
+void Bloom_OnResize(Renderpass* bloomRenderpass, u32 width, u32 height) {
+    Bloom* bloom = (Bloom*)bloomRenderpass->internalData;
     // framebuffers should all be the same size
     const FramebufferProperties& spec = bloom->framebuffer.framebufferProperties;
-    if ((spec.width != x || spec.height != y)) {
-        Framebuffer_Resize(&bloom->framebuffer, x, y);
-        Framebuffer_Resize(&bloom->pingPongFramebuffers[0], x, y);
-        Framebuffer_Resize(&bloom->pingPongFramebuffers[1], x, y);
-        Framebuffer_Resize(&bloom->combineFramebuffer, x, y);
+    if ((spec.width != width || spec.height != height)) {
+        Framebuffer_Resize(&bloom->framebuffer, width, height);
+        Framebuffer_Resize(&bloom->pingPongFramebuffers[0], width, height);
+        Framebuffer_Resize(&bloom->pingPongFramebuffers[1], width, height);
+        Framebuffer_Resize(&bloom->combineFramebuffer, width, height);
     }
 }
 
