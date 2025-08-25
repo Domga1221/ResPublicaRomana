@@ -8,6 +8,7 @@
 #include "EditorRenderpass.hpp"
 #include "PBRRenderpass.hpp"
 #include "ShadowmapRenderpass.hpp"
+#include "SkyboxRenderpass.hpp"
 
 void Renderpass_Create(Renderpass* renderpass, RenderpassType type) {
     if(type == RENDERPASS_BLOOM) {
@@ -50,6 +51,13 @@ void Renderpass_Create(Renderpass* renderpass, RenderpassType type) {
         renderpass->Render = ShadowmapRenderpass_Render;
         renderpass->Resize = ShadowmapRenderpass_Resize;
         renderpass->Shutdown = ShadowmapRenderpass_Shutdown;
+    }
+
+    if(type == RENDERPASS_SKYBOX) {
+        renderpass->Initialize = SkyboxRenderpass_Initialize;
+        renderpass->Render = SkyboxRenderpass_Render;
+        renderpass->Resize = SkyboxRenderpass_Resize;
+        renderpass->Shutdown = SkyboxRenderpass_Shutdown;
     }
     
     if(type == RENDERPASS_NONE) {

@@ -36,6 +36,8 @@ Renderpass pbrRenderpass;
 
 Renderpass shadowmapRenderpass;
 
+Renderpass skyboxRenderpass;
+
 void EditorScene_Initialze() {
     ShaderPool_Initialize();
     std::string hdrPath = std::string("Assets/HDR/newport_loft.hdr");
@@ -58,6 +60,9 @@ void EditorScene_Initialze() {
 
     Renderpass_Create(&shadowmapRenderpass, RENDERPASS_SHADOWMAP);
     shadowmapRenderpass.Initialize(&shadowmapRenderpass);
+
+    Renderpass_Create(&skyboxRenderpass, RENDERPASS_SKYBOX);
+    skyboxRenderpass.Initialize(&skyboxRenderpass);
     // Renderpasses end
 
     Renderpass_Create(&bloomRenderpass, RENDERPASS_BLOOM);
@@ -79,15 +84,16 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
     renderProperties.projection = &projectionRH;
     renderProperties.registry = &scene->registry;
     renderProperties.editorShader = ShaderPool_GetEditorShader();
+    renderProperties.ibl = &ibl;
 
     editorRenderpass.Render(&editorRenderpass, &renderProperties);
 
     // ibl
-    ImageBasedLighting_RenderSkybox(&ibl, view, projectionRH, true);
+    skyboxRenderpass.Render(&skyboxRenderpass, &renderProperties);
 }
 
 // 1. ssaoRenderpass x
-// 2. light shadowmap
+// 2. light shadowmap x
 // 3. PBRRenderpass x
 // 4. skybox
 // 5. bloomRenderpass x
