@@ -27,16 +27,18 @@ Shader debugQuadShader;
 
 
 #include <Renderer/Renderpasses/Renderpass.hpp>
-Renderpass bloomRenderpass;
-Renderpass colorCorrectRenderpass;
-Renderpass ssaoRenderpass;
+static Renderpass bloomRenderpass;
+static Renderpass colorCorrectRenderpass;
+static Renderpass ssaoRenderpass;
 
-Renderpass editorRenderpass;
-Renderpass pbrRenderpass;
+static Renderpass editorRenderpass;
+static Renderpass pbrRenderpass;
 
-Renderpass shadowmapRenderpass;
+static Renderpass shadowmapRenderpass;
 
-Renderpass skyboxRenderpass;
+static Renderpass skyboxRenderpass;
+
+static List<Renderpass*> renderpasses;
 
 void EditorScene_Initialze() {
     ShaderPool_Initialize();
@@ -45,28 +47,47 @@ void EditorScene_Initialze() {
     //Bloom_Initialize(&bloom);
     //ColorCorrect_Initialize();
     GBuffer_Initialize(&gBuffer);
-
+    
+    
     // Renderpasses
-    Renderpass_Create(&colorCorrectRenderpass, RENDERPASS_COLOR_CORRECT);
-    colorCorrectRenderpass.Initialize(&colorCorrectRenderpass);
-    Renderpass_Create(&bloomRenderpass, RENDERPASS_BLOOM);
-    bloomRenderpass.Initialize(&bloomRenderpass);
-    Renderpass_Create(&ssaoRenderpass, RENDERPASS_SSAO);
-    ssaoRenderpass.Initialize(&ssaoRenderpass);
+    // 1. ssaoRenderpass 
+    // 2. light shadowmap 
+    // 3. PBRRenderpass 
+    // 4. skybox 
+    // 5. bloomRenderpass 
+    // 6. colorCorrectRenderpass 
+    List_Create(&renderpasses);
 
-    Renderpass_Create(&editorRenderpass, RENDERPASS_EDITOR);
-    editorRenderpass.Initialize(&editorRenderpass);
-    Renderpass_Create(&pbrRenderpass, RENDERPASS_PBR);
+    Renderpass_Create(&ssaoRenderpass, RENDERPASS_SSAO);
+    List_PushBack(&renderpasses, &ssaoRenderpass);
 
     Renderpass_Create(&shadowmapRenderpass, RENDERPASS_SHADOWMAP);
-    shadowmapRenderpass.Initialize(&shadowmapRenderpass);
+    List_PushBack(&renderpasses, &shadowmapRenderpass);
 
+    Renderpass_Create(&editorRenderpass, RENDERPASS_EDITOR);
+    List_PushBack(&renderpasses, &editorRenderpass);
+    
+    Renderpass_Create(&pbrRenderpass, RENDERPASS_PBR);
+    List_PushBack(&renderpasses, &pbrRenderpass);
+    
     Renderpass_Create(&skyboxRenderpass, RENDERPASS_SKYBOX);
-    skyboxRenderpass.Initialize(&skyboxRenderpass);
-    // Renderpasses end
+    List_PushBack(&renderpasses, &skyboxRenderpass);
 
     Renderpass_Create(&bloomRenderpass, RENDERPASS_BLOOM);
-    bloomRenderpass.Initialize(&bloomRenderpass);
+    //bloomRenderpass.Initialize(&bloomRenderpass);
+    List_PushBack(&renderpasses, &bloomRenderpass);
+
+    Renderpass_Create(&colorCorrectRenderpass, RENDERPASS_COLOR_CORRECT);
+    //colorCorrectRenderpass.Initialize(&colorCorrectRenderpass);
+    List_PushBack(&renderpasses, &colorCorrectRenderpass);
+    // Renderpasses end
+
+
+    // TODO: renderer dispatch function and initialize that takes care of this 
+    for(u32 i = 0; i < renderpasses.size; i++) {
+        renderpasses.data[i]->Initialize(renderpasses.data[i]);
+    }
+
 
     std::string currentDir = Filesystem_GetCWD();
     std::string v = currentDir + "/Assets/Shaders/square.vert";
@@ -85,6 +106,7 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
     renderProperties.registry = &scene->registry;
     renderProperties.editorShader = ShaderPool_GetEditorShader();
     renderProperties.ibl = &ibl;
+    renderProperties.colorCorrectEnabled = false; // for skybox
 
     editorRenderpass.Render(&editorRenderpass, &renderProperties);
 
@@ -92,17 +114,16 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
     skyboxRenderpass.Render(&skyboxRenderpass, &renderProperties);
 }
 
-// 1. ssaoRenderpass x
-// 2. light shadowmap x
-// 3. PBRRenderpass x
-// 4. skybox
-// 5. bloomRenderpass x
-// 6. colorCorrectRenderpass x
-// TODO: function to update renderproperties, where each pass updates them
-//       with required information for other passes 
+// TODO: maybe function to update renderproperties, where each pass updates them
+//       with required information for other passes, right now it's at the end of render
 void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera, Framebuffer* framebuffer,
     b8 bloomEnabled, b8 ssaoEnabled, b8 colorCorrectEnabled, b8 playMode) {
     RenderCommand_ActiveTexture(0);
+
+    bloomRenderpass.enabled = bloomEnabled;
+    ssaoRenderpass.enabled = ssaoEnabled;
+    colorCorrectRenderpass.enabled = colorCorrectEnabled;
+    editorRenderpass.enabled = false;
     
     glm::mat4 view = SceneCamera_GetViewMatrix(sceneCamera);
     //glm::mat4 projection = SceneCamera_GetProjectionMatrix(sceneCamera);
@@ -122,29 +143,28 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
     renderProperties.colorCorrectEnabled = colorCorrectEnabled;
     
     
+    for(u32 i = 0; i < renderpasses.size; i++) {
+        if(renderpasses.data[i]->enabled)
+            renderpasses.data[i]->Render(renderpasses.data[i], &renderProperties);
+    }
     
-    // TODO: renderpasses 
+    // TODO: old just for reference, remove later
+    /*
     if(ssaoEnabled) {            
         ssaoRenderpass.Render(&ssaoRenderpass, &renderProperties);
     }
-
-    // TODO: put into Render
-    renderProperties.ssaoBlurColorBuffer = ((GBuffer*)ssaoRenderpass.internalData)->ssaoBlurColorBuffer;
 
     shadowmapRenderpass.Render(&shadowmapRenderpass, &renderProperties);
     
     RenderCommand_SetViewportSize(viewportSize.x, viewportSize.y);
 
     // BEGIN GAMEOBJECTS
-    RenderCommand_BindTexture2D(0);
-    RenderCommand_ActiveTexture(0);
-    Framebuffer_Bind(framebuffer);
-    
     pbrRenderpass.Render(&pbrRenderpass, &renderProperties);
     // END GAMEOBJECTS
 
     
     ImageBasedLighting_RenderSkybox(&ibl, view, projectionRH, !colorCorrectEnabled);
+    */
 
     // BEGIN PARTICLESYSTEM
     // TODO: Blend breaks SSAO 
@@ -167,11 +187,14 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
 
 
     // Bloom 
+    
+    /*
     if(bloomEnabled)
         //Bloom_Render(&bloom, framebuffer);
         bloomRenderpass.Render(&bloomRenderpass, &renderProperties);
     if(colorCorrectEnabled)
         colorCorrectRenderpass.Render(&colorCorrectRenderpass, &renderProperties);
+    */
 
     // SSAO Debug, NOTE: change square.frag 
     /*

@@ -9,6 +9,10 @@ void PBRRenderpass_Initialize(Renderpass* renderpass) {
 }
 
 void PBRRenderpass_Render(Renderpass* renderpass, RenderProperties* renderProperties) {
+    RenderCommand_BindTexture2D(0);
+    RenderCommand_ActiveTexture(0);
+    Framebuffer_Bind(renderProperties->framebuffer);
+
     Shader* pbrShader = renderProperties->pbrShader;
     glm::mat4* view = renderProperties->view;
     glm::mat4* projectionRH = renderProperties->projection;

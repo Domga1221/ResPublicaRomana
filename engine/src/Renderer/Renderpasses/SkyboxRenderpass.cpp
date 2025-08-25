@@ -10,7 +10,8 @@ void SkyboxRenderpass_Render(Renderpass* renderpass, RenderProperties* renderPro
     ImageBasedLighting* ibl = renderProperties->ibl;
     glm::mat4* view = renderProperties->view;
     glm::mat4* projectionRH = renderProperties->projection;
-    ImageBasedLighting_RenderSkybox(ibl, *view, *projectionRH, true);
+    b8 colorCorrect = !renderProperties->colorCorrectEnabled;
+    ImageBasedLighting_RenderSkybox(ibl, *view, *projectionRH, colorCorrect);
 }
 
 void SkyboxRenderpass_Resize(Renderpass* renderpass, u32 width, u32 height) {

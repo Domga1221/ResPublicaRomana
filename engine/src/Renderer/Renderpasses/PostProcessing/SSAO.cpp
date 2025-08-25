@@ -16,6 +16,7 @@ RPR_API void SSAO_Render(Renderpass* renderpass, RenderProperties* renderPropert
         renderProperties->view, renderProperties->projection, 
         renderProperties->registry,
         renderProperties->pbrShader);
+    renderProperties->ssaoBlurColorBuffer = gBuffer->ssaoBlurColorBuffer;
 }
 
 RPR_API void SSAO_Resize(Renderpass* renderpass, u32 width, u32 height) {
