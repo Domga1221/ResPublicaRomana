@@ -31,6 +31,9 @@ Renderpass bloomRenderpass;
 Renderpass colorCorrectRenderpass;
 Renderpass ssaoRenderpass;
 
+Renderpass editorRenderpass;
+Renderpass pbrRenderpass;
+
 void EditorScene_Initialze() {
     ShaderPool_Initialize();
     std::string hdrPath = std::string("Assets/HDR/newport_loft.hdr");
@@ -46,6 +49,10 @@ void EditorScene_Initialze() {
     bloomRenderpass.Initialize(&bloomRenderpass);
     Renderpass_Create(&ssaoRenderpass, RENDERPASS_SSAO);
     ssaoRenderpass.Initialize(&ssaoRenderpass);
+
+    Renderpass_Create(&editorRenderpass, RENDERPASS_EDITOR);
+    editorRenderpass.Initialize(&editorRenderpass);
+    Renderpass_Create(&pbrRenderpass, RENDERPASS_PBR);
     // Renderpasses end
 
     Renderpass_Create(&bloomRenderpass, RENDERPASS_BLOOM);
@@ -58,101 +65,78 @@ void EditorScene_Initialze() {
 }
 
 void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera) {
-    Shader* editorShader = ShaderPool_GetEditorShader();
     glm::mat4 view = SceneCamera_GetViewMatrix(sceneCamera);
-    //glm::mat4 projection = SceneCamera_GetProjectionMatrix(sceneCamera);
     glm::mat4 projectionRH = SceneCamera_GetProjectionMatrixRH(sceneCamera);
-
-    auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
-    for(entt::entity entity : group) {
-        std::tuple<TransformComponent&, MeshComponent&, MaterialComponent&> tuple =
-            group.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
-
-        TransformComponent& transformComponent = std::get<TransformComponent&>(tuple);
-        MeshComponent& meshComponent = std::get<MeshComponent&>(tuple);
-        MaterialComponent& materialComponent = std::get<MaterialComponent&>(tuple);
-
-        //RPR_INFO("(%d, %d, %d)", transformComponent.position.x, transformComponent.position.y, transformComponent.position.z);
-
-        glm::mat4 model = transformComponent.GetTransform();
-
-        Shader_Bind(editorShader);
-        Shader_SetMat4(editorShader, "model", model);
-        Shader_SetMat4(editorShader, "view", view);
-        Shader_SetMat4(editorShader, "projection", projectionRH);
-        RenderCommand_ActiveTexture(0);
-        Texture* albedo = materialComponent.material.textures.data[0];
-        if(albedo != nullptr)
-            Texture_Bind(albedo);
-        Shader_SetInt(editorShader, "texture_0", 0);
-
-        Shader_SetInt(editorShader, "colorCorrect", 0);
-
-        Mesh_Bind(&meshComponent.mesh);
-        RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
-    }
-    glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(2.0f, 0.0f, 0.0f));
-    RenderCommand_ActiveTexture(0);
-    Shader_Bind(editorShader);
-    Shader_SetMat4(editorShader, "model", model);
-    Shader_SetMat4(editorShader, "view", view);
-    Shader_SetMat4(editorShader, "projection", projectionRH);
-    Shader_SetInt(editorShader, "texture_0", 0);
-    RenderCommand_BindTexture2D(ibl.hdrTexture);
-    Shader_SetMat4(editorShader, "model", model);
-    Primitives_RenderQuad();
-    model = glm::translate(glm::mat4(1.0f), glm::vec3(6.0f, 0.0f, 0.0f));
-    Shader_SetMat4(editorShader, "model", model);
-    Primitives_RenderCube();
     
+    RenderProperties renderProperties;
+    renderProperties.deltaTime = deltaTime;
+    renderProperties.view = &view;
+    renderProperties.projection = &projectionRH;
+    renderProperties.registry = &scene->registry;
+    renderProperties.editorShader = ShaderPool_GetEditorShader();
+
+    editorRenderpass.Render(&editorRenderpass, &renderProperties);
+
     // ibl
     ImageBasedLighting_RenderSkybox(&ibl, view, projectionRH, true);
 }
 
 void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera, Framebuffer* framebuffer,
-    b8 bloomEnabled, b8 ssaoEnabled, b8 colorCorrectEnabled) {
-        RenderCommand_ActiveTexture(0);
-        
-        glm::mat4 view = SceneCamera_GetViewMatrix(sceneCamera);
-        //glm::mat4 projection = SceneCamera_GetProjectionMatrix(sceneCamera);
-        glm::mat4 projectionRH = SceneCamera_GetProjectionMatrixRH(sceneCamera);
-        
-        RenderProperties renderProperties;
-        renderProperties.deltaTime = deltaTime;
-        renderProperties.framebuffer = framebuffer;
-        renderProperties.view = &view;
-        renderProperties.projection = &projectionRH;
-        renderProperties.registry = &scene->registry;
-        renderProperties.pbrShader = ShaderPool_GetPBRShader();
+    b8 bloomEnabled, b8 ssaoEnabled, b8 colorCorrectEnabled, b8 playMode) {
+    RenderCommand_ActiveTexture(0);
+    
+    glm::mat4 view = SceneCamera_GetViewMatrix(sceneCamera);
+    //glm::mat4 projection = SceneCamera_GetProjectionMatrix(sceneCamera);
+    glm::mat4 projectionRH = SceneCamera_GetProjectionMatrixRH(sceneCamera);
+    
+    RenderProperties renderProperties;
+    renderProperties.deltaTime = deltaTime;
+    renderProperties.framebuffer = framebuffer;
+    renderProperties.view = &view;
+    renderProperties.projection = &projectionRH;
+    renderProperties.registry = &scene->registry;
+    renderProperties.pbrShader = ShaderPool_GetPBRShader();
+    renderProperties.editorShader = ShaderPool_GetEditorShader();
+    renderProperties.cameraPosition = &sceneCamera->position;
+    renderProperties.ibl = &ibl;
+    renderProperties.ssaoEnabled = ssaoEnabled;
+    renderProperties.colorCorrectEnabled = colorCorrectEnabled;
+    
+    
+    
+    // TODO: renderpasses 
+    if(ssaoEnabled) {            
+        ssaoRenderpass.Render(&ssaoRenderpass, &renderProperties);
+    }
 
-        // TODO: renderpasses 
-        if(ssaoEnabled) {            
-            ssaoRenderpass.Render(&ssaoRenderpass, &renderProperties);
+    renderProperties.ssaoBlurColorBuffer = ((GBuffer*)ssaoRenderpass.internalData)->ssaoBlurColorBuffer;
+
+    
+    auto lights = scene->registry.view<TransformComponent, LightComponent>();
+    auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
+    
+    Shadowmap* shadowmap = nullptr;
+    glm::vec3 lightPosition;
+    // TODO: check why i can't iterate with for(auto entity : lights)
+    // TODO: don't need to iterate over all lights,
+    lights.each([&shadowmap, &lightPosition](TransformComponent& transformComponent, LightComponent& lightComponent) {
+        if(lightComponent.shadowmap != nullptr) {
+            shadowmap = lightComponent.shadowmap;
+            lightPosition = transformComponent.position;
         }
-        
-        auto lights = scene->registry.view<TransformComponent, LightComponent>();
-        auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
-        
-        Shadowmap* shadowmap = nullptr;
-        glm::vec3 lightPosition;
-        // TODO: check why i can't iterate with for(auto entity : lights)
-        lights.each([&shadowmap, &lightPosition](TransformComponent& transformComponent, LightComponent& lightComponent) {
-            if(lightComponent.shadowmap != nullptr) {
-                shadowmap = lightComponent.shadowmap;
-                lightPosition = transformComponent.position;
-            }
-        });
-        if(shadowmap != nullptr) {
-            RenderCommand_CullFrontFace();
-            // render to depth map 
-            shadowmap->directionalLightPosition = lightPosition;
-            shadowmap->lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, shadowmap->nearPlane, shadowmap->farPlane);
-            shadowmap->lightView = glm::lookAt(lightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            shadowmap->lightSpaceMatrix = shadowmap->lightProjection * shadowmap->lightView;
+    });
+    if(shadowmap != nullptr) {
+        RenderCommand_CullFrontFace();
+        // render to depth map 
+        shadowmap->directionalLightPosition = lightPosition;
+        shadowmap->lightView = glm::lookAt(lightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        shadowmap->lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, shadowmap->nearPlane, shadowmap->farPlane);
+        shadowmap->lightSpaceMatrix = shadowmap->lightProjection * shadowmap->lightView;
             
-            // render scene from lights point of view
+        // render scene from lights point of view
         Shader_Bind(&shadowmap->simpleDepthShader);
         Shader_SetMat4(&shadowmap->simpleDepthShader, "lightSpaceMatrix", shadowmap->lightSpaceMatrix);
+        
 
         RenderCommand_SetViewportSize(shadowmap->SHADOW_WIDTH, shadowmap->SHADOW_HEIGHT);
         RenderCommand_BindFramebuffer(shadowmap->depthMapFBO);
@@ -170,125 +154,26 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
             Mesh_Bind(&meshComponent.mesh);
             RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
         }    
-        RenderCommand_CullBackFace();
+        RenderCommand_CullBackFace();    
     }
+
+    renderProperties.shadowmap = shadowmap;
+    
     RenderCommand_SetViewportSize(viewportSize.x, viewportSize.y);
 
     // BEGIN GAMEOBJECTS
     RenderCommand_BindTexture2D(0);
     RenderCommand_ActiveTexture(0);
     Framebuffer_Bind(framebuffer);
-    //scene->registry.view<TransformComponent, LightComponent>().each([](auto& t, auto& l) {
-
-    //});
-    for(entt::entity entity : group) {
-        std::tuple<TransformComponent&, MeshComponent&, MaterialComponent&> tuple =
-            group.get<TransformComponent, MeshComponent, MaterialComponent>(entity);
-
-        TransformComponent& transformComponent = std::get<TransformComponent&>(tuple);
-        MeshComponent& meshComponent = std::get<MeshComponent&>(tuple);
-        MaterialComponent& materialComponent = std::get<MaterialComponent&>(tuple);
-
-        Shader* shader = materialComponent.material.shader;
-        if(shader == ShaderPool_GetEditorShader()) {
-            glm::mat4 model = transformComponent.GetTransform();
-
-            Shader_Bind(shader);
-            Shader_SetMat4(shader, "model", model);
-            Shader_SetMat4(shader, "view", view);
-            Shader_SetMat4(shader, "projection", projectionRH);
-            RenderCommand_ActiveTexture(0);
-            Texture* albedo = materialComponent.material.textures.data[0];
-            if(albedo != nullptr)
-                Texture_Bind(albedo);
-            Shader_SetInt(shader, "texture_0", 0);
-
-            Shader_SetInt(shader, "colorCorrect", colorCorrectEnabled);
-
-            Mesh_Bind(&meshComponent.mesh);
-            RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
-        }
-        if(shader == ShaderPool_GetPBRShader()) {
-            Shader_Bind(shader);
-            glm::mat4 model = transformComponent.GetTransform();
-            Shader_SetMat4(shader, "model", model);
-            Shader_SetMat4(shader, "view", view);
-            Shader_SetMat4(shader, "projection", projectionRH);
-            Shader_SetVec3(shader, "camPos", sceneCamera->position);
-            Material_BindTextures(&materialComponent.material);
-
-            Shader_SetInt(shader, "albedoMap", 0);
-            Shader_SetInt(shader, "normalMap", 1);
-            Shader_SetInt(shader, "metallicMap", 2);
-            Shader_SetInt(shader, "roughnessMap", 3);
-            Shader_SetInt(shader, "aoMap", 4);
-
-            RenderCommand_ActiveTexture(5);
-            RenderCommand_BindCubemap(ibl.irradianceMap);
-            Shader_SetInt(shader, "irradianceMap", 5);
-            // Specular IBL 
-            RenderCommand_ActiveTexture(6);
-            RenderCommand_BindCubemap(ibl.prefilterMap);
-            Shader_SetInt(shader, "prefilterMap", 6);
-            RenderCommand_ActiveTexture(7);
-            RenderCommand_BindTexture2D(ibl.brdfLUTTexture);
-            Shader_SetInt(shader, "brdfLUT", 7);
-
-            // TODO: shadowmap
-            if(shadowmap != nullptr) {
-                Shader_SetVec3(shader, "directionalLightPos", shadowmap->directionalLightPosition);
-                Shader_SetMat4(shader, "lightSpaceMatrix", shadowmap->lightSpaceMatrix);
-                RenderCommand_ActiveTexture(8);
-                RenderCommand_BindTexture2D(shadowmap->depthMap);
-                Shader_SetInt(shader, "shadowMap", 8);
-                Shader_SetBool(shader, "applyShadow", true);
-            }
-            else { 
-                Shader_SetBool(shader, "applyShadow", false);
-            }
-
-            // TODO: SSAO
-            if(ssaoEnabled) {
-                Shader_SetInt(shader, "applySSAO", 1);
-                RenderCommand_ActiveTexture(9);
-                RenderCommand_BindTexture2D(((GBuffer*)ssaoRenderpass.internalData)->ssaoBlurColorBuffer);
-                //RenderCommand_BindTexture2D(gBuffer.ssaoBlurColorBuffer);
-                Shader_SetInt(shader, "SSAOBlurTexture", 9);
-                Shader_SetVec3(shader, "u_resolution", glm::vec3(viewportSize.x, viewportSize.y, 0.0));
-            } else { 
-                Shader_SetBool(shader, "applySSAO", 0);
-            }
-            // TODO: lights
-
-            // color correct
-            Shader_SetInt(shader, "colorCorrect", !colorCorrectEnabled); // TODO: do properly when loading textures or something
-
-            if(lights.size_hint() > 4) 
-                RPR_WARN("EditorScene_OnUpdateRuntime: Rendering using more than 4 lights, only 4 lights supported!");
-            Shader_SetInt(shader, "lightCount", lights.size_hint());
-            if(lights.size_hint() >= 1) {
-                int i = 0;
-                lights.each([shader, &i](auto& transformComponent, auto& lightComponent) {
-                    glm::vec3& lightPos = transformComponent.position;
-                    std::string lightPosString = "lightPositions[" + std::to_string(i) + "]";
-                    std::string lightColorsString = "lightColors[" + std::to_string(i) + "]";
-                    Shader_SetVec3(shader, lightPosString.c_str(), lightPos);
-                    Shader_SetVec3(shader, lightColorsString.c_str(), 
-                        PointLight_GetIntensifiedColor(&lightComponent.pointLight));
-                    i++;
-                });
-            }
-
-            Mesh_Bind(&meshComponent.mesh);
-            RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
-        }
-    }
+    
+    pbrRenderpass.Render(&pbrRenderpass, &renderProperties);
     // END GAMEOBJECTS
 
     
     ImageBasedLighting_RenderSkybox(&ibl, view, projectionRH, !colorCorrectEnabled);
 
     // BEGIN PARTICLESYSTEM
+    // TODO: Blend breaks SSAO 
     /*
     RenderCommand_EnableBlend();
     RenderCommand_BlendEquation_Add();

@@ -4,6 +4,8 @@
 
 #include "Renderer/Framebuffer.hpp"
 #include "Renderer/Shader.hpp"
+#include "Renderer/PBR/ImageBasedLighting.hpp"
+#include "Renderer/Light/Shadowmap.hpp"
 
 #include <entt/entt.hpp>
 #include <glm/glm.hpp>
@@ -25,10 +27,19 @@ typedef struct RenderProperties {
     Framebuffer* framebuffer;
     glm::mat4* view;
     glm::mat4* projection;
+    glm::vec3* cameraPosition;
+
+    glm::vec2 viewportSize; // TODO: could be in renderpass itself as to not copy around too much
 
     // TODO: passing these for now
     entt::registry* registry;
     Shader* pbrShader;
+    Shader* editorShader;
+    ImageBasedLighting* ibl;
+    Shadowmap* shadowmap;
+    b8 ssaoEnabled;
+    u32 ssaoBlurColorBuffer;
+    b8 colorCorrectEnabled;
 } RenderProperties;
 
 

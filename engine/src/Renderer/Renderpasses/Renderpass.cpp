@@ -5,6 +5,8 @@
 #include "PostProcessing/Bloom.hpp"
 #include "PostProcessing/ColorCorrect.hpp"
 #include "PostProcessing/SSAO.hpp"
+#include "EditorRenderpass.hpp"
+#include "PBRRenderpass.hpp"
 
 void Renderpass_Create(Renderpass* renderpass, RenderpassType type) {
     if(type == RENDERPASS_BLOOM) {
@@ -26,6 +28,20 @@ void Renderpass_Create(Renderpass* renderpass, RenderpassType type) {
         renderpass->Render = ColorCorrect_Render;
         renderpass->Resize = ColorCorrect_Resize;
         renderpass->Shutdown = ColorCorrect_Shutdown;
+    }
+
+    if(type == RENDERPASS_EDITOR) {
+        renderpass->Initialize = EditorRenderpass_Initialize;
+        renderpass->Render = EditorRenderpass_Render;
+        renderpass->Resize = EditorRenderpass_Resize;
+        renderpass->Shutdown = EditorRenderpass_Shutdown;
+    }
+
+    if(type == RENDERPASS_PBR) {
+        renderpass->Initialize = PBRRenderpass_Initialize;
+        renderpass->Render = PBRRenderpass_Render;
+        renderpass->Resize = PBRRenderpass_Resize;
+        renderpass->Shutdown = PBRRenderpass_Shutdown;
     }
     
     if(type == RENDERPASS_NONE) {

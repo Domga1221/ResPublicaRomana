@@ -348,7 +348,8 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
         EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
     else 
         EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera, &framebuffer,
-            PostProcessingPanel_GetBloom(), PostProcessingPanel_GetSSAO(), PostProcessingPanel_GetColorCorrect());
+            PostProcessingPanel_GetBloom(), PostProcessingPanel_GetSSAO(), PostProcessingPanel_GetColorCorrect(), 
+            playMode);
 
     // -- Hexagon 
     //HexagonGrid_Render(hexagonGrid, view, projection);
