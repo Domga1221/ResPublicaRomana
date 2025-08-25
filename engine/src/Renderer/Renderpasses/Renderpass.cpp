@@ -7,6 +7,7 @@
 #include "PostProcessing/SSAO.hpp"
 #include "EditorRenderpass.hpp"
 #include "PBRRenderpass.hpp"
+#include "ShadowmapRenderpass.hpp"
 
 void Renderpass_Create(Renderpass* renderpass, RenderpassType type) {
     if(type == RENDERPASS_BLOOM) {
@@ -42,6 +43,13 @@ void Renderpass_Create(Renderpass* renderpass, RenderpassType type) {
         renderpass->Render = PBRRenderpass_Render;
         renderpass->Resize = PBRRenderpass_Resize;
         renderpass->Shutdown = PBRRenderpass_Shutdown;
+    }
+
+    if(type == RENDERPASS_SHADOWMAP) {
+        renderpass->Initialize = ShadowmapRenderpass_Initialize;
+        renderpass->Render = ShadowmapRenderpass_Render;
+        renderpass->Resize = ShadowmapRenderpass_Resize;
+        renderpass->Shutdown = ShadowmapRenderpass_Shutdown;
     }
     
     if(type == RENDERPASS_NONE) {

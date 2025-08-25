@@ -34,6 +34,8 @@ Renderpass ssaoRenderpass;
 Renderpass editorRenderpass;
 Renderpass pbrRenderpass;
 
+Renderpass shadowmapRenderpass;
+
 void EditorScene_Initialze() {
     ShaderPool_Initialize();
     std::string hdrPath = std::string("Assets/HDR/newport_loft.hdr");
@@ -53,6 +55,9 @@ void EditorScene_Initialze() {
     Renderpass_Create(&editorRenderpass, RENDERPASS_EDITOR);
     editorRenderpass.Initialize(&editorRenderpass);
     Renderpass_Create(&pbrRenderpass, RENDERPASS_PBR);
+
+    Renderpass_Create(&shadowmapRenderpass, RENDERPASS_SHADOWMAP);
+    shadowmapRenderpass.Initialize(&shadowmapRenderpass);
     // Renderpasses end
 
     Renderpass_Create(&bloomRenderpass, RENDERPASS_BLOOM);
@@ -81,6 +86,14 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
     ImageBasedLighting_RenderSkybox(&ibl, view, projectionRH, true);
 }
 
+// 1. ssaoRenderpass x
+// 2. light shadowmap
+// 3. PBRRenderpass x
+// 4. skybox
+// 5. bloomRenderpass x
+// 6. colorCorrectRenderpass x
+// TODO: function to update renderproperties, where each pass updates them
+//       with required information for other passes 
 void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera, Framebuffer* framebuffer,
     b8 bloomEnabled, b8 ssaoEnabled, b8 colorCorrectEnabled, b8 playMode) {
     RenderCommand_ActiveTexture(0);
@@ -109,55 +122,10 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
         ssaoRenderpass.Render(&ssaoRenderpass, &renderProperties);
     }
 
+    // TODO: put into Render
     renderProperties.ssaoBlurColorBuffer = ((GBuffer*)ssaoRenderpass.internalData)->ssaoBlurColorBuffer;
 
-    
-    auto lights = scene->registry.view<TransformComponent, LightComponent>();
-    auto group = scene->registry.group<TransformComponent>(entt::get<MeshComponent, MaterialComponent>);
-    
-    Shadowmap* shadowmap = nullptr;
-    glm::vec3 lightPosition;
-    // TODO: check why i can't iterate with for(auto entity : lights)
-    // TODO: don't need to iterate over all lights,
-    lights.each([&shadowmap, &lightPosition](TransformComponent& transformComponent, LightComponent& lightComponent) {
-        if(lightComponent.shadowmap != nullptr) {
-            shadowmap = lightComponent.shadowmap;
-            lightPosition = transformComponent.position;
-        }
-    });
-    if(shadowmap != nullptr) {
-        RenderCommand_CullFrontFace();
-        // render to depth map 
-        shadowmap->directionalLightPosition = lightPosition;
-        shadowmap->lightView = glm::lookAt(lightPosition, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-        shadowmap->lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, shadowmap->nearPlane, shadowmap->farPlane);
-        shadowmap->lightSpaceMatrix = shadowmap->lightProjection * shadowmap->lightView;
-            
-        // render scene from lights point of view
-        Shader_Bind(&shadowmap->simpleDepthShader);
-        Shader_SetMat4(&shadowmap->simpleDepthShader, "lightSpaceMatrix", shadowmap->lightSpaceMatrix);
-        
-
-        RenderCommand_SetViewportSize(shadowmap->SHADOW_WIDTH, shadowmap->SHADOW_HEIGHT);
-        RenderCommand_BindFramebuffer(shadowmap->depthMapFBO);
-        RenderCommand_Clear(false, true);
-
-        for(entt::entity entity : group) {
-            std::tuple<TransformComponent&, MeshComponent&> tuple =
-                group.get<TransformComponent, MeshComponent>(entity);
-
-            TransformComponent& transformComponent = std::get<TransformComponent&>(tuple);
-            MeshComponent& meshComponent = std::get<MeshComponent&>(tuple);
-
-            glm::mat4 model = transformComponent.GetTransform();
-            Shader_SetMat4(&shadowmap->simpleDepthShader, "model", model);
-            Mesh_Bind(&meshComponent.mesh);
-            RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
-        }    
-        RenderCommand_CullBackFace();    
-    }
-
-    renderProperties.shadowmap = shadowmap;
+    shadowmapRenderpass.Render(&shadowmapRenderpass, &renderProperties);
     
     RenderCommand_SetViewportSize(viewportSize.x, viewportSize.y);
 

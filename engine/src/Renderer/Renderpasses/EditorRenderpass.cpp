@@ -6,7 +6,7 @@
 #include "Renderer/Shader.hpp"
 
 void EditorRenderpass_Initialize(Renderpass* renderpass) {
-
+    
 }
 
 void EditorRenderpass_Render(Renderpass* renderpass, RenderProperties* renderProperties) {

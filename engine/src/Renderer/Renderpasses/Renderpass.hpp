@@ -13,6 +13,8 @@
 enum RenderpassType {
     RENDERPASS_NONE,
 
+    RENDERPASS_SHADOWMAP,
+
     RENDERPASS_EDITOR,
     RENDERPASS_PBR,
 
