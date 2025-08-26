@@ -38,6 +38,8 @@ static Renderpass shadowmapRenderpass;
 
 static Renderpass skyboxRenderpass;
 
+static Renderpass particleSystemRenderpass;
+
 static List<Renderpass*> renderpasses;
 
 void EditorScene_Initialze() {
@@ -73,12 +75,13 @@ void EditorScene_Initialze() {
     Renderpass_Create(&skyboxRenderpass, RENDERPASS_SKYBOX);
     List_PushBack(&renderpasses, &skyboxRenderpass);
 
+    Renderpass_Create(&particleSystemRenderpass, RENDERPASS_PARTICLESYSTEM);
+    List_PushBack(&renderpasses, &particleSystemRenderpass);
+
     Renderpass_Create(&bloomRenderpass, RENDERPASS_BLOOM);
-    //bloomRenderpass.Initialize(&bloomRenderpass);
     List_PushBack(&renderpasses, &bloomRenderpass);
 
     Renderpass_Create(&colorCorrectRenderpass, RENDERPASS_COLOR_CORRECT);
-    //colorCorrectRenderpass.Initialize(&colorCorrectRenderpass);
     List_PushBack(&renderpasses, &colorCorrectRenderpass);
     // Renderpasses end
 
