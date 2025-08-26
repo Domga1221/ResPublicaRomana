@@ -141,6 +141,7 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
     renderProperties.ibl = &ibl;
     renderProperties.ssaoEnabled = ssaoEnabled;
     renderProperties.colorCorrectEnabled = colorCorrectEnabled;
+    renderProperties.viewportSize = viewportSize;
     
     
     for(u32 i = 0; i < renderpasses.size; i++) {
