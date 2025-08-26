@@ -5,12 +5,14 @@
 #include <iostream>
 #include <filesystem>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 // UI
 #include "UI/ContentBrowserPanel.hpp"
 #include "UI/SceneHierarchyPanel.hpp"
 #include "UI/InspectorPanel.hpp"
 #include <imgui-docking/imgui.h>
+#include <imguizmo/ImGuizmo.h>
 
 #include <Memory/List.hpp>
 
@@ -583,7 +585,29 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     
     viewportMousePosition = glm::vec2(mouseX, mouseY); 
 
-   
+
+    // Gizmos
+    GameObject* selected = SceneHierarchyPanel_GetSelectedGameObject();
+    if(selected != nullptr) {
+        ImGuizmo::SetOrthographic(false);
+        ImGuizmo::AllowAxisFlip(false);
+        ImGuizmo::SetDrawlist();
+        f32 windowWidth = ImGui::GetWindowWidth();
+        f32 windowHeight = ImGui::GetWindowHeight();
+        ImGuizmo::SetRect(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y, windowWidth, windowHeight);
+        //ImGuizmo::SetOwnerWindowName();
+        glm::mat4 view = SceneCamera_GetViewMatrix(&sceneCamera);
+        glm::mat4 projection = SceneCamera_GetProjectionMatrixRH(&sceneCamera);
+        TransformComponent& tc = selected->GetComponent<TransformComponent>();
+        glm::mat4 transform = tc.GetTransform();
+        ImGuizmo::DrawCubes(glm::value_ptr(view), glm::value_ptr(projection), glm::value_ptr(transform), 1);
+        if(ImGuizmo::Manipulate(glm::value_ptr(view), glm::value_ptr(projection), 
+            ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::LOCAL, glm::value_ptr(transform)))
+            tc.position = glm::vec3(transform[3]);
+            //RPR_WARN("x: %f, y: %f", ImGui::GetMousePos().x, ImGui::GetMousePos().y);
+        //if(ImGuizmo::IsUsing()) {
+        //}
+    }
 
     ImGui::End(); 
     

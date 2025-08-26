@@ -37,6 +37,35 @@ project "imgui-docking"
     }
     linkoptions { "-g" }
 
+
+project "imguizmo"
+    kind "StaticLib"
+    language "C++"
+    cppdialect "C++17"
+    symbols "on"
+
+    -- outputdir defined in parent dir premake file 
+    -- currentDir defined in parent dir premake file 
+    targetdir ("bin/" .. outputdir)
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    symbolspath ("bin/" .. outputdir .. "/%{prj.name}.pdb")
+
+    files {
+        "engine/Libraries/include/imguizmo/*.h",
+        "engine/Libraries/include/imguizmo/*.cpp",
+    }
+
+    includedirs {
+        "engine/Libraries/include/imgui-docking"
+    }
+   
+    toolset("clang")
+    buildoptions {
+        --"-Wvarargs", "-Wall", "-Werror",
+    }
+    linkoptions { "-g" }
+
+
 project "engine"
     location "engine"
     kind "SharedLib"
@@ -65,6 +94,7 @@ project "engine"
 
     links {
         "imgui-docking",
+        "imguizmo",
         "gdi32",
         "user32",
         "kernel32",
@@ -130,6 +160,7 @@ project "sandbox"
     links {
         "engine",
         "imgui-docking",
+        "imguizmo",
         "gdi32",
         "user32",
         "kernel32",

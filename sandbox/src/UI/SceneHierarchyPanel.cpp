@@ -10,7 +10,11 @@
 
 
 static Scene* activeScene = 0;
-static GameObject* selection;
+static GameObject* selection = nullptr;
+
+GameObject* SceneHierarchyPanel_GetSelectedGameObject() {
+    return selection;
+}
 
 static ImGuiTreeNodeFlags base_flags;
 
