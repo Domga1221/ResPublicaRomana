@@ -26,6 +26,7 @@ void ParticleSystemRenderpass_Render(Renderpass* renderpass, RenderProperties* r
         ParticleSystem_Update(pc.particleSystem, deltaTime);
         ParticleSystem_Render(pc.particleSystem, &model, view, projectionRH, false);
     });
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
     RenderCommand_DepthMask(true);
     RenderCommand_DisableBlend();
 }
