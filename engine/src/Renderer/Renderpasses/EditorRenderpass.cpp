@@ -40,7 +40,8 @@ void EditorRenderpass_Render(Renderpass* renderpass, RenderProperties* renderPro
         Shader_SetInt(editorShader, "colorCorrect", 0);
 
         // entityID
-        Shader_SetInt(editorShader, "u_entityID", (i32)50);
+        int entityID = (i32)entity;
+        Shader_SetInt(editorShader, "u_entityID", entityID);
 
         Mesh_Bind(&meshComponent.mesh);
         RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);

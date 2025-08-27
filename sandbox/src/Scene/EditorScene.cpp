@@ -98,12 +98,13 @@ void EditorScene_Initialze() {
     Shader_Create(&debugQuadShader, v.c_str(), f.c_str());
 }
 
-void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera) {
+void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera, Framebuffer* framebuffer) {
     glm::mat4 view = SceneCamera_GetViewMatrix(sceneCamera);
     glm::mat4 projectionRH = SceneCamera_GetProjectionMatrixRH(sceneCamera);
     
     RenderProperties renderProperties;
     renderProperties.deltaTime = deltaTime;
+    renderProperties.framebuffer = framebuffer;
     renderProperties.view = &view;
     renderProperties.projection = &projectionRH;
     renderProperties.registry = &scene->registry;
@@ -115,6 +116,15 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
 
     // ibl
     skyboxRenderpass.Render(&skyboxRenderpass, &renderProperties);
+
+    /*
+    Framebuffer_Bind(framebuffer);
+    Shader_Bind(&debugQuadShader);
+    RenderCommand_ActiveTexture(0);
+    Shader_SetInt(&debugQuadShader, "u_texture", 0);
+    RenderCommand_BindTexture2D(framebuffer->colorIDs.data[1]);
+    Primitives_RenderQuad();
+    */
 }
 
 // TODO: maybe function to update renderproperties, where each pass updates them

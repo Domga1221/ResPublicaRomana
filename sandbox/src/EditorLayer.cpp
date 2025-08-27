@@ -349,7 +349,7 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     // -- EditorScene
     Framebuffer_ClearAttachment(&framebuffer, 1, -1);
     if(!playMode)
-        EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
+        EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera, &framebuffer);
     else 
         EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera, &framebuffer,
             PostProcessingPanel_GetBloom(), PostProcessingPanel_GetSSAO(), PostProcessingPanel_GetColorCorrect(), 
