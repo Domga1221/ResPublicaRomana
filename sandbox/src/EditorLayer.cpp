@@ -359,7 +359,14 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     i32 mouseY = viewportMousePosition.y;
     if(mouseX >= 0 && mouseY >= 0 && mouseX < (i32)viewportSize.x && mouseY < (i32)viewportSize.y && !playMode) {
         i32 pixelData = Framebuffer_ReadPixel(&framebuffer, 1, mouseX, mouseY);
-        RPR_INFO("Reading at %d, %d, Pixel Data: %d", mouseX, mouseY, pixelData);
+        if(Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_1)) {
+            for(u32 i = 0; i < activeScene.root->children.size; i++) {
+                if((u32)activeScene.root->children.data[i]->handle == pixelData) {
+                    SceneHierarchyPanel_SetSelectedGameObject(activeScene.root->children.data[i]); // TODO: event system 
+                    InspectorPanel_SetSelectedGameObject(activeScene.root->children.data[i]);
+                }
+            }
+        }
     }
 
     // -- Hexagon 

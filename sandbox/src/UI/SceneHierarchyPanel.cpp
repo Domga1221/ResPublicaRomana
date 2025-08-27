@@ -146,3 +146,7 @@ void SceneHierarchyPanel_OnImGuiRender() {
     ImGui::End();
 }
 
+
+void SceneHierarchyPanel_SetSelectedGameObject(GameObject* gameObject) {
+    selection = gameObject;
+}

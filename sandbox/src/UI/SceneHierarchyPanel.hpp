@@ -10,5 +10,5 @@ void SceneHierarchyPanel_OnImGuiRender();
 
 GameObject* SceneHierarchyPanel_GetSelectedGameObject(); // TODO: who should own selection?
 
-//typedef struct GameObject GameObject;
-//void SceneHierarchyPanel_SetSelectedGameObject(GameObject* gameObject); // TODO: for in viewport selection
+typedef struct GameObject GameObject;
+void SceneHierarchyPanel_SetSelectedGameObject(GameObject* gameObject); 
