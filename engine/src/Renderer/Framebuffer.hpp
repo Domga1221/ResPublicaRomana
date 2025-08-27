@@ -49,3 +49,6 @@ RPR_API void Framebuffer_Bind(Framebuffer* framebuffer);
 RPR_API void Framebuffer_Unbind();
 
 RPR_API void Framebuffer_Resize(Framebuffer* framebuffer, u32 width, u32 height);
+
+RPR_API i32 Framebuffer_ReadPixel(Framebuffer* framebuffer, u32 attachmentIndex, i32 x, i32 y);
+RPR_API void Framebuffer_ClearAttachment(Framebuffer* framebuffer, u32 attachmentIndex, i32 value);

@@ -39,6 +39,9 @@ void EditorRenderpass_Render(Renderpass* renderpass, RenderProperties* renderPro
 
         Shader_SetInt(editorShader, "colorCorrect", 0);
 
+        // entityID
+        Shader_SetInt(editorShader, "u_entityID", (i32)50);
+
         Mesh_Bind(&meshComponent.mesh);
         RenderCommand_DrawIndexed(meshComponent.mesh.indexCount);
     }

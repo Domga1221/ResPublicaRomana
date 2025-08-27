@@ -160,6 +160,7 @@ void EditorLayer_OnAttach() {
     FramebufferProperties framebufferProperties;
     FramebufferProperties_Create(&framebufferProperties);
     FramebufferProperties_AddAttachment(&framebufferProperties, TEXTURE_FORMAT_RGBA16F);
+    FramebufferProperties_AddAttachment(&framebufferProperties, TEXTURE_FORMAT_RED_INTEGER);
     FramebufferProperties_AddAttachment(&framebufferProperties, TEXTURE_FORMAT_DEPTH);
     framebufferProperties.width = 1280;
     framebufferProperties.height = 720;
@@ -346,12 +347,20 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     //RenderCommand_DrawIndexed(mesh->indexCount);
 
     // -- EditorScene
+    Framebuffer_ClearAttachment(&framebuffer, 1, -1);
     if(!playMode)
         EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera);
     else 
         EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera, &framebuffer,
             PostProcessingPanel_GetBloom(), PostProcessingPanel_GetSSAO(), PostProcessingPanel_GetColorCorrect(), 
             playMode);
+
+    i32 mouseX = viewportMousePosition.x;
+    i32 mouseY = viewportMousePosition.y;
+    if(mouseX >= 0 && mouseY >= 0 && mouseX < (i32)viewportSize.x && mouseY < (i32)viewportSize.y && !playMode) {
+        i32 pixelData = Framebuffer_ReadPixel(&framebuffer, 1, mouseX, mouseY);
+        RPR_INFO("Reading at %d, %d, Pixel Data: %d", mouseX, mouseY, pixelData);
+    }
 
     // -- Hexagon 
     //HexagonGrid_Render(hexagonGrid, view, projection);
@@ -587,6 +596,8 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
 
 
     // Gizmos
+    // TODO:
+    /*
     GameObject* selected = SceneHierarchyPanel_GetSelectedGameObject();
     if(selected != nullptr) {
         ImGuizmo::SetOrthographic(false);
@@ -608,7 +619,7 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
         //if(ImGuizmo::IsUsing()) {
         //}
     }
-
+    */
     ImGui::End(); 
     
 }

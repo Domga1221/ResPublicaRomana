@@ -66,6 +66,18 @@ void Framebuffer_Create(Framebuffer* framebuffer, FramebufferProperties* framebu
                 glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, 
                     framebuffer->colorIDs.data[i], 0);
                 break;
+            case TEXTURE_FORMAT_RED_INTEGER:
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_R32I, 
+                    framebufferProperties->width, framebufferProperties->height, 0,
+                    GL_RED_INTEGER, GL_UNSIGNED_BYTE, nullptr);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+                glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+                glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, 
+                    framebuffer->colorIDs.data[i], 0);
+                break;
             default:
                 RPR_ERROR("Framebuffer_Create: color attachment not supported: %d", current);
                 break;
@@ -127,4 +139,27 @@ void Framebuffer_Resize(Framebuffer* framebuffer, u32 width, u32 height) {
     }    
 
     Framebuffer_Create(framebuffer, &framebuffer->framebufferProperties);
+}
+
+i32 Framebuffer_ReadPixel(Framebuffer* framebuffer, u32 attachmentIndex, i32 x, i32 y) {
+    if(attachmentIndex >= framebuffer->colorAttachments.size) {
+        RPR_ERROR("Framebuffer_ReadPixel: attachmentIndex too big");
+    }
+    glReadBuffer(GL_COLOR_ATTACHMENT0 + attachmentIndex);
+    int pixelData = 10;
+    glReadPixels(x, y, 1, 1, GL_RED_INTEGER, GL_INT, &pixelData);
+    GLenum error = glGetError();
+    if(error != GL_NO_ERROR) 
+        RPR_ERROR("Framebuffer_ReadPixel: glError: %d", error);
+    return pixelData;
+}
+
+void Framebuffer_ClearAttachment(Framebuffer* framebuffer, u32 attachmentIndex, i32 value) {
+    if(attachmentIndex >= framebuffer->colorIDs.size) {
+        RPR_ERROR("Framebuffer_ClearAttachment: Trying to access colorattachments with too big of an index");
+    }
+    glClearTexImage(framebuffer->colorIDs.data[attachmentIndex], 0, GL_RED_INTEGER, GL_INT, &value);
+    GLenum error = glGetError();
+    if(error != GL_NO_ERROR) 
+        RPR_ERROR("Framebuffer_ClearAttachment: glError: %d", error);
 }

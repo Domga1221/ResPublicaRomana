@@ -77,7 +77,7 @@ ImGuiContext* ImGuiLayer_Begin() {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    ImGuizmo::BeginFrame();
+    // ImGuizmo::BeginFrame(); // TODO:
     ImGuiContext* context = ImGui::GetCurrentContext();
     return context;
 }
