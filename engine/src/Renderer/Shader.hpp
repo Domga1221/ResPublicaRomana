@@ -13,6 +13,8 @@ struct Shader {
 RPR_API void Shader_Create(Shader* shader, const u8* vertexPath, const u8* fragmentPath);
 RPR_API void Shader_Create(Shader* shader, std::string vertexPath, std::string fragmentPath);
 
+RPR_API void Shader_Destroy(Shader* shader);
+
 RPR_API void Shader_Bind(Shader* shader);
 RPR_API void Shader_Unbind();
 

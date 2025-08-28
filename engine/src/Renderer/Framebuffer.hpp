@@ -44,6 +44,7 @@ struct Framebuffer {
 };
 
 RPR_API void Framebuffer_Create(Framebuffer* framebuffer, FramebufferProperties* framebufferProperties);
+RPR_API void Framebuffer_Destroy(Framebuffer* framebuffer);
 
 RPR_API void Framebuffer_Bind(Framebuffer* framebuffer);
 RPR_API void Framebuffer_Unbind();

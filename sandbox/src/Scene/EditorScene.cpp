@@ -1,31 +1,19 @@
 #include "EditorScene.hpp"
 
+#include <glm/matrix.hpp>
 #include <Scene/Components.hpp>
 
+// Renderer
+#include "ShaderPool.hpp"
 #include <Renderer/RenderCommand.hpp>
 #include <Renderer/Shader.hpp>
-
 #include <Renderer/PBR/ImageBasedLighting.hpp>
-static ImageBasedLighting ibl;
 #include <Renderer/Primitives.hpp>
-
-#include <filesystem>
-
-#include "ShaderPool.hpp"
-
-#include <Renderer/Renderpasses/PostProcessing/Bloom.hpp>
-#include <Renderer/Renderpasses/PostProcessing/ColorCorrect.hpp>
-#include <Renderer/Renderpasses/PostProcessing/GBuffer.hpp>
-static Bloom bloom;
-static GBuffer gBuffer;
-
+static Shader debugQuadShader;
+static ImageBasedLighting ibl;
 static glm::vec2 viewportSize = glm::vec2(1600, 900);
 
-Shader debugQuadShader;
-
-#include <glm/matrix.hpp>
-
-
+// Renderpasses
 #include <Renderer/Renderpasses/Renderpass.hpp>
 static Renderpass bloomRenderpass;
 static Renderpass colorCorrectRenderpass;
@@ -46,9 +34,6 @@ void EditorScene_Initialze() {
     ShaderPool_Initialize();
     std::string hdrPath = std::string("Assets/HDR/newport_loft.hdr");
     ImageBasedLighting_Initialize(&ibl, hdrPath.c_str());
-    //Bloom_Initialize(&bloom);
-    //ColorCorrect_Initialize();
-    GBuffer_Initialize(&gBuffer);
     
     
     // Renderpasses
@@ -161,54 +146,6 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
         if(renderpasses.data[i]->enabled)
             renderpasses.data[i]->Render(renderpasses.data[i], &renderProperties);
     }
-    
-    // TODO: old just for reference, remove later
-    /*
-    if(ssaoEnabled) {            
-        ssaoRenderpass.Render(&ssaoRenderpass, &renderProperties);
-    }
-
-    shadowmapRenderpass.Render(&shadowmapRenderpass, &renderProperties);
-    
-    RenderCommand_SetViewportSize(viewportSize.x, viewportSize.y);
-
-    // BEGIN GAMEOBJECTS
-    pbrRenderpass.Render(&pbrRenderpass, &renderProperties);
-    // END GAMEOBJECTS
-
-    
-    ImageBasedLighting_RenderSkybox(&ibl, view, projectionRH, !colorCorrectEnabled);
-    */
-
-    // BEGIN PARTICLESYSTEM
-    // TODO: Blend breaks SSAO 
-    /*
-    RenderCommand_EnableBlend();
-    RenderCommand_BlendEquation_Add();
-    RenderCommand_BlendFunc_SrcAlpha_One(); 
-    RenderCommand_DepthMask(false);
-    auto particleSystemComponents = scene->registry.view<ParticleSystemComponent, TransformComponent>();
-    particleSystemComponents.each([deltaTime, &view, &projectionRH](ParticleSystemComponent& pc, TransformComponent& tc) {
-        glm::mat4 model = tc.GetTransform();
-        ParticleSystem_Emit(pc.particleSystem, &pc.particleProps);
-        ParticleSystem_Update(pc.particleSystem, deltaTime);
-        ParticleSystem_Render(pc.particleSystem, &model, &view, &projectionRH, false);
-    });
-    RenderCommand_DepthMask(true);
-    RenderCommand_DisableBlend();
-    */
-    // END PARTICLESYSTEM
-
-
-    // Bloom 
-    
-    /*
-    if(bloomEnabled)
-        //Bloom_Render(&bloom, framebuffer);
-        bloomRenderpass.Render(&bloomRenderpass, &renderProperties);
-    if(colorCorrectEnabled)
-        colorCorrectRenderpass.Render(&colorCorrectRenderpass, &renderProperties);
-    */
 
     // SSAO Debug, NOTE: change square.frag 
     /*
@@ -224,12 +161,14 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
     */
 }
 
+void EditorScene_Shutdown() {
+    ShaderPool_Shutdown();
+}
+
 
 void EditorScene_OnViewportResize(u32 width, u32 height) {
-    //Bloom_OnResize(&bloom, width, height);
     bloomRenderpass.Resize(&bloomRenderpass, width, height);
     ssaoRenderpass.Resize(&ssaoRenderpass, width, height);
-    GBuffer_OnResize(&gBuffer, width, height);
     viewportSize.x = width;
     viewportSize.y = height;
 }

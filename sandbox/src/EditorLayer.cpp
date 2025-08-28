@@ -118,6 +118,7 @@ void EditorLayer_OnAttach() {
 
 void EditorLayer_OnDetach() {
     // TODO:
+    Framebuffer_Destroy(&framebuffer);
 }
 
 void EditorLayer_OnUpdate(f32 deltaTime) {

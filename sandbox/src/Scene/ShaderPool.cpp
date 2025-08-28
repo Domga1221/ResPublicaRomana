@@ -18,7 +18,8 @@ void ShaderPool_Initialize() {
 }
 
 void ShaderPool_Shutdown() {
-    // TODO: 
+    Shader_Destroy(&editorShader);
+    Shader_Destroy(&pbrShader);
 }
 
 

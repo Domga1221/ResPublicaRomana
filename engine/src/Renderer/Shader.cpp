@@ -89,6 +89,10 @@ void Shader_Create(Shader* shader, std::string vertexPath, std::string fragmentP
     Shader_Create(shader, (const char*)vertexPath.c_str(), (const char*)fragmentPath.c_str());
 }
 
+void Shader_Destroy(Shader* shader) {
+    glDeleteProgram(shader->ID);
+}
+
 void Shader_Bind(Shader* shader) {
     glUseProgram(shader->ID);
 }

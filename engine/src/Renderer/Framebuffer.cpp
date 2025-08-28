@@ -117,6 +117,20 @@ void Framebuffer_Create(Framebuffer* framebuffer, FramebufferProperties* framebu
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void Framebuffer_Destroy(Framebuffer* framebuffer) {
+    glDeleteFramebuffers(1, &framebuffer->ID);
+    glDeleteTextures(framebuffer->colorIDs.size, framebuffer->colorIDs.data);
+    glDeleteTextures(1, &framebuffer->depthID);
+
+    List_Destroy(&framebuffer->framebufferProperties.attachments);
+    framebuffer->framebufferProperties.width = 0;
+    framebuffer->framebufferProperties.height = 0;
+    List_Destroy(&framebuffer->colorAttachments);
+    List_Destroy(&framebuffer->colorIDs);
+    framebuffer->ID = 0;
+    framebuffer->depthAttachment = TEXTURE_FORMAT_NONE;
+}
+
 void Framebuffer_Bind(Framebuffer* framebuffer) {
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->ID);
     glViewport(0, 0, framebuffer->framebufferProperties.width, framebuffer->framebufferProperties.height);
