@@ -31,18 +31,6 @@ struct RPR_API GameObject {
         }   // TODO: Crashes when entity doesn't have the compnent, but can't return null
         return scene->registry.get<T>(handle);
     }
-
-    // TODO: TryGetComponent
-    /*
-    template<typename T>
-    b8 TryGetComponent(T& out) {
-        if(!HasComponent<T>()) 
-            return false;
-
-        out = GetComponent<T>();
-        return true;
-    }
-    */
    
     template<typename T>
     T* TryGetComponent() {

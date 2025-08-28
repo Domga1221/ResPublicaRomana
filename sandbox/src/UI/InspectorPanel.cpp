@@ -25,7 +25,7 @@ static GameObject* selected;
 void drawComponents(GameObject* gameObject);
 
 
-void InspectorPanel_Initialize(Shader* shader) {
+void InspectorPanel_Initialize() {
     FramebufferProperties framebufferProperties;
     FramebufferProperties_Create(&framebufferProperties);
     FramebufferProperties_AddAttachment(&framebufferProperties, TEXTURE_FORMAT_RGBA16F);

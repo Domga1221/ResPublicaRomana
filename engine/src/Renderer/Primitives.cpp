@@ -4,7 +4,7 @@
 
 #include "Renderer/RenderCommand.hpp"
 
-static const float cubeVertices[288] = {
+static const f32 cubeVertices[288] = {
     // back face
     -1.0f, -1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
      1.0f,  1.0f, -1.0f,  0.0f,  0.0f, -1.0f, 1.0f, 1.0f, // top-right
@@ -49,13 +49,21 @@ static const float cubeVertices[288] = {
      -1.0f,  1.0f,  1.0f,  0.0f,  1.0f,  0.0f, 0.0f, 0.0f  // bottom-left        
 };
 
-
-static const float quadVertices[] = {
+// vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+// TODO: pragma just for now
+#pragma clang diagnostic ignored "-Wunused-const-variable"
+static const f32 quadVertices[] = { 
     // positions        // texture Coords
     -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
     -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
      1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
      1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+};
+
+static const f32 triangleVertices[24] = {
+        -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
+        0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
+        0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 1.0f,   0.5f, 0.5f,
 };
 
 

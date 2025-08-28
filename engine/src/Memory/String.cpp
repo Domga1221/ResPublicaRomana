@@ -17,7 +17,7 @@ void String_Destroy(String* s) {
     s->length = 0;
 }
 
-void String_Append(String* s, const char* toAppend) {
+void String_Append(String* s, const char* toAppend) { 
     u32 len = strlen(toAppend);
     char* newChar = (char*)MEMORY_Allocate(sizeof(char) * (s->length + len + 1), MEMORY_TAG_STRING);
     MEMORY_Copy(newChar, s->sequence, s->length);

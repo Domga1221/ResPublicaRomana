@@ -4,7 +4,7 @@
 
 typedef struct Scene Scene;
 typedef struct Shader Shader; // TODO: remove 
-void InspectorPanel_Initialize(Shader* shader);
+void InspectorPanel_Initialize();
 void InspectorPanel_OnImGuiRender();
 
 typedef struct GameObject GameObject;

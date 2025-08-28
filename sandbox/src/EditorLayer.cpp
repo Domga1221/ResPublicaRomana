@@ -2,37 +2,26 @@
 
 #include <Core/ClientLog.hpp>
 
-#include <iostream>
-#include <filesystem>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 // UI
+#include <imgui-docking/imgui.h>
+#include <imguizmo/ImGuizmo.h>
 #include "UI/ContentBrowserPanel.hpp"
 #include "UI/SceneHierarchyPanel.hpp"
 #include "UI/InspectorPanel.hpp"
-#include <imgui-docking/imgui.h>
-#include <imguizmo/ImGuizmo.h>
-
-#include <Memory/List.hpp>
+#include "UI/PostProcessingPanel.hpp"
 
 // Renderer
-#include <Renderer/Shader.hpp>
-#include <Renderer/BufferLayout.hpp>
-#include <Renderer/VertexBuffer.hpp>
-#include <Renderer/VertexArray.hpp>
-Shader shader;
-VertexBuffer* vertexBuffer;
-VertexArray* vertexArray;
 #include <Renderer/Framebuffer.hpp>
-Framebuffer framebuffer;
-Shader screenSpaceShader;
-VertexBuffer* screenVertexBuffer;
-VertexArray* screenVertexArray;
 #include <Renderer/RenderCommand.hpp>
+#include "Renderer/Texture.hpp"
+static Framebuffer framebuffer;
 
+// SceneCamera
 #include "Scene/SceneCamera.hpp"
-SceneCamera sceneCamera;
+static SceneCamera sceneCamera;
 #include <Core/Input.hpp>
 #include <Core/Keycodes.hpp>
 void handleSceneCameraMovement(f32 deltaTime) {
@@ -44,8 +33,8 @@ void handleSceneCameraMovement(f32 deltaTime) {
     if(Input_IsKeyPressed(RPR_KEY_SPACE)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_UP, deltaTime);
     if(Input_IsKeyPressed(RPR_KEY_LEFT_SHIFT)) SceneCamera_ProcessKeyboard(&sceneCamera, SCENE_CAMERA_MOVEMENT_DOWN, deltaTime);
 }
-f32 lastMouseX = 1280 / 2;
-f32 lastMouseY = 720 / 2;
+static f32 lastMouseX = 1280 / 2;
+static f32 lastMouseY = 720 / 2;
 void handleSceneCameraMouseMovement() {
 
     f32 currentMouseX = Input_GetMouseX();
@@ -60,56 +49,37 @@ void handleSceneCameraMouseMovement() {
         SceneCamera_ProcessMouseMovement(&sceneCamera, xOffset, yOffset);
 }
 
-#include "Renderer/Texture.hpp"
-#include <glad/glad.h>
-Texture texture;
-
-#include "Renderer/Skybox.hpp"
-Skybox skybox;
-Shader skyboxShader;
-
+// Scene
 #include <Scene/GameObject.hpp>
 #include <Scene/Scene.hpp>
 #include <Scene/Components.hpp>
+#include "Scene/EditorScene.hpp"
+#include "Scene/ShaderPool.hpp"
+#include "Scene/SceneSerialization.hpp"
 static Scene activeScene;
 
-#include <Renderer/Mesh.hpp>
-//Mesh mesh;
-Mesh* mesh;
+// Filesystem
+#include <Platform/Filesystem.hpp>
+void saveSceneAs();
+void openScene();
 
-#include "Scene/EditorScene.hpp"
-
-#include <Systems/HexagonGrid.hpp>
-HexagonGrid* hexagonGrid;
 
 static glm::vec2 viewportSize = glm::vec2(1280, 720);
 static glm::vec2 viewportBounds[2];
 static glm::vec2 viewportMousePosition;
 
-#include "Physics/Raycast.hpp"
-
-#include "Renderer/Material.hpp"
-Material material;
-
-#include "Memory/String.hpp"
-#include <string>
-
-#include <Platform/Filesystem.hpp>
-#include "Scene/SceneSerialization.hpp"
-void saveSceneAs();
-void openScene();
-
-
 static Texture playButton;
 static Texture stopButton;
 static b8 playMode = false;
 
-#include "UI/PostProcessingPanel.hpp"
 
 void EditorLayer_OnAttach() {
     RPR_CLIENT_INFO("Hello from EditorLayer");
+    const char* currentPath = Filesystem_GetCWD();
+    RPR_CLIENT_INFO("%s", currentPath);
 
-      // Scene
+
+    // Scene
     Scene_Create(&activeScene);
 
     EditorScene_Initialze();
@@ -118,43 +88,8 @@ void EditorLayer_OnAttach() {
     ContentBrowserPanel_Initialize();
     SceneHierarchyPanel_Initialize(&activeScene);
     PostProcessingPanel_Initialize(); // Does nothing currently
+    InspectorPanel_Initialize(); // TODO: move up
     
-    
-    std::string currentPath = std::filesystem::current_path().string();
-    
-    std::string vertPath = currentPath + "/Assets/Shaders/triangle3D.vert";
-    std::string fragPath = currentPath + "/Assets/Shaders/triangle3D.frag";
-    Shader_Create(&shader, vertPath, fragPath);
-    RPR_CLIENT_INFO("%s", currentPath.c_str());
-    
-    InspectorPanel_Initialize(&shader); // TODO: move up
-    
-    BufferLayout bufferLayout;
-    BufferLayout_Create(&bufferLayout);
-    BufferLayout_AddElement(&bufferLayout, { .name = "aPosition", .shaderDataType = ShaderDataType::Float3 });
-    BufferLayout_AddElement(&bufferLayout, { "aColor", ShaderDataType::Float3 });
-    BufferLayout_AddElement(&bufferLayout, { "aTexCoords", ShaderDataType::Float2 });
-    BufferLayout_CalculateOffsetAndStride(&bufferLayout);
-    
-    for(int i = 0; i < bufferLayout.elements.size; i++) {
-        BufferElement_Print(&bufferLayout.elements.data[i]);
-    }
-
-    
-    f32 triangleVertices[24] = {
-        -0.5f, -0.5f, 0.0f,     1.0f, 0.0f, 0.0f,   0.0f, 0.0f,
-        0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f,
-        0.0f, 0.5f, 0.0f,       0.0f, 0.0f, 1.0f,   0.5f, 0.5f,
-    };
-    
-    vertexBuffer = VertexBuffer_Create(triangleVertices, sizeof(triangleVertices));
-    VertexBuffer_SetLayout(vertexBuffer, &bufferLayout);
-    
-    BufferLayout_Print(&vertexBuffer->bufferLayout);
-    
-    vertexArray = VertexArray_Create();
-    VertexArray_AddVertexBuffer(vertexArray, vertexBuffer);
-
 
     // Framebuffer
     FramebufferProperties framebufferProperties;
@@ -167,134 +102,22 @@ void EditorLayer_OnAttach() {
 
     Framebuffer_Create(&framebuffer, &framebufferProperties);
 
-    RPR_CLIENT_INFO("%s", currentPath.c_str());
-    vertPath = currentPath + "/Assets/Shaders/screenSpace.vert";
-    fragPath = currentPath + "/Assets/Shaders/screenSpace.frag";
-    Shader_Create(&screenSpaceShader, vertPath, fragPath);
-
-    float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-        // positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
-    };
-    BufferLayout screenBufferLayout;
-    BufferLayout_Create(&screenBufferLayout);
-    BufferLayout_AddElement(&screenBufferLayout, { .name = "aPos", .shaderDataType = ShaderDataType::Float2 });
-    BufferLayout_AddElement(&screenBufferLayout, { "aTexCoords", ShaderDataType::Float2});
-    BufferLayout_CalculateOffsetAndStride(&screenBufferLayout);
-
-    screenVertexBuffer = VertexBuffer_Create(quadVertices, sizeof(quadVertices));
-    VertexBuffer_SetLayout(screenVertexBuffer, &screenBufferLayout);
-    
-    screenVertexArray = VertexArray_Create();
-    VertexArray_AddVertexBuffer(screenVertexArray, screenVertexBuffer);
 
     SceneCamera_Create(&sceneCamera, glm::vec3(1.0f, 0.5f, -2.0f));
 
-    std::string texturePath = "Assets/Textures/bricks10_diffuse_1k.jpg";
-    Texture_Create(&texture, texturePath.c_str());
-    RPR_CLIENT_INFO("Texture channels: %d", texture.numberOfChannels);
-
-    Skybox_Create(&skybox);
-
-
-    // Entity test
     /*
-    GameObject* e = GameObject_Create(&activeScene);
-    RPR_INFO("gameObject handle: %u", e->handle);
-    RPR_INFO("active scene: %p, gameObject scene: %p", &activeScene, e->scene);
-    TagComponent& tc = e->GetComponent<TagComponent>();
-    RPR_INFO("gameObject tag: %s", tc.c_str());
-    TransformComponent& transform = e->GetComponent<TransformComponent>();
-    RPR_INFO("gameObject transform position: (%d, %d, %d)", transform.position.x, transform.position.y, transform.position.z);
-
-    RPR_INFO("GameObject has transform component: %d", e->HasComponent<TransformComponent>());
-    e->RemoveComponent<TransformComponent>();
-    RPR_INFO("GameObject has transform component: %d", e->HasComponent<TransformComponent>());
-    //transform = e.GetComponent<TransformComponent>();
-    */
-
-
-    // TODO: move to own function
     GameObject* g1 = GameObject_Create(&activeScene);
-    //List_Create(&g1->children);
-    g1->GetComponent<TagComponent>().tag = "1";
-    GameObject* g2 = GameObject_Create(&activeScene);
-    //List_Create(&g2->children);
-    g2->GetComponent<TagComponent>().tag = "2";
-    
-
-    //List_PushBack(&e->children, g1);
-    //List_PushBack(&e->children, g2);   
-    
-
-    // Mesh testing 
-    /*
-    std::string cube_ownPath = currentPath + "/Assets/Models/cube_own.obj";
-    //Mesh_Create(&mesh, cube_ownPath);
-    GameObject* cube = GameObject_Create(&activeScene);
-    //List_Create(&cube->children);
-    cube->GetComponent<TagComponent>().tag = "cube";
-    MeshComponent& meshComponent = cube->AddComponent<MeshComponent>("/Assets/Models/cube_own.obj");
-    Mesh_Create(&meshComponent.mesh, cube_ownPath);
-    mesh = &meshComponent.mesh;
-    MaterialComponent& materialComponent = cube->AddComponent<MaterialComponent>();
-    Material_Create(&materialComponent.material, &shader);
-    texturePath = currentPath + "/Assets/Textures/bricks10_diffuse_1k.jpg";
-    Texture* materialTexture = (Texture*)MEMORY_Allocate(sizeof(Texture), MEMORY_TAG_RENDERER);
-    Texture_Create(materialTexture, texturePath.c_str());
-    materialComponent.material.textures.data[0] = materialTexture;
-    //List_PushBack(&e->children, cube);
+    std::string meshPath = "Assets/Models/cube_own.obj";
+    g1->AddComponent<MeshComponent>();
+    g1->AddComponent<MaterialComponent>(ShaderPool_GetEditorShader());
     */
 
-    // Hexagon
-    hexagonGrid = HexagonGrid_Create(5, 5);
-
-
-    // Material
-    //Material_Create(&material, &shader);
-
-
-    // String
-    String s; 
-    String_Create(&s, "test");
-    std::string memUsage = MEMORY_GetMemoryUsageString();
-    RPR_CLIENT_WARN("%s", memUsage.c_str());
-
-    String_Append(&s, "asdf"); // TODO: Fix
-
-    memUsage = MEMORY_GetMemoryUsageString();
-    RPR_CLIENT_WARN("%s", memUsage.c_str());
-    RPR_CLIENT_WARN("%s", s.sequence);
-
-    String_Destroy(&s);
-
-
-    // entity
-    RPR_CLIENT_INFO("\n---");
-    RPR_CLIENT_INFO("GameObjects under root: ");
-    for(u32 i = 0; i < activeScene.root->children.size; i++) {
-        RPR_CLIENT_INFO("GameObject: %u", activeScene.root->children.data[i]);
-    }
-
-    RPR_CLIENT_WARN("address of scene: %u", &activeScene);
-
-
-    //Scene_Destroy(&activeScene);
-    //Scene_Create(&activeScene);
-
-    // 
     Texture_Create(&playButton, "Resources/PlayButton64.png");
     Texture_Create(&stopButton, "Resources/StopButton64.png");
 }
 
 void EditorLayer_OnDetach() {
-    
+    // TODO:
 }
 
 void EditorLayer_OnUpdate(f32 deltaTime) {
@@ -309,150 +132,11 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
         // TODO: handle resizing properly with events 
         EditorScene_OnViewportResize((u32)viewportSize.x, (u32)viewportSize.y);
     }
-    //RPR_INFO("viewportSize.x: %d, framebufferwidth: %d", (u32)viewportSize.x, (u32)framebuffer.framebufferProperties.width);
-    //RPR_INFO("viewportSize.y: %d, framebufferheight: %d", (u32)viewportSize.y, (u32)framebuffer.framebufferProperties.height);
 
-
-
-    handleSceneCameraMovement(deltaTime);
-    handleSceneCameraMouseMovement();
-
-    RenderCommand_EnableDepthTest(true);
-    
-    // TODO: FRAMEBUFFER HAS NO DEPTH ATTACHMENT
-    Framebuffer_Bind(&framebuffer);
-    glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 0.0f);
-    //glClearColor(0.0f, 1.0f, 1.0f, 0.0f);
-    //glClear(GL_COLOR_BUFFER_BIT);
-    RenderCommand_SetClearColor(&color);
-    RenderCommand_Clear(true, true);
-
-    glm::mat4 view = SceneCamera_GetViewMatrix(&sceneCamera);
-    glm::mat4 projection = SceneCamera_GetProjectionMatrixRH(&sceneCamera);
-    // -- triangle
-    Shader_Bind(&shader);
-    glm::mat4 model = glm::mat4(1.0f);
-    Shader_SetMat4(&shader, "model", model);
-    Shader_SetMat4(&shader, "view", view);
-    Shader_SetMat4(&shader, "projection", projection);
-    Shader_SetInt(&shader, "texture_0", 0);
-    RenderCommand_ActiveTexture(0);
-    Texture_Bind(& texture);
-    VertexArray_Bind(vertexArray);
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
-    RenderCommand_Draw(3);
-
-    // -- cube 
-    //Mesh_Bind(mesh);
-    //RenderCommand_DrawIndexed(mesh->indexCount);
-
-    // -- EditorScene
-    Framebuffer_ClearAttachment(&framebuffer, 1, -1);
-    if(!playMode)
-        EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera, &framebuffer);
-    else 
-        EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera, &framebuffer,
-            PostProcessingPanel_GetBloom(), PostProcessingPanel_GetSSAO(), PostProcessingPanel_GetColorCorrect(), 
-            playMode);
-
-    i32 mouseX = viewportMousePosition.x;
-    i32 mouseY = viewportMousePosition.y;
-    if(mouseX >= 0 && mouseY >= 0 && mouseX < (i32)viewportSize.x && mouseY < (i32)viewportSize.y && !playMode) {
-        i32 pixelData = Framebuffer_ReadPixel(&framebuffer, 1, mouseX, mouseY);
-        if(Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_1)) {
-            for(u32 i = 0; i < activeScene.root->children.size; i++) {
-                if((u32)activeScene.root->children.data[i]->handle == pixelData) {
-                    SceneHierarchyPanel_SetSelectedGameObject(activeScene.root->children.data[i]); // TODO: event system 
-                    InspectorPanel_SetSelectedGameObject(activeScene.root->children.data[i]);
-                }
-            }
-        }
-    }
-
-    // -- Hexagon 
-    //HexagonGrid_Render(hexagonGrid, view, projection);
-
-    // -- Skybox
-    //Skybox_Render(&skybox, &view, &projection);
-    // -- Skybox End
-    Framebuffer_Unbind();
-    RenderCommand_EnableDepthTest(false);
-
-    //glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D, framebuffer.colorIDs.data[0]);
-    RenderCommand_ActiveTexture(0);
-    RenderCommand_BindTexture2D(framebuffer.colorIDs.data[0]);
-    Shader_Bind(&screenSpaceShader);
-    VertexArray_Bind(screenVertexArray);
-    //glDrawArrays(GL_TRIANGLES, 0, 6);
-    RenderCommand_Draw(6);
-
-
+    // -- Input
     static bool pressed = false;
     if(Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_1) && pressed == false) {
-        /*
-        RPR_WARN("%f, %f", viewportMousePosition.x, viewportMousePosition.y);
-        pressed = true;
-
-        // to ndc
-        // x[-1, 1] y[-1, 1] z[-1, 1]
-        float x = (2.0f * viewportMousePosition.x) / viewportSize.x - 1.0f;
-        float y = (2.0f * viewportMousePosition.y) / viewportSize.y - 1.0f;
-        float z = 1.0f;
-        RPR_WARN("%f, %f, %f", x, y, z);
-
-        // homogenous clip coordinates
-        glm::vec4 ray_clip = glm::vec4(x, y, -1.0f, 1.0f);
-
-        // Camera coordinates, Eye / view space 
-        glm::vec4 ray_eye = glm::inverse(SceneCamera_GetProjectinoMatrix(&sceneCamera)) * ray_clip;
-        ray_eye.z = 1.0f;
-        ray_eye.w = 0.0f;
-
-        // World coordinates
-        glm::vec3 ray_world = glm::inverse(SceneCamera_GetViewMatrix(&sceneCamera)) * ray_eye;
-        ray_world = glm::normalize(ray_world);
-
-        RPR_WARN("%f, %f, %f", ray_world.x, ray_world.y, ray_world.z);
-
-
-        // ray plane intersect
-        glm::vec3 plane_normal = glm::vec3(0.0f, 1.0f, 0.0f);
-        glm::vec3 plane_offset = glm::vec3(0.0f, 0.0f, 0.0f);
-
-        glm::vec3 ray_origin = sceneCamera.position;
-        glm::vec3 ray_direction = ray_world;
-
-        Ray ray;
-        ray.origin = ray_origin;
-        ray.direction = ray_direction;
-        Plane plane;
-        plane.origin = plane_offset;
-        plane.normal = plane_normal;
-
-        glm::vec3 hitPoint;
-        bool hit = Physics_RayPlaneIntersection(ray, plane, &hitPoint);
-        if(hit) {
-            RPR_WARN("HIT: %f, %f, %f", hitPoint.x, hitPoint.y, hitPoint.z);
-            glm::vec3 axialCoordinates = Hex_PointToHex(glm::vec2(hitPoint.x, hitPoint.z), 1.0f);
-            glm::ivec3 intCubeCoordinates = Hex_FractionalCubeToIntCube(axialCoordinates);
-            RPR_WARN("HEX: %d, %d, %d", intCubeCoordinates.x, intCubeCoordinates.y, intCubeCoordinates.z);
-        }
-        */
-
-        /*
-        float denom = glm::dot(plane_normal, ray_direction);
-        if(glm::abs(denom) > 0.0001f) {
-            float t = glm::dot((plane_offset - ray_origin), plane_normal) / denom;
-            if(t >= 0) {
-                glm::vec3 hit = ray_origin + ray_direction * t;
-                RPR_WARN("HIT: %f, %f, %f", hit.x, hit.y, hit.z);
-                glm::vec3 axialCoordinates = Hex_PointToHex(glm::vec2(hit.x, hit.z), 1.0f);
-                glm::ivec3 intCubeCoordinates = Hex_FractionalCubeToIntCube(axialCoordinates);
-                RPR_WARN("HEX: %d, %d, %d", intCubeCoordinates.x, intCubeCoordinates.y, intCubeCoordinates.z);
-            }
-        }
-        */
+        
     }
     if(Input_IsMouseButtonReleased(RPR_MOUSE_BUTTON_1))
         pressed = false;
@@ -468,6 +152,45 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
         sceneCamera.up = glm::normalize(glm::cross(sceneCamera.right, sceneCamera.front));
         RPR_WARN("%f, %f, %f", sceneCamera.position.x, sceneCamera.position.y, sceneCamera.position.z);
     }
+    handleSceneCameraMovement(deltaTime);
+    handleSceneCameraMouseMovement();
+
+
+    // -- Rendering
+    RenderCommand_EnableDepthTest(true);
+    
+    Framebuffer_Bind(&framebuffer);
+    glm::vec4 color = glm::vec4(0.0f, 1.0f, 1.0f, 0.0f);
+    RenderCommand_SetClearColor(&color);
+    RenderCommand_Clear(true, true);
+
+    // -- EditorScene
+    Framebuffer_ClearAttachment(&framebuffer, 1, -1);
+    if(!playMode)
+        EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera, &framebuffer);
+    else 
+        EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera, &framebuffer,
+            PostProcessingPanel_GetBloom(), PostProcessingPanel_GetSSAO(), PostProcessingPanel_GetColorCorrect(), 
+            playMode);
+
+    // -- Mousepicking
+    i32 mouseX = viewportMousePosition.x;
+    i32 mouseY = viewportMousePosition.y;
+    if(mouseX >= 0 && mouseY >= 0 && mouseX < (i32)viewportSize.x && mouseY < (i32)viewportSize.y && !playMode) {
+        i32 pixelData = Framebuffer_ReadPixel(&framebuffer, 1, mouseX, mouseY);
+        if(Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_1)) {
+            for(u32 i = 0; i < activeScene.root->children.size; i++) {
+                if((u32)activeScene.root->children.data[i]->handle == pixelData) {
+                    SceneHierarchyPanel_SetSelectedGameObject(activeScene.root->children.data[i]); // TODO: event system 
+                    InspectorPanel_SetSelectedGameObject(activeScene.root->children.data[i]);
+                }
+            }
+        }
+    }
+
+    Framebuffer_Unbind();
+    RenderCommand_EnableDepthTest(false);
+
 
     if(Input_IsKeyPressed(RPR_KEY_ESCAPE)) {
         std::exit(0);    // TODO: Do this properly
@@ -521,14 +244,12 @@ void EditorLayer_OnImGuiRender(ImGuiContext* context) {
     style.WindowMinSize.x = minWinSizeX;
 
     if (ImGui::BeginMenuBar()) {
-        if (ImGui::BeginMenu("File")) {
-            //  ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);
-    
-            if (ImGui::MenuItem("New", "Ctrl+N")) std::cout << "New\n";
+        if (ImGui::BeginMenu("File")) {    
+            if (ImGui::MenuItem("New", "Ctrl+N")) RPR_INFO("New");
             if (ImGui::MenuItem("Open...", "Ctrl+O")) openScene();
             if (ImGui::MenuItem("Save As...", "Ctrl+Shift+S")) saveSceneAs();
     
-            if (ImGui::MenuItem("Exit")) std::cout << "Exit\n";
+            if (ImGui::MenuItem("Exit")) RPR_INFO("Exit");
             ImGui::EndMenu();
         }
         ImGui::EndMenuBar();
@@ -640,10 +361,11 @@ void openScene() {
 
     // TODO: maybe return scene as pointer or something in creation and free it in destroy as well 
     Scene_Destroy(&activeScene);
-
     Scene_Create(&activeScene);
-
     Scene_Deserialize(&activeScene, filepath);
+
+    SceneHierarchyPanel_SetSelectedGameObject(nullptr); // TODO: event system 
+    InspectorPanel_SetSelectedGameObject(nullptr);
 }
 
 void saveSceneAs() {

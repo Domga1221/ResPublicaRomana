@@ -73,7 +73,6 @@ void ImGuiLayer_OnImGuiRender(ImGuiContext* context) {
 }
 
 ImGuiContext* ImGuiLayer_Begin() {
-    //RPR_WARN("ImGuiLayer_Begin called");
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
