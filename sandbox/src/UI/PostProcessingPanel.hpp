@@ -3,6 +3,7 @@
 #include "defines.hpp"
 
 void PostProcessingPanel_Initialize(); 
+void PostProcessingPanel_Shutdown();
 void PostProcessingPanel_OnImGuiRender();
 
 b8 PostProcessingPanel_GetBloom();

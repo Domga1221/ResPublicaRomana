@@ -20,6 +20,10 @@ void PostProcessingPanel_OnImGuiRender() {
     ImGui::End();
 }
 
+void PostProcessingPanel_Shutdown() {
+    
+}
+
 b8 PostProcessingPanel_GetBloom() {
     return bloom;
 }

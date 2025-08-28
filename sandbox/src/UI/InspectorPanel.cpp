@@ -88,6 +88,9 @@ void InspectorPanel_OnImGuiRender() {
     ImGui::End();
 }
 
+void InspectorPanel_Shutdown() {
+    Framebuffer_Destroy(&debugFramebuffer);
+}
 
 void InspectorPanel_SetSelectedGameObject(GameObject* gameObject) {
     selected = gameObject;

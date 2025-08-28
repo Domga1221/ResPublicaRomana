@@ -106,3 +106,7 @@ void ContentBrowserPanel_OnImGuiRender() {
 
     ImGui::End();
 }
+
+void ContentBrowserPanel_Shutdown() {
+    
+}

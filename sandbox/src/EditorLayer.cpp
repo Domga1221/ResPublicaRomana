@@ -119,6 +119,10 @@ void EditorLayer_OnAttach() {
 void EditorLayer_OnDetach() {
     EditorScene_Shutdown();
 
+    InspectorPanel_Shutdown();
+    PostProcessingPanel_Shutdown();
+    ContentBrowserPanel_Shutdown();
+
     Framebuffer_Destroy(&framebuffer);
 }
 
