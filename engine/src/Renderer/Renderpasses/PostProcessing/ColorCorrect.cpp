@@ -32,5 +32,5 @@ void ColorCorrect_Resize(Renderpass* renderpass, u32 width, u32 height) {
 }
 
 void ColorCorrect_Shutdown(Renderpass* renderpass) {
-
+    Shader_Destroy(&colorCorrectShader);
 }

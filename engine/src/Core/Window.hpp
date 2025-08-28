@@ -18,4 +18,5 @@ void Window_Update();
 
 typedef struct GLFWwindow GLFWwindow;
 GLFWwindow* Window_GetGLFWWindowPtr();
+// TODO: maybe own clock
 f32 Window_GetTime(); // TODO: should not be in window, but I don't want to include GLFW in Application.cpp

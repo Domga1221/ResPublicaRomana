@@ -25,5 +25,6 @@ void SSAO_Resize(Renderpass* renderpass, u32 width, u32 height) {
 }
 
 void SSAO_Shutdown(Renderpass* renderpass) {
-    // TODO:
+    GBuffer* gBuffer = (GBuffer*)renderpass->internalData;
+    GBuffer_Shutdown(gBuffer);
 }

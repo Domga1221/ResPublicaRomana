@@ -117,7 +117,8 @@ void EditorLayer_OnAttach() {
 }
 
 void EditorLayer_OnDetach() {
-    // TODO:
+    EditorScene_Shutdown();
+
     Framebuffer_Destroy(&framebuffer);
 }
 

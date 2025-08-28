@@ -162,7 +162,15 @@ void EditorScene_OnUpdateRuntime(f32 deltaTime, Scene* scene, SceneCamera* scene
 }
 
 void EditorScene_Shutdown() {
+    for(u32 i = 0; i < renderpasses.size; i++) {
+        renderpasses.data[i]->Shutdown(renderpasses.data[i]);
+        Renderpass_Destroy(renderpasses.data[i]);
+    }
+    List_Destroy(&renderpasses);
+
+    ImageBasedLighting_Shutdown(&ibl);
     ShaderPool_Shutdown();
+    Shader_Destroy(&debugQuadShader);
 }
 
 

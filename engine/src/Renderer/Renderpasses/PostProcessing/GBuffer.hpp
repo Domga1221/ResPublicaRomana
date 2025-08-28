@@ -37,6 +37,7 @@ typedef struct GBuffer {
 
 
 RPR_API void GBuffer_Initialize(GBuffer* gBuffer);
+RPR_API void GBuffer_Shutdown(GBuffer* gBuffer);
 RPR_API void GBuffer_OnResize(GBuffer* gBuffer, u32 width, u32 height);
 RPR_API void GBuffer_Render(GBuffer* gBuffer, glm::mat4* view, 
     glm::mat4* projectionRH, entt::registry* registry, Shader* pbrShader);

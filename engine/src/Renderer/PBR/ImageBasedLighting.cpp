@@ -247,3 +247,20 @@ void ImageBasedLighting_RenderSkybox(ImageBasedLighting* ibl, glm::mat4& view, g
     glDepthFunc(GL_LESS);
 }
 
+void ImageBasedLighting_Shutdown(ImageBasedLighting* ibl) {
+    glDeleteTextures(1, &ibl->hdrTexture);
+    glDeleteTextures(1, &ibl->envCubemap);
+
+    glDeleteFramebuffers(1, &ibl->captureFBO);
+    glDeleteRenderbuffers(1, &ibl->captureRBO);
+
+    glDeleteTextures(1, &ibl->irradianceMap);
+    glDeleteTextures(1, &ibl->prefilterMap);
+    glDeleteTextures(1, &ibl->brdfLUTTexture);
+   
+    Shader_Destroy(&ibl->equirectangularToCubemap);
+    Shader_Destroy(&ibl->skybox);
+    Shader_Destroy(&ibl->irradiance);
+    Shader_Destroy(&ibl->prefilter);
+    Shader_Destroy(&ibl->brdf);
+}

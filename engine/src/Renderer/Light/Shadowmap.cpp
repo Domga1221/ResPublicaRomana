@@ -43,6 +43,12 @@ void Shadowmap_Create(Shadowmap* shadowmap) {
 }
 
 void Shadowmap_Destroy(Shadowmap* shadowmap) {
+    glDeleteTextures(1, &shadowmap->depthMap);
+    glDeleteFramebuffers(1, &shadowmap->depthMapFBO);
 
+    Shader_Destroy(&shadowmap->simpleDepthShader);
+    Shader_Destroy(&shadowmap->debugDepthQuadShader);
+    shadowmap->SHADOW_WIDTH = 0;
+    shadowmap->SHADOW_HEIGHT = 0;
 }
 

@@ -23,8 +23,8 @@ struct ImageBasedLighting {
     Shader brdf;
 };
 
-void RPR_API ImageBasedLighting_Initialize(ImageBasedLighting* ibl, const char* hdrPath);
-void RPR_API ImageBasedLighting_Shutdown(ImageBasedLighting* ibl); // TODO:
+RPR_API void ImageBasedLighting_Initialize(ImageBasedLighting* ibl, const char* hdrPath);
+RPR_API void ImageBasedLighting_Shutdown(ImageBasedLighting* ibl); // TODO:
 
 // TODO: move view and projection into uniform buffer, so no passing around needed
-void RPR_API ImageBasedLighting_RenderSkybox(ImageBasedLighting* ibl, glm::mat4& view, glm::mat4& projection, bool ColorCorrect); 
+RPR_API void ImageBasedLighting_RenderSkybox(ImageBasedLighting* ibl, glm::mat4& view, glm::mat4& projection, bool ColorCorrect); 

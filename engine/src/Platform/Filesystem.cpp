@@ -52,6 +52,10 @@ void Filesystem_Initialize() {
     RPR_INFO("Filesystem_Initialize: current path: %s", CWD);
 }
 
-RPR_API const char* Filesystem_GetCWD() {
+void Filesystem_Shutdown() {
+
+}
+
+const char* Filesystem_GetCWD() {
     return CWD.c_str();
 }

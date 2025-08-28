@@ -47,7 +47,7 @@ typedef struct ParticleSystem {
 } ParticleSystem;
 
 RPR_API void ParticleSystem_Create(ParticleSystem* particleSystem);
-RPR_API void ParticleSystem_Destroy(ParticleSystem* particleSystem); // TODO: 
+RPR_API void ParticleSystem_Destroy(ParticleSystem* particleSystem); 
 
 RPR_API void ParticleSystem_Update(ParticleSystem* particleSystem, f32 deltaTime);
 RPR_API void ParticleSystem_Render(ParticleSystem* particleSystem, 

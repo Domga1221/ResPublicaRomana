@@ -48,7 +48,7 @@ void ParticleSystem_Destroy(ParticleSystem* particleSystem) {
     VertexArray_Destroy(particleSystem->particleVAO);
     Texture_Destroy(particleSystem->sprite);
     MEMORY_Free(particleSystem->sprite, sizeof(Texture), MEMORY_TAG_RENDERER);
-    // TODO: Shader destruction
+    Shader_Destroy(&particleSystem->particleShader);
 }
 
 void ParticleSystem_Update(ParticleSystem* particleSystem, f32 deltaTime) {

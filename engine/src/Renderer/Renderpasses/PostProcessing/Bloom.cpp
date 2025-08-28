@@ -63,7 +63,14 @@ void Bloom_Initialize(Renderpass* bloomRenderpass) {
 }
 
 void Bloom_Shutdown(Renderpass* bloomRenderpass) {
-    // TODO:
+    Bloom* bloom = (Bloom*)bloomRenderpass->internalData;
+    Framebuffer_Destroy(&bloom->framebuffer);
+    Shader_Destroy(&bloom->brightPixelShader);
+    Framebuffer_Destroy(&bloom->pingPongFramebuffers[0]);
+    Framebuffer_Destroy(&bloom->pingPongFramebuffers[1]);    
+    Shader_Destroy(&bloom->blurShader);
+    Framebuffer_Destroy(&bloom->combineFramebuffer);
+    Shader_Destroy(&bloom->combineShader);
 }
 
 void Bloom_Render(Renderpass* bloomRenderpass, RenderProperties* renderProperties) {

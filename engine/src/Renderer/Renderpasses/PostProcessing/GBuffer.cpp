@@ -174,6 +174,27 @@ void GBuffer_Initialize(GBuffer* gBuffer) {
     }
 }
 
+void GBuffer_Shutdown(GBuffer* gBuffer) {
+    glDeleteFramebuffers(1, &gBuffer->gBuffer);
+    glDeleteTextures(1, &gBuffer->gPosition);
+    glDeleteTextures(1, &gBuffer->gNormal);
+    glDeleteTextures(1, &gBuffer->gAlbedo);
+    glDeleteRenderbuffers(1, &gBuffer->rboDepth);
+
+    gBuffer->ssaoKernel.~vector();
+    gBuffer->ssaoNoise.~vector();
+    glDeleteTextures(1, &gBuffer->noiseTexture);
+    glDeleteFramebuffers(1, &gBuffer->ssaoFBO);
+    glDeleteTextures(1, &gBuffer->ssaoColorBuffer);
+
+    glDeleteFramebuffers(1, &gBuffer->ssaoBlurFBO);
+    glDeleteFramebuffers(1, &gBuffer->ssaoBlurColorBuffer);
+
+    Shader_Destroy(&gBuffer->gBufferShader);
+    Shader_Destroy(&gBuffer->SSAOShader);
+    Shader_Destroy(&gBuffer->SSAOBlurShader);
+}
+
 void GBuffer_OnResize(GBuffer* gBuffer, u32 width, u32 height) {
     
     gBuffer->viewportSize.x = width;
