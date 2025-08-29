@@ -25,7 +25,7 @@ RPR_API void MEMORY_Initialize() {
 }
 
 RPR_API void MEMORY_Shutdown() {
-    
+    RPR_DEBUG("MEMORY_Shutdown");
 }
 
 RPR_API void* MEMORY_Allocate(u64 size, Memory_Tag tag) {

@@ -13,6 +13,11 @@ void Event_Initialize() {
 
 void Event_Shutdown() {
     // TODO: 
+    RPR_DEBUG("Event_Shutdown");
+
+    for(u32 i = 0; i < EVENT_TYPE_EVENT_LAST; i++) {
+        List_Destroy(&eventTypeToFunctions[i]);
+    }
 }
 
 RPR_API void Event_AddListener(Event_Type eventType, PFN_OnEvent function) {

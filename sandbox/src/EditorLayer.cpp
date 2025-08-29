@@ -23,6 +23,7 @@ static Framebuffer framebuffer;
 #include "Scene/SceneCamera.hpp"
 static SceneCamera sceneCamera;
 #include <Core/Input.hpp>
+#include <Core/Event.hpp>
 #include <Core/Keycodes.hpp>
 void handleSceneCameraMovement(f32 deltaTime) {
     if(!Input_IsMouseButtonPressed(RPR_MOUSE_BUTTON_2)) return;
@@ -199,7 +200,8 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
 
 
     if(Input_IsKeyPressed(RPR_KEY_ESCAPE)) {
-        std::exit(0);    // TODO: Do this properly
+        Event event = { .KeyPressed = RPR_KEY_ESCAPE };
+        Event_Fire(EVENT_TYPE_KEY_PRESSED, event);
     }
 }
 

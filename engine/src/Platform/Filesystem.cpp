@@ -53,7 +53,7 @@ void Filesystem_Initialize() {
 }
 
 void Filesystem_Shutdown() {
-
+    RPR_DEBUG("Filesystem_Shutdown");
 }
 
 const char* Filesystem_GetCWD() {

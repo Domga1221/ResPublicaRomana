@@ -13,6 +13,8 @@ void LayerStack_Initialize() {
 }
 
 void LayerStack_Shutdown() {
+    RPR_DEBUG("LayerStack_Shutdown");
+    
     for(int i = 0; i < layerStack.layers.size; i++) {
         MEMORY_Free(layerStack.layers.data[i], sizeof(Layer), MEMORY_TAG_LAYER);
     }

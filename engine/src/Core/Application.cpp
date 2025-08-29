@@ -8,7 +8,8 @@
 #include "Core/LayerStack.hpp"
 #include "ImGuiLayer.hpp"
 
-Layer imGuiLayer;
+static Application* application;
+static Layer* imGuiLayer;
 
 #include "Memory/List.hpp"
 #include "Memory/List_Test.hpp"
@@ -19,12 +20,20 @@ Layer imGuiLayer;
 #include "Core/MouseCodes.hpp"
 #include "Core/Keycodes.hpp"
 void Application_OnKeyPressed(Event event) {
-    //u16 keyPressed = event.KeyPressed;
+    u16 keyPressed = event.KeyPressed;
     //RPR_INFO("Key pressed: %d", keyPressed);
+    if(keyPressed == RPR_KEY_ESCAPE) {
+        Event quitEvent = {};
+        Event_Fire(EVENT_TYPE_APPLICATION_QUIT, quitEvent);
+    }
 }
 void Application_OnMouseButtonPressed(Event event) {
     //u16 mouseButton = event.MouseButtonPressed;
     //RPR_INFO("Mouse button pressed %d", mouseButton);
+}
+void Application_OnQuit(Event event) {
+    RPR_DEBUG("Application_OnQuit received");
+    application->isRunning = false;
 }
 
 #include "Platform/Filesystem.hpp"
@@ -32,6 +41,8 @@ void Application_OnMouseButtonPressed(Event event) {
 
 #include "Renderer/ParticleSystem/Random.hpp"
 void Application_Initialize(Application* app) {
+    application = app;
+    app->isRunning = true;
 
     MEMORY_Initialize();
     LayerStack_Initialize();
@@ -42,20 +53,20 @@ void Application_Initialize(Application* app) {
     WindowProps windowProps { "REngine", 1600, 900 };
     Window_Initialize(&windowProps);
     
-    app->isRunning = true;
     
     std::string memoryUsageString = MEMORY_GetMemoryUsageString();
     RPR_DEBUG("%s", memoryUsageString);
     
-    
-    ImGuiLayer_Initialize(&imGuiLayer); 
+    imGuiLayer = (Layer*)MEMORY_Allocate(sizeof(Layer), MEMORY_TAG_LAYER);
+    ImGuiLayer_Initialize(imGuiLayer); 
     // right now imguilayer is pushed as first layer into stack, then sandbox editorlayer is pushed
-    LayerStack_PushLayer(&imGuiLayer);
+    LayerStack_PushLayer(imGuiLayer);
     
     
     // event 
     Event_AddListener(EVENT_TYPE_KEY_PRESSED, Application_OnKeyPressed);
     Event_AddListener(EVENT_TYPE_MOUSE_BUTTON_PRESSED, Application_OnMouseButtonPressed);
+    Event_AddListener(EVENT_TYPE_APPLICATION_QUIT, Application_OnQuit);
     
     // Renderer
     Primitives_Initialize();
@@ -98,6 +109,14 @@ void Application_Run(Application* app) {
         if(Window_ShouldClose())
             app->isRunning = false;
     }
+
+    app->isRunning = false;
+
+    Filesystem_Shutdown();
+    Event_Shutdown();
+    LayerStack_Shutdown();
+    MEMORY_Shutdown();
+    // Random_Shutdown();
 }
 
 RPR_API void Application_PushLayer(Layer* layer) {

@@ -2,6 +2,8 @@
 
 #include "defines.hpp"
 
+// TODO: not sure if this is the right approach for events right now
+// 32 bytes 
 struct Event {
     union {
         u16 WindowResize[2];
@@ -14,6 +16,8 @@ enum Event_Type {
     EVENT_TYPE_WINDOW_RESIZE = 0,
     EVENT_TYPE_KEY_PRESSED,
     EVENT_TYPE_MOUSE_BUTTON_PRESSED,
+
+    EVENT_TYPE_APPLICATION_QUIT,
 
     EVENT_TYPE_EVENT_LAST,
 };
