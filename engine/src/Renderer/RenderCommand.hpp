@@ -92,3 +92,9 @@ RPR_API inline void RenderCommand_BlendFunc_SrcAlpha_One() {
 RPR_API inline void RenderCommand_DepthMask(b8 toggle) {
     glDepthMask(toggle); 
 }
+
+// TODO: do this properly
+// right now it's just, so that I can render a particlesystem in EditorScene
+RPR_API inline void RenderCommand_BlendFunc() { 
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
+}

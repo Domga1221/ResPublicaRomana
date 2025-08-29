@@ -2,6 +2,7 @@
 
 #include <glm/matrix.hpp>
 #include <Scene/Components.hpp>
+#include <Scene/GameObject.hpp>
 
 // Renderer
 #include "ShaderPool.hpp"
@@ -83,7 +84,8 @@ void EditorScene_Initialze() {
     Shader_Create(&debugQuadShader, v.c_str(), f.c_str());
 }
 
-void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera, Framebuffer* framebuffer) {
+void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneCamera, Framebuffer* framebuffer,
+        GameObject* selectedGameObject) {
     glm::mat4 view = SceneCamera_GetViewMatrix(sceneCamera);
     glm::mat4 projectionRH = SceneCamera_GetProjectionMatrixRH(sceneCamera);
     
@@ -101,6 +103,24 @@ void EditorScene_OnUpdateEditor(f32 deltaTime, Scene* scene, SceneCamera* sceneC
 
     // ibl
     skyboxRenderpass.Render(&skyboxRenderpass, &renderProperties);
+
+    if(selectedGameObject != nullptr) {
+        if(ParticleSystemComponent* pc = selectedGameObject->TryGetComponent<ParticleSystemComponent>()) {
+            RenderCommand_EnableBlend();
+            RenderCommand_BlendEquation_Add();
+            RenderCommand_BlendFunc_SrcAlpha_One(); 
+            RenderCommand_DepthMask(false);
+
+            glm::mat4 model = selectedGameObject->GetComponent<TransformComponent>().GetTransform();
+            ParticleSystem_Emit(pc->particleSystem, &pc->particleProps);
+            ParticleSystem_Update(pc->particleSystem, deltaTime);
+            ParticleSystem_Render(pc->particleSystem, &model, &view, &projectionRH, false);
+
+            RenderCommand_BlendFunc();
+            RenderCommand_DepthMask(true);
+            RenderCommand_DisableBlend();
+        }
+    }
 
     /*
     Framebuffer_Bind(framebuffer);

@@ -174,7 +174,8 @@ void EditorLayer_OnUpdate(f32 deltaTime) {
     // -- EditorScene
     Framebuffer_ClearAttachment(&framebuffer, 1, -1);
     if(!playMode)
-        EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera, &framebuffer);
+        EditorScene_OnUpdateEditor(deltaTime, &activeScene, &sceneCamera, &framebuffer,
+        SceneHierarchyPanel_GetSelectedGameObject());
     else 
         EditorScene_OnUpdateRuntime(deltaTime, &activeScene, &sceneCamera, &framebuffer,
             PostProcessingPanel_GetBloom(), PostProcessingPanel_GetSSAO(), PostProcessingPanel_GetColorCorrect(), 
