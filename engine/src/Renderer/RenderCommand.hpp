@@ -5,7 +5,6 @@
 #include <glm/glm.hpp>
 #include <glad/glad.h>
 
-// TODO: should these be inline?
 
 RPR_API inline void RenderCommand_SetClearColor(const glm::vec4* color) {
     glClearColor(color->r, color->g, color->b, color->a);

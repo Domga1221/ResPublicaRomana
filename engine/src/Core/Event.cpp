@@ -12,7 +12,6 @@ void Event_Initialize() {
 }   
 
 void Event_Shutdown() {
-    // TODO: 
     RPR_DEBUG("Event_Shutdown");
 
     for(u32 i = 0; i < EVENT_TYPE_EVENT_LAST; i++) {
@@ -31,7 +30,13 @@ RPR_API void Event_AddListener(Event_Type eventType, PFN_OnEvent function) {
 }
 
 RPR_API void Event_RemoveListener(Event_Type eventType, PFN_OnEvent function) {
-    // TODO:
+    for(u32 i = 0; i < eventTypeToFunctions[eventType].size; i++) {
+        if(eventTypeToFunctions[eventType].data[i] == function) {
+            List_Remove(&eventTypeToFunctions[eventType], function);
+            return;
+        }
+    }
+    RPR_WARN("Event_RemoveListener: function to remove not found");
 }
 
 RPR_API void Event_Fire(Event_Type eventType, Event event) {

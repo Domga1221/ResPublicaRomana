@@ -33,7 +33,6 @@ void serializeGameObject(nlohmann::ordered_json* gameObjectsArray, GameObject ga
     }
 
     if (MaterialComponent* mc = gameObject.TryGetComponent<MaterialComponent>()) {
-        // TODO: 
         
         entityObj["MaterialComponent"] = nlohmann::json::object();
 
@@ -44,7 +43,7 @@ void serializeGameObject(nlohmann::ordered_json* gameObjectsArray, GameObject ga
         else
             RPR_ERROR("Scene_Serialize: serializeGameObject: Material Shader not found and saved!");
 
-        i32 textureCount = 0; // TODO: use saved texture count 
+        i32 textureCount = 0;
         for (u32 i = 0; i < mc->material.textures.size; i++) {
             Texture* texture = mc->material.textures.data[i];
             if (texture != nullptr) {

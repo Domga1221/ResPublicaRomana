@@ -26,11 +26,14 @@ void LayerStack_PushLayer(Layer* layer) {
     layer->OnAttach();
 }
    
-void LayerStack_PopLayer(Layer* layer) {
-    // TODO:
-    //std::vector<Layer*>::iterator iterator = std::find(layerStack.layers.Begin(), layerStack.layers.End(), layer);
-    //layerStack.layers.Erase(iterator);
-    //layer->OnDetach();
+void LayerStack_PopLayer(Layer* layer) { // TODO: is actually remove not pop since its not actually a stack 
+    for(u32 i = 0; i < layerStack.layers.size; i++) {
+        if(layerStack.layers.data[i] == layer) {
+            List_Remove(&layerStack.layers, layer);
+            return;
+        }
+    }
+    RPR_WARN("LayerStack_PopLayer: Couldn't find layer");
 }
 
 void LayerStack_Update(f32 deltaTime) {
