@@ -121,8 +121,11 @@ struct ParticleSystemComponent {
         ParticleSystem_Create(particleSystem);
     }
     ~ParticleSystemComponent() {
-        // TODO:
+        ParticleSystem_Destroy(particleSystem);
+        MEMORY_Free(particleSystem, sizeof(ParticleSystem), MEMORY_TAG_RENDERER);
     }
-
-    // TODO: Move constructor
+    ParticleSystemComponent(ParticleSystemComponent&& other) {
+        particleProps = other.particleProps;
+        particleSystem = other.particleSystem;
+    }
 };
